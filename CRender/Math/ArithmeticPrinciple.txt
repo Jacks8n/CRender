@@ -1,0 +1,12 @@
+﻿
+CRender.Math PRINCIPLE:
+
+0. Left hand coordinate, because it's convenient to imagine with left hand while my right hand is busy
+    I.   Thumb         <=> Z Axis
+    II.  Index finger  <=> X Axis
+    III. Middle finger <=> Y Axis
+1. Vector3 rotation sequence: x -> y -> z
+2. Use Radian
+3. A positive orientation is clockwise around a positive axis
+
+...blabla...

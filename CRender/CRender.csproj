@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>CRender</AssemblyName>
+    <RootNamespace>CRender</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningLevel>1</WarningLevel>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Math\ArithmeticPrinciple.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Math\ArithmeticPrinciple.txt" />
+  </ItemGroup>
+
+</Project>
