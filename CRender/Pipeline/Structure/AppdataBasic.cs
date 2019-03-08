@@ -22,7 +22,7 @@ namespace CRender.Pipeline.Structure
         public void AssignAppdata(ref Model model, int vertexIndex)
         {
             _vertex = new Vector4(model.Vertices[vertexIndex], 1);
-            _uv = model.UVs[vertexIndex];
+            _uv = model.UVs != null ? model.UVs[vertexIndex] : Vector2.Zero;
         }
     }
 }

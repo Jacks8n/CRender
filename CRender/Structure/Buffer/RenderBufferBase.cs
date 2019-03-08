@@ -14,8 +14,6 @@ namespace CRender.Structure
 
         private GenericVector<T>[][] _pixels = null;
 
-        public virtual void WritePixel(int u, int v, GenericVector<T> pixel) => _pixels[u][v].Write(pixel);
-
         public RenderBuffer() { }
 
         public RenderBuffer(int width, int height, int channelCount) => Initialize(width, height, channelCount);
@@ -38,6 +36,10 @@ namespace CRender.Structure
                     for (int j = 0; j < height; j++)
                         for (int k = 0; k < channelCount; k++)
                             _pixels[i][j][k] = default;
+        }
+        public virtual void WritePixel(int u, int v, GenericVector<T> pixel)
+        {
+            _pixels[u][v].Write(pixel);
         }
     }
 }

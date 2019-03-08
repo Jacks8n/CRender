@@ -47,6 +47,12 @@ namespace CRender.Structure
             _addableIndex = count;
         }
 
+        public void Write(T value)
+        {
+            for (int i = 0; i < Length; i++)
+                _values[i] = value;
+        }
+
         public void Write(GenericVector<T> other)
         {
             for (int i = 0; i < Length && i < other.Length; i++)
@@ -58,6 +64,50 @@ namespace CRender.Structure
         {
             if (_addableIndex < Length)
                 _values[_addableIndex++] = item;
+        }
+
+        public static GenericVector<T> operator +(GenericVector<T> l, GenericVector<T> r)
+        {
+            if (typeof(T) == typeof(float))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((float)(object)l._values[i] + (float)(object)r._values[i]);
+            else if (typeof(T) == typeof(int))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((int)(object)l._values[i] + (int)(object)r._values[i]);
+            return l;
+        }
+
+        public static GenericVector<T> operator -(GenericVector<T> l, GenericVector<T> r)
+        {
+            if (typeof(T) == typeof(float))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((float)(object)l._values[i] - (float)(object)r._values[i]);
+            else if (typeof(T) == typeof(int))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((int)(object)l._values[i] - (int)(object)r._values[i]);
+            return l;
+        }
+
+        public static GenericVector<T> operator *(GenericVector<T> l, GenericVector<T> r)
+        {
+            if (typeof(T) == typeof(float))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((float)(object)l._values[i] * (float)(object)r._values[i]);
+            else if (typeof(T) == typeof(int))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((int)(object)l._values[i] * (int)(object)r._values[i]);
+            return l;
+        }
+
+        public static GenericVector<T> operator /(GenericVector<T> l, GenericVector<T> r)
+        {
+            if (typeof(T) == typeof(float))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((float)(object)l._values[i] / (float)(object)r._values[i]);
+            else if (typeof(T) == typeof(int))
+                for (int i = 0; i < l.Length; i++)
+                    l._values[i] = (T)(object)((int)(object)l._values[i] / (int)(object)r._values[i]);
+            return l;
         }
 
         void IDisposable.Dispose()

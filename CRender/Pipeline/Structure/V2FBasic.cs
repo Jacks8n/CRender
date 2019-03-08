@@ -4,8 +4,6 @@ namespace CRender.Pipeline.Structure
 {
     public struct V2FBasic : IRenderData_VOut, IRenderData_FIn<V2FBasic>
     {
-        Vector4 IRenderData_FIn<V2FBasic>.Vertex_FIn { get => _vertex; set => _vertex = value; }
-
         Vector2 IRenderData_FIn<V2FBasic>.UV_FIn { get => _uv; set => _uv = value; }
 
         Vector4 IRenderData_VOut.Vertex_VOut { get => _vertex; set => _vertex = value; }

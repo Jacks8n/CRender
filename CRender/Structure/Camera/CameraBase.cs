@@ -8,19 +8,19 @@ namespace CRender.Structure
 
         public Transform Transform { get; }
 
-        public float Height { get; set; }
-
         public float Width { get; set; }
+
+        public float Height { get; set; }
 
         public float NearPlane { get; set; }
 
         public float FarPlane { get; set; }
 
-        public CameraBase(float height, float width, float near, float far)
+        public CameraBase(float width, float height, float near, float far, Transform transform)
         {
-            Transform = new Transform(this);
-            Height = height;
+            Transform = transform;
             Width = width;
+            Height = height;
             NearPlane = near;
             FarPlane = far;
         }

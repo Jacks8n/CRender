@@ -10,11 +10,16 @@ namespace CRender.Pipeline
     public class PipelineBase<TApp, TV2F>
         where TApp : struct, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
     {
-        private int[] _triangleIndices;
+        #region TODO
 
+        //TODO
         private RenderBuffer<float> _mainTexture;
 
         private Sampler_Point _sampler = new Sampler_Point(SamplerRepeat_Repeat.Instance, SamplerRepeat_Repeat.Instance);
+
+        #endregion
+
+        private readonly RenderBuffer<float> _renderTarget = new RenderBuffer<float>();
 
         private Matrix4x4 _matrixObjectToWorld;
 
@@ -25,8 +30,6 @@ namespace CRender.Pipeline
         private Vector2 _bufferSizeF;
 
         private Vector2Int _bufferSize;
-
-        private RenderBuffer<float> _renderTarget = new RenderBuffer<float>();
 
         #region Application
 
@@ -40,6 +43,7 @@ namespace CRender.Pipeline
             TApp appdata = new TApp();
             TV2F[][] vertexV2FData = new TV2F[entities.Length][];
             IPrimitive[][] primitives = new IPrimitive[entities.Length][];
+            Vector2[][] screenCoords = new Vector2[entities.Length][];
             for (int i = 0; i < entities.Length; i++)
             {
                 RenderEntity instanceCopy = entities[i].GetInstanceToApply();
@@ -49,24 +53,33 @@ namespace CRender.Pipeline
 
                 Vector3[] vertices = instanceCopy.Model.Vertices;
                 vertexV2FData[i] = new TV2F[vertices.Length];
+                screenCoords[i] = new Vector2[vertices.Length];
                 primitives[i] = instanceCopy.Model.Primitives;
                 for (int j = 0; j < vertices.Length; j++)
                 {
                     appdata.AssignAppdata(ref instanceCopy.Model, j);
-                    vertexV2FData[i][j] = Vertex(ref appdata);
+                    TV2F v2f = Vertex(ref appdata);
+
+                    vertexV2FData[i][j] = v2f;
+                    screenCoords[i][j] = ViewToScreen(v2f.Vertex_VOut);
                 }
             }
 
             //Octree is so annoying
             //Clipping();
 
-            Vector2Int[][] rasterization = Rasterize(vertexV2FData, primitives);
+            Vector2Int[][][] rasterization = Rasterize(screenCoords, vertexV2FData, primitives);
 
+            GenericVector<float> whiteColor = new GenericVector<float>(3) { 1, 1, 1 };
+            //Model
             for (int i = 0; i < rasterization.Length; i++)
+                //Primitive
                 for (int j = 0; j < rasterization[i].Length; j++)
-                {
-                    Fragment(vertexV2FData[i][j]);
-                }
+                    //PixelPos
+                    for (int k = 0; k < rasterization[i][j].Length; k++)
+                    {
+                        _renderTarget.WritePixel(rasterization[i][j][k].X, rasterization[i][j][k].Y, whiteColor);
+                    }
 
             return _renderTarget;
         }
@@ -97,23 +110,24 @@ namespace CRender.Pipeline
 
         #region Rasterization
 
-        protected Vector2 ViewToScreen(Vector4 vpos) => new Vector2((1 - vpos.Y) * .5f, vpos.Z * .5f);
+        protected Vector2 ViewToScreen(Vector4 vpos) => new Vector2(vpos.Y * .5f + .5f, vpos.Z * .5f + .5f);
 
-        protected virtual Vector2Int[][] Rasterize(TV2F[][] vertices, IPrimitive[][] primitives)
+        protected virtual unsafe Vector2Int[][][] Rasterize(Vector2[][] screenCoords, TV2F[][] modelV2Fs, IPrimitive[][] primitives)
         {
             Rasterizer.StartRasterize(_bufferSizeF);
-            Vector2Int[][] rasterization = new Vector2Int[vertices.Length][];
+            Vector2Int[][][] rasterization = new Vector2Int[modelV2Fs.Length][][];
 
-            Vector2[] screenCoords = new Vector2[3];
-            for (int modelIndex = 0; modelIndex < vertices.Length; modelIndex++)
+            Vector2* primitiveCoords = stackalloc Vector2[3];
+            for (int modelIndex = 0; modelIndex < modelV2Fs.Length; modelIndex++)
             {
-                for (int i = 0; i < primitives[modelIndex].Length; i++)
+                rasterization[modelIndex] = new Vector2Int[primitives[modelIndex].Length][];
+                for (int primitiveIndex = 0; primitiveIndex < primitives[modelIndex].Length; primitiveIndex++)
                 {
-                    IPrimitive primitive = primitives[modelIndex][i];
+                    IPrimitive primitive = primitives[modelIndex][primitiveIndex];
 
                     for (int j = 0; j < primitive.Count; j++)
-                        screenCoords[j] = ViewToScreen(vertices[modelIndex][primitive.Indices[j]].Vertex_VOut);
-                    Rasterizer.SetPoints(screenCoords);
+                        primitiveCoords[j] = screenCoords[modelIndex][primitive.Indices[j]];
+                    Rasterizer.SetPoints(primitiveCoords);
 
                     switch (primitive.Count)
                     {
@@ -124,7 +138,7 @@ namespace CRender.Pipeline
                             throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
                             break;
                     }
-                    rasterization[modelIndex] = Rasterizer.ContriveResult();
+                    rasterization[modelIndex][primitiveIndex] = Rasterizer.ContriveResult();
                 }
             }
 

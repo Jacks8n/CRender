@@ -10,7 +10,7 @@
         public static T[] GetCopy<T>(this T[] arr)
         {
             T[] copy = arr.GetEmptyArray();
-            arr.CopyTo(arr, 0);
+            arr.CopyTo(copy, 0);
             return copy;
         }
     }

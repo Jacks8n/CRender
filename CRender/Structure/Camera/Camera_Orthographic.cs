@@ -6,7 +6,7 @@ namespace CRender.Structure
     {
         public override Matrix4x4 WorldToView => Matrix4x4.Orthographic(Width, Height, NearPlane, FarPlane) * Transform.WorldToLocal;
 
-        public Camera_Orthographic(float height, float width, float near, float far) : base(height, width, near, far)
+        public Camera_Orthographic(float width, float height, float near, float far, Transform transform) : base(width, height, near, far, transform)
         {
 
         }

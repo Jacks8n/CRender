@@ -6,9 +6,9 @@ namespace CRender.Structure
     {
         Matrix4x4 WorldToView { get; }
 
-        float Height { get; }
-
         float Width { get; }
+
+        float Height { get; }
 
         float NearPlane { get; }
 

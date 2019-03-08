@@ -9,8 +9,6 @@ namespace CRender.Structure
 
         public Matrix4x4 WorldToLocal => Matrix4x4.ScaleRotationTranslation(new Vector3(1f / Scale.X, 1f / Scale.Y, 1f / Scale.Z), -Rotation, -Position);
 
-        public IRenderObject Owner { get; private set; }
-
         public Vector3 Position;
 
         public Vector3 Rotation;
@@ -23,29 +21,29 @@ namespace CRender.Structure
 
         private static readonly Vector3 SCALE_DEFAULT = Vector3.One;
 
-        private Transform _instanceToApply;
+        private readonly Transform _instanceToApply;
 
-        private Transform() { }
+        public Transform()
+        {
+            Position = POSITION_DEFAULT;
+            Rotation = ROTATION_DEFAULT;
+            Scale = SCALE_DEFAULT;
+        }
 
-        public Transform(IRenderObject owner) : this(owner, POSITION_DEFAULT)
+        public Transform(Vector3 pos) : this(pos, ROTATION_DEFAULT)
         {
         }
 
-        public Transform(IRenderObject owner, Vector3 pos) : this(owner, pos, ROTATION_DEFAULT)
+        public Transform(Vector3 pos, Vector3 rotation) : this(pos, rotation, SCALE_DEFAULT)
         {
         }
 
-        public Transform(IRenderObject owner, Vector3 pos, Vector3 rotation) : this(owner, pos, rotation, SCALE_DEFAULT)
+        private Transform(Vector3 pos, Vector3 rotation, Vector3 scale)
         {
-        }
-
-        private Transform(IRenderObject owner, Vector3 pos, Vector3 rotation, Vector3 scale)
-        {
-            Owner = owner ?? throw new Exception("Transform must be attached to an Owner");
             Position = pos;
             Rotation = rotation;
             Scale = scale;
-            _instanceToApply = new Transform() { Owner = owner };
+            _instanceToApply = new Transform();
         }
 
         public Transform GetInstanceToApply()

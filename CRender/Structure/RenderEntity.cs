@@ -8,20 +8,24 @@ namespace CRender.Structure
 
         public Model Model;
 
+        /// <summary>
+        /// Optional
+        /// </summary>
         public Material Material;
-        
-        private readonly RenderEntity _instanceToApply;
+
+        private RenderEntity _instanceToApply;
 
         public RenderEntity(Transform transform, Model model, Material material)
         {
             Transform = transform;
             Model = model;
             Material = material;
-            _instanceToApply = new RenderEntity(transform.GetInstanceToApply(), model.GetInstanceToApply(), material.GetInstanceToApply());
         }
 
         public RenderEntity GetInstanceToApply()
         {
+            if (_instanceToApply == null)
+                _instanceToApply = new RenderEntity(Transform.GetInstanceToApply(), Model.GetInstanceToApply(), Material?.GetInstanceToApply());
             return _instanceToApply;
         }
 

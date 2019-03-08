@@ -84,8 +84,8 @@
             float scaleX = 2f / (far - near);
             return new Matrix4x4(
                 m11: scaleX, m21: 0, m31: 0, m41: -(near + far) * .5f * scaleX,
-                m12: 0, m22: 2f / height, m32: 0, m42: 0,
-                m13: 0, m23: 0, m33: 2f / width, m43: 0,
+                m12: 0, m22: 2f / width, m32: 0, m42: 0,
+                m13: 0, m23: 0, m33: 2f / height, m43: 0,
                 m14: 0, m24: 0, m34: 0, m44: 1);
         }
     }

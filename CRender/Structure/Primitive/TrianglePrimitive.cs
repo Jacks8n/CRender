@@ -1,14 +1,14 @@
 ﻿namespace CRender.Structure
 {
-    public struct TrianglePrimitive : IPrimitive
+    public readonly struct TrianglePrimitive : IPrimitive
     {
         public int Count => 3;
 
         public int[] Indices { get; }
 
-        public TrianglePrimitive(int[] indices)
+        public TrianglePrimitive(int index0, int index1, int index2)
         {
-            Indices = indices;
+            Indices = new int[] { index0, index1, index2 };
         }
     }
 }
