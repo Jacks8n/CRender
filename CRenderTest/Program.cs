@@ -1,11 +1,10 @@
-﻿using CRender.Math;
-using CRender.Pipeline.Structure;
+﻿using System.Threading;
 using CRender;
+using CRender.Math;
 using CRender.Pipeline;
+using CRender.Pipeline.Structure;
 using CRender.Structure;
 using NUnit.Framework;
-using System.Threading;
-
 using static System.Console;
 
 namespace CRenderTest
@@ -23,6 +22,7 @@ namespace CRenderTest
         public static void TestRenderFrames()
         {
             RenderBuffer<float> buffer = new RenderBuffer<float>(CRenderSettings.RenderWidth, CRenderSettings.RenderHeight, 3);
+            CharRenderBuffer<float> charBuffer = new CharRenderBuffer<float>(buffer);
 
             float framerate = 25f;
             float time = 10f;
@@ -38,13 +38,14 @@ namespace CRenderTest
                 if (i / step > lastU)
                     buffer.WritePixel(++lastU, 0, white);
                 Thread.Sleep(frameInterval);
-                CRenderer.Render(buffer);
+                CRenderer.Render(charBuffer);
             }
         }
 
         public static void TestDrawXYZLine()
         {
             PipelineBase<AppdataBasic, V2FBasic> pipeline = new PipelineBase<AppdataBasic, V2FBasic>();
+            CharRenderBuffer<float> charBuffer = new CharRenderBuffer<float>(pipeline.RenderTarget);
 
             RenderEntity entity = new RenderEntity(new Transform(Vector3.Zero),
                 new Model(
@@ -67,7 +68,8 @@ namespace CRenderTest
             int frameInterval = (int)(1000f / framerate);
             for (int i = 0; i < totalFrame; i++)
             {
-                CRenderer.Render(pipeline.Draw(entitiesApply, camera));
+                pipeline.Draw(entitiesApply, camera);
+                CRenderer.Render(charBuffer);
                 entity.Transform.Rotation.Z += angleStep;
                 Thread.Sleep(frameInterval);
             }
@@ -76,18 +78,22 @@ namespace CRenderTest
         public static void TestDrawBuffer()
         {
             RenderBuffer<float> buffer = new RenderBuffer<float>(CRenderSettings.RenderWidth, CRenderSettings.RenderHeight, channelCount: 3);
+            CharRenderBuffer<float> charBuffer = new CharRenderBuffer<float>(buffer);
+
             GenericVector<float> white = new GenericVector<float>(3) { 1, 1, 1 };
             buffer.WritePixel(0, 0, white);
             buffer.WritePixel(8, 2, white);
             buffer.WritePixel(16, 4, white);
             buffer.WritePixel(24, 6, white);
             buffer.WritePixel(32, 8, white);
-            CRenderer.Render(buffer);
+            CRenderer.Render(charBuffer);
         }
 
         public static void TestDrawColor()
         {
             RenderBuffer<float> buffer = new RenderBuffer<float>(CRenderSettings.RenderWidth, CRenderSettings.RenderHeight, channelCount: 3);
+            CharRenderBuffer<float> charBuffer = new CharRenderBuffer<float>(buffer);
+
             GenericVector<float> color = new GenericVector<float>(3) { 0, 0, 0 };
             for (int i = 0; i < buffer.Width; i++)
             {
@@ -95,7 +101,7 @@ namespace CRenderTest
                     buffer.WritePixel(i, j, color);
                 color.Write((float)i / buffer.Width);
             }
-            CRenderer.Render(buffer);
+            CRenderer.Render(charBuffer);
         }
 
         [Test]

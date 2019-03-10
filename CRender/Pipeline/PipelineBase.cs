@@ -10,16 +10,22 @@ namespace CRender.Pipeline
     public class PipelineBase<TApp, TV2F>
         where TApp : struct, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
     {
+        public RenderBuffer<float> RenderTarget => _renderTarget;
+
         #region TODO
 
         //TODO
-        private RenderBuffer<float> _mainTexture;
+        private readonly RenderBuffer<float> _mainTexture;
 
-        private Sampler_Point _sampler = new Sampler_Point(SamplerRepeat_Repeat.Instance, SamplerRepeat_Repeat.Instance);
+        private readonly Sampler_Point _sampler = new Sampler_Point(SamplerRepeat_Repeat.Instance, SamplerRepeat_Repeat.Instance);
 
         #endregion
 
-        private readonly RenderBuffer<float> _renderTarget = new RenderBuffer<float>();
+        private readonly Vector2 _bufferSizeF;
+
+        private readonly Vector2Int _bufferSize;
+
+        private readonly RenderBuffer<float> _renderTarget;
 
         private Matrix4x4 _matrixObjectToWorld;
 
@@ -27,18 +33,18 @@ namespace CRender.Pipeline
 
         private Matrix4x4 _matrixObjectToView;
 
-        private Vector2 _bufferSizeF;
-
-        private Vector2Int _bufferSize;
+        public PipelineBase()
+        {
+            _bufferSize = CRenderSettings.RenderSize;
+            _bufferSizeF = (Vector2)_bufferSize;
+            _renderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 3);
+        }
 
         #region Application
 
         public RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
             _matrixWorldToView = camera.WorldToView;
-            _bufferSize = CRenderSettings.RenderSize;
-            _bufferSizeF = (Vector2)_bufferSize;
-            _renderTarget.Initialize(_bufferSize.X, _bufferSize.Y, channelCount: 4);
 
             TApp appdata = new TApp();
             TV2F[][] vertexV2FData = new TV2F[entities.Length][];

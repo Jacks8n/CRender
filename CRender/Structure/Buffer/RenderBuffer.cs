@@ -14,28 +14,27 @@ namespace CRender.Structure
 
         private GenericVector<T>[][] _pixels = null;
 
+        private bool _initialized = false;
+
         public RenderBuffer() { }
 
         public RenderBuffer(int width, int height, int channelCount) => Initialize(width, height, channelCount);
 
         public void Initialize(int width, int height, int channelCount)
         {
-            if (_pixels == null || Width != width || Height != height || ChannelCount != channelCount)
-            {
-                _pixels = new GenericVector<T>[width][];
+            if (_initialized)
+                throw new Exception("RenderBuffer has initialized");
 
-                for (int i = 0; i < width; i++)
-                {
-                    _pixels[i] = new GenericVector<T>[height];
-                    for (int j = 0; j < height; j++)
-                        _pixels[i][j] = new GenericVector<T>(channelCount);
-                }
+            _pixels = new GenericVector<T>[width][];
+
+            for (int i = 0; i < width; i++)
+            {
+                _pixels[i] = new GenericVector<T>[height];
+                for (int j = 0; j < height; j++)
+                    _pixels[i][j] = new GenericVector<T>(channelCount);
             }
-            else
-                for (int i = 0; i < width; i++)
-                    for (int j = 0; j < height; j++)
-                        for (int k = 0; k < channelCount; k++)
-                            _pixels[i][j][k] = default;
+
+            _initialized = true;
         }
         public virtual void WritePixel(int u, int v, GenericVector<T> pixel)
         {
