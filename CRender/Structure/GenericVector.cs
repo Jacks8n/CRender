@@ -60,6 +60,13 @@ namespace CRender.Structure
             _addableIndex = other.Length;
         }
 
+        public void Clear()
+        {
+            _addableIndex = 0;
+            for (int i = 0; i < Length; i++)
+                _values[i] = default;
+        }
+
         public void Add(T item)
         {
             if (_addableIndex < Length)

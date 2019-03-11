@@ -36,6 +36,14 @@ namespace CRender.Structure
 
             _initialized = true;
         }
+
+        public void Clear()
+        {
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    _pixels[i][j].Clear();
+        }
+
         public virtual void WritePixel(int u, int v, GenericVector<T> pixel)
         {
             _pixels[u][v].Write(pixel);

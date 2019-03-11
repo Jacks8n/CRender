@@ -11,6 +11,17 @@ namespace CRender
 
         public static Vector2Int RenderSize => new Vector2Int(Console.WindowWidth, Console.WindowHeight);
 
-        public static float AspectRatio => (float)Console.WindowWidth / Console.WindowHeight;
+        public static bool IsCountFrames
+        {
+            get => _isCountFrames;
+            set
+            {
+                if (_isCountFrames ^ value)
+                    CRenderer.ResetFrameCount();
+                _isCountFrames = value;
+            }
+        }
+
+        private static bool _isCountFrames;
     }
 }

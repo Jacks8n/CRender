@@ -63,5 +63,10 @@
                 y: r.X * l.M12 + r.Y * l.M22 + r.Z * l.M32 + r.W * l.M42,
                 z: r.X * l.M13 + r.Y * l.M23 + r.Z * l.M33 + r.W * l.M43,
                 w: r.X * l.M14 + r.Y * l.M24 + r.Z * l.M34 + r.W * l.M44);
+
+        public override string ToString()
+        {
+            return $"M11:{M11} M21:{M21} M31:{M31} M41:{M41}\nM12:{M12} M22:{M22} M32:{M32} M42:{M42}\nM13:{M13} M23:{M23} M33:{M33} M43:{M43}\nM14:{M14} M24:{M24} M34:{M34} M44:{M44}";
+        }
     }
 }

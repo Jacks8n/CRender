@@ -5,9 +5,11 @@ namespace CRender.Structure
 {
     public class Transform : IAppliable<Transform>
     {
-        public Matrix4x4 LocalToWorld => Matrix4x4.ScaleRotationTranslation(Scale, Rotation, Position);
+        public Matrix4x4 LocalToWorld => Matrix4x4.Translation(Position) * Matrix4x4.RotationEuler(Rotation) * Matrix4x4.Scale(Scale);
 
-        public Matrix4x4 WorldToLocal => Matrix4x4.ScaleRotationTranslation(new Vector3(1f / Scale.X, 1f / Scale.Y, 1f / Scale.Z), -Rotation, -Position);
+        public Matrix4x4 WorldToLocal => Matrix4x4.Scale(new Vector3(1f / Scale.X, 1f / Scale.Y, 1f / Scale.Z))
+            * Matrix4x4.Transpose(Matrix4x4.RotationEuler(Rotation))
+                * Matrix4x4.Translation(-Position);
 
         public Vector3 Position;
 

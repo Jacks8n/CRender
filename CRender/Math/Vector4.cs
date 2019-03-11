@@ -3,6 +3,38 @@
     [System.Diagnostics.DebuggerDisplay("X:{X} Y:{Y} Z:{Z} W:{W}")]
     public struct Vector4
     {
+        #region Constants
+
+        public static readonly Vector4 Zero = new Vector4(0, 0, 0, 0);
+
+        public static readonly Vector4 One = new Vector4(1, 1, 1, 1);
+
+        public static readonly Vector4 UnitXPositive_Point = new Vector4(Vector3.UnitXPositive, 1);
+
+        public static readonly Vector4 UnitXNegative_Point = new Vector4(Vector3.UnitXNegative, 1);
+
+        public static readonly Vector4 UnitYPositive_Point = new Vector4(Vector3.UnitYPositive, 1);
+
+        public static readonly Vector4 UnitYNegative_Point = new Vector4(Vector3.UnitYNegative, 1);
+
+        public static readonly Vector4 UnitZPositive_Point = new Vector4(Vector3.UnitZPositive, 1);
+
+        public static readonly Vector4 UnitZNegative_Point = new Vector4(Vector3.UnitZNegative, 1);
+
+        public static readonly Vector4 UnitXPositive_Vector = new Vector4(Vector3.UnitXPositive, 0);
+
+        public static readonly Vector4 UnitXNegative_Vector = new Vector4(Vector3.UnitXNegative, 0);
+
+        public static readonly Vector4 UnitYPositive_Vector = new Vector4(Vector3.UnitYPositive, 0);
+
+        public static readonly Vector4 UnitYNegative_Vector = new Vector4(Vector3.UnitYNegative, 0);
+
+        public static readonly Vector4 UnitZPositive_Vector = new Vector4(Vector3.UnitZPositive, 0);
+
+        public static readonly Vector4 UnitZNegative_Vector = new Vector4(Vector3.UnitZNegative, 0);
+
+        #endregion
+
         public Vector2 XY => new Vector2(X, Y);
 
         public Vector2 XZ => new Vector2(X, Z);

@@ -5,6 +5,8 @@ namespace CRender.Math
 {
     public static class JMath
     {
+        public const float PI_TWO = 6.283185307179586476925286766559f;
+
         public const float PI = 3.1415926535897932384626433832795f;
 
         public const float PI_HALF = 1.5707963267948966192313216916398f;

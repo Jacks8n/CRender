@@ -34,6 +34,8 @@ namespace CRender
         /// </summary>
         private const uint CONSOLE_TEXTMODE_BUFFER = 0x00000001;
 
+        private static readonly _COORD COORD_ZERO = new _COORD(0, 0);
+
         private readonly IntPtr _outputBuffer0, _outputBuffer1;
 
         private ConsoleExt()
@@ -43,18 +45,15 @@ namespace CRender
             SetConsoleActiveScreenBuffer(_outputBuffer1);
         }
 
-        public static unsafe void Output(char* value, int width, int height)
+        public static void Output(char[] value)
         {
-            WriteToBufferAndShow(value, width, height, _instance._outputBuffer0);
-            WriteToBufferAndShow(value, width, height, _instance._outputBuffer1);
+            WriteToBufferAndShow(value, _instance._outputBuffer0);
+            WriteToBufferAndShow(value, _instance._outputBuffer1);
         }
 
-        private static unsafe void WriteToBufferAndShow(char* value, int width, int height, IntPtr buffer)
+        private static void WriteToBufferAndShow(char[] value, IntPtr buffer)
         {
-            _COORD coord = new _COORD(0, 0);
-            for (; coord.Y < height; coord.Y++)
-                for (; coord.X < width; coord.X++)
-                    WriteConsoleOutputCharacter(buffer, value++, 1u, coord, out _);
+            WriteConsoleOutputCharacter(buffer, value, (uint)value.Length, COORD_ZERO, out _);
             SetConsoleActiveScreenBuffer(buffer);
         }
 
@@ -74,7 +73,7 @@ namespace CRender
         /// https://docs.microsoft.com/en-us/windows/console/writeconsoleoutputcharacter
         /// </summary>
         [DllImport("Kernel32.dll")]
-        private static unsafe extern bool WriteConsoleOutputCharacter(IntPtr hConsoleOutput, char* lpCharacter, uint nLength, _COORD dwWriteCoord, out uint lpNumberOfCharsWritten);
+        private static extern bool WriteConsoleOutputCharacter(IntPtr hConsoleOutput, char[] lpCharacter, uint nLength, _COORD dwWriteCoord, out uint lpNumberOfCharsWritten);
 
         /// <summary>
         /// https://docs.microsoft.com/en-us/windows/console/setconsoleactivescreenbuffer

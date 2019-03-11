@@ -44,6 +44,7 @@ namespace CRender.Pipeline
 
         public RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
+            _renderTarget.Clear();
             _matrixWorldToView = camera.WorldToView;
 
             TApp appdata = new TApp();

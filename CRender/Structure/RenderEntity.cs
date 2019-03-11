@@ -4,7 +4,7 @@ namespace CRender.Structure
 {
     public class RenderEntity : IRenderObject, IAppliable<RenderEntity>, IOctreeElement<RenderEntity>
     {
-        public Transform Transform { get; }
+        public Transform Transform { get; private set; }
 
         public Model Model;
 
@@ -14,6 +14,8 @@ namespace CRender.Structure
         public Material Material;
 
         private RenderEntity _instanceToApply;
+
+        private RenderEntity() { }
 
         public RenderEntity(Transform transform, Model model, Material material)
         {
@@ -25,7 +27,10 @@ namespace CRender.Structure
         public RenderEntity GetInstanceToApply()
         {
             if (_instanceToApply == null)
-                _instanceToApply = new RenderEntity(Transform.GetInstanceToApply(), Model.GetInstanceToApply(), Material?.GetInstanceToApply());
+                _instanceToApply = new RenderEntity();
+            _instanceToApply.Transform = Transform.GetInstanceToApply();
+            _instanceToApply.Model = Model.GetInstanceToApply();
+            _instanceToApply.Material = Material?.GetInstanceToApply();
             return _instanceToApply;
         }
 

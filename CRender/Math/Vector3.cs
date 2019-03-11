@@ -3,7 +3,7 @@
     [System.Diagnostics.DebuggerDisplay("X: {X} Y: {Y} Z: {Z}")]
     public struct Vector3
     {
-        #region Constant
+        #region Constants
 
         public static readonly Vector3 Zero = new Vector3(0, 0, 0);
 

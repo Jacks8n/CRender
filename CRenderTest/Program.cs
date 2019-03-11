@@ -5,6 +5,7 @@ using CRender.Pipeline;
 using CRender.Pipeline.Structure;
 using CRender.Structure;
 using NUnit.Framework;
+
 using static System.Console;
 
 namespace CRenderTest
@@ -14,8 +15,10 @@ namespace CRenderTest
     {
         private static unsafe void Main(string[] args)
         {
-            //TestDrawXYZLine();
-            TestRenderFrames();
+            //Rotation seems to be the bug
+            CRenderSettings.IsCountFrames = true;
+            TestDrawLine();
+            //TestRenderFrames();
             ReadKey();
         }
 
@@ -34,37 +37,38 @@ namespace CRenderTest
             int step = totalFrame / buffer.Width + 1;
             for (int i = 0; i < totalFrame; i++)
             {
-                buffer.WritePixel(lastU, 0, black);
                 if (i / step > lastU)
+                {
+                    buffer.WritePixel(lastU, 0, black);
                     buffer.WritePixel(++lastU, 0, white);
+                }
                 Thread.Sleep(frameInterval);
                 CRenderer.Render(charBuffer);
             }
         }
 
-        public static void TestDrawXYZLine()
+        public static void TestDrawLine()
         {
             PipelineBase<AppdataBasic, V2FBasic> pipeline = new PipelineBase<AppdataBasic, V2FBasic>();
             CharRenderBuffer<float> charBuffer = new CharRenderBuffer<float>(pipeline.RenderTarget);
 
             RenderEntity entity = new RenderEntity(new Transform(Vector3.Zero),
                 new Model(
-                    vertices: new Vector3[] { Vector3.Zero, Vector3.UnitXPositive, Vector3.UnitYPositive, Vector3.UnitZPositive },
-                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(0, 2), new LinePrimitive(0, 3) },
+                    vertices: new Vector3[] { Vector3.Zero, Vector3.UnitXPositive, Vector3.UnitYPositive },//, Vector3.UnitZPositive },
+                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(0, 2) },// new LinePrimitive(0, 3) },
                     uvs: null,
                     normals: null
                 ), null);
-            ICamera camera = new Camera_Orthographic(width: 8f, height: 8f, near: -5, far: 10,
+            ICamera camera = new Camera_Orthographic(width: 10f, height: 10f, near: -10, far: 10,
                 new Transform(
-                    pos: new Vector3(1.5f, 1.5f, 2f),
-                    rotation: new Vector3(0f, 0.8f, -2.37f)
-                ));
+                pos: Vector3.Zero,
+                rotation: new Vector3(0, JMath.PI_HALF, 0)));
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
             float framerate = 25f;
-            float time = 1f;
+            float time = 10f;
             int totalFrame = (int)(framerate * time);
-            float angleStep = JMath.PI / totalFrame;
+            float angleStep = JMath.PI_TWO / totalFrame;
             int frameInterval = (int)(1000f / framerate);
             for (int i = 0; i < totalFrame; i++)
             {
@@ -174,15 +178,11 @@ namespace CRenderTest
         public static void TestLocalToWorldMatrix_Translation()
         {
             Transform transform = new Transform(Vector3.UnitXPositive);
-            Vector4 point0 = new Vector4(Vector3.Zero, 1);
-            Vector4 point1 = new Vector4(Vector3.UnitXPositive, 1);
-            Vector4 point2 = new Vector4(Vector3.UnitYPositive, 1);
-            Vector4 point3 = new Vector4(Vector3.UnitZPositive, 1);
             Matrix4x4 l2w = transform.LocalToWorld;
-            Vector4 world0 = l2w * point0;
-            Vector4 world1 = l2w * point1;
-            Vector4 world2 = l2w * point2;
-            Vector4 world3 = l2w * point3;
+            Vector4 world0 = l2w * new Vector4(Vector3.Zero, 1);
+            Vector4 world1 = l2w * Vector4.UnitXPositive_Point;
+            Vector4 world2 = l2w * Vector4.UnitYPositive_Point;
+            Vector4 world3 = l2w * Vector4.UnitZPositive_Point;
             Assert.AreEqual(world0.X, 1);
             Assert.AreEqual(world0.Y, 0);
             Assert.AreEqual(world0.Z, 0);
@@ -201,15 +201,11 @@ namespace CRenderTest
         public static void TestWorldToLocalMatrix_Translation()
         {
             Transform transform = new Transform(Vector3.UnitXPositive);
-            Vector4 point0 = new Vector4(Vector3.Zero, 1);
-            Vector4 point1 = new Vector4(Vector3.UnitXPositive, 1);
-            Vector4 point2 = new Vector4(Vector3.UnitYPositive, 1);
-            Vector4 point3 = new Vector4(Vector3.UnitZPositive, 1);
             Matrix4x4 l2w = transform.WorldToLocal;
-            Vector4 world0 = l2w * point0;
-            Vector4 world1 = l2w * point1;
-            Vector4 world2 = l2w * point2;
-            Vector4 world3 = l2w * point3;
+            Vector4 world0 = l2w * new Vector4(Vector3.Zero, 1);
+            Vector4 world1 = l2w * Vector4.UnitXPositive_Point;
+            Vector4 world2 = l2w * Vector4.UnitYPositive_Point;
+            Vector4 world3 = l2w * Vector4.UnitZPositive_Point;
             Assert.AreEqual(world0.X, -1);
             Assert.AreEqual(world0.Y, 0);
             Assert.AreEqual(world0.Z, 0);
@@ -222,6 +218,54 @@ namespace CRenderTest
             Assert.AreEqual(world3.X, -1);
             Assert.AreEqual(world3.Y, 0);
             Assert.AreEqual(world3.Z, 1);
+        }
+
+        [Test]
+        public static void TestLocalToWorldMatrix_Rotation()
+        {
+            Transform transform = new Transform();
+            transform.Rotation.X = JMath.PI_HALF;
+            Matrix4x4 x_pi_half = transform.LocalToWorld;
+            transform.Rotation.Y = JMath.PI_HALF;
+            Matrix4x4 xy_pi_half = transform.LocalToWorld;
+            transform.Rotation.Z = JMath.PI_HALF;
+            Matrix4x4 xyz_pi_half = transform.LocalToWorld;
+            Vector4 world0 = x_pi_half * Vector4.One;
+            Vector4 world1 = xy_pi_half * Vector4.One;
+            Vector4 world2 = xyz_pi_half * Vector4.One;
+            Assert.AreEqual(world0.X, 1, 1e-5f);
+            Assert.AreEqual(world0.Y, -1, 1e-5f);
+            Assert.AreEqual(world0.Z, 1, 1e-5f);
+            Assert.AreEqual(world1.X, 0, 1e-5f);
+            Assert.AreEqual(world1.Y, -1, 1e-5f);
+            Assert.AreEqual(world1.Z, -1, 1e-5f);
+            Assert.AreEqual(world2.X, 0, 1e-5f);
+            Assert.AreEqual(world2.Y, 1, 1e-5f);
+            Assert.AreEqual(world2.Z, -1, 1e-5f);
+        }
+
+        [Test]
+        public static void TestWorldToLocalMatrix_Rotation()
+        {
+            Transform transform = new Transform();
+            transform.Rotation.X = JMath.PI_HALF;
+            Matrix4x4 x_pi_half = transform.WorldToLocal;
+            transform.Rotation.Y = JMath.PI_HALF;
+            Matrix4x4 xy_pi_half = transform.WorldToLocal;
+            transform.Rotation.Z = JMath.PI_HALF;
+            Matrix4x4 xyz_pi_half = transform.WorldToLocal;
+            Vector4 world0 = x_pi_half * Vector4.One;
+            Vector4 world1 = xy_pi_half * Vector4.One;
+            Vector4 world2 = xyz_pi_half * Vector4.One;
+            Assert.AreEqual(world0.X, 1, 1e-5f);
+            Assert.AreEqual(world0.Y, 1, 1e-5f);
+            Assert.AreEqual(world0.Z, -1, 1e-5f);
+            Assert.AreEqual(world1.X, -1, 1e-5f);
+            Assert.AreEqual(world1.Y, 1, 1e-5f);
+            Assert.AreEqual(world1.Z, -1, 1e-5f);
+            Assert.AreEqual(world2.X, -1, 1e-5f);
+            Assert.AreEqual(world2.Y, 1, 1e-5f);
+            Assert.AreEqual(world2.Z, 1, 1e-5f);
         }
     }
 }
