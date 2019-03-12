@@ -50,31 +50,30 @@
                 m41: 0, m42: 0, m43: 0, m44: 1);
         }
 
+        public static Matrix4x4 RotationEulerInverse(Vector3 rotation)
+        {
+            RotationData rot = new RotationData(rotation);
+
+            //!xelpmoc yllaer s'tI
+            return new Matrix4x4(
+                m11: rot.cosXYZ.Z * rot.cosXYZ.Y,
+                m21: rot.sinXYZ.Z * rot.cosXYZ.Y,
+                m31: -rot.sinXYZ.Y,
+                m12: -rot.cosXsinZ + rot.cosXYZ.Z * rot.sinXsinY,
+                m22: rot.cosXYZ.Z * rot.cosXYZ.X + rot.sinXYZ.Z * rot.sinXsinY,
+                m32: rot.cosXYZ.Y * rot.sinXYZ.X,
+                m13: rot.cosXYZ.Z * rot.cosXsinY + rot.sinXsinZ,
+                m23: -rot.cosXYZ.Z * rot.sinXYZ.X + rot.sinXYZ.Z * rot.cosXsinY,
+                m33: rot.cosXYZ.Y * rot.cosXYZ.X,
+                m14: 0, m24: 0, m34: 0,
+                m41: 0, m42: 0, m43: 0, m44: 1);
+        }
+
         public static Matrix4x4 Scale(Vector3 scale) => new Matrix4x4(
                 m11: scale.X, m21: 0, m31: 0, m41: 0,
                 m12: 0, m22: scale.Y, m32: 0, m42: 0,
                 m13: 0, m23: 0, m33: scale.Z, m43: 0,
                 m14: 0, m24: 0, m34: 0, m44: 1);
-
-        public static Matrix4x4 ScaleRotationTranslation(Vector3 scale, Vector3 rotation, Vector3 translation)
-        {
-            RotationData rot = new RotationData(rotation);
-
-            return new Matrix4x4(
-                m11: rot.cosXYZ.Y * rot.cosXYZ.Z,
-                m21: (rot.sinXsinY * rot.cosXYZ.Z - rot.cosXsinZ) * scale.Y,
-                m31: (rot.cosXsinY * rot.cosXYZ.Z + rot.sinXsinZ) * scale.Z,
-                m41: translation.X,
-                m12: rot.cosXYZ.Y * rot.sinXYZ.Z * scale.X,
-                m22: (rot.cosXYZ.X * rot.cosXYZ.Z + rot.sinXsinY * rot.sinXYZ.Z) * scale.Y,
-                m32: -rot.sinXYZ.X * rot.cosXYZ.Z * scale.Y,
-                m42: translation.Y,
-                m13: -rot.sinXYZ.Y * scale.X,
-                m23: rot.sinXYZ.X * rot.cosXYZ.Y * scale.Z,
-                m33: rot.cosXYZ.X * rot.cosXYZ.Y * scale.Z,
-                m43: translation.Z,
-                m14: 0, m24: 0, m34: 0, m44: 1);
-        }
 
         /// <summary>
         /// Positive X oriented, Y is <paramref name="width"/>,Z is <paramref name="height"/>

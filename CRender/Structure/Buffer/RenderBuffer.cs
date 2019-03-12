@@ -2,17 +2,15 @@
 
 namespace CRender.Structure
 {
-    public class RenderBuffer<T> where T : unmanaged
+    public class RenderBuffer<T> : IRenderBuffer<GenericVector<T>> where T : unmanaged
     {
-        public int ChannelCount => _pixels[0][0].Length;
+        public int ChannelCount { get; private set; }
 
-        public int Width => _pixels.Length;
+        public int Width { get; private set; }
 
-        public int Height => _pixels[0].Length;
+        public int Height { get; private set; }
 
-        public GenericVector<T>[] this[int u] => _pixels[u];
-
-        private GenericVector<T>[][] _pixels = null;
+        private GenericVector<T>[] _pixels = null;
 
         private bool _initialized = false;
 
@@ -25,28 +23,40 @@ namespace CRender.Structure
             if (_initialized)
                 throw new Exception("RenderBuffer has initialized");
 
-            _pixels = new GenericVector<T>[width][];
+            Width = width;
+            Height = height;
+            _pixels = new GenericVector<T>[width * height];
 
-            for (int i = 0; i < width; i++)
-            {
-                _pixels[i] = new GenericVector<T>[height];
-                for (int j = 0; j < height; j++)
-                    _pixels[i][j] = new GenericVector<T>(channelCount);
-            }
+            for (int i = 0; i < _pixels.Length; i++)
+                _pixels[i] = new GenericVector<T>(channelCount);
 
             _initialized = true;
         }
 
-        public void Clear()
+        public ref GenericVector<T> GetPixel(int u, int v)
         {
-            for (int i = 0; i < Width; i++)
-                for (int j = 0; j < Height; j++)
-                    _pixels[i][j].Clear();
+            return ref _pixels[UVToIndex(u, v)];
         }
 
         public virtual void WritePixel(int u, int v, GenericVector<T> pixel)
         {
-            _pixels[u][v].Write(pixel);
+            _pixels[UVToIndex(u, v)].Write(pixel);
+        }
+
+        public GenericVector<T>[] GetRenderBuffer()
+        {
+            return _pixels;
+        }
+
+        public void Clear()
+        {
+            for (int i = 0; i < _pixels.Length; i++)
+                _pixels[i].Clear();
+        }
+
+        private int UVToIndex(int u, int v)
+        {
+            return u + v * Width;
         }
     }
 }

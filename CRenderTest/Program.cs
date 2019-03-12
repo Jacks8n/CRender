@@ -15,6 +15,7 @@ namespace CRenderTest
     {
         private static unsafe void Main(string[] args)
         {
+            WindowHeight = 50;
             //Rotation seems to be the bug
             CRenderSettings.IsCountFrames = true;
             TestDrawLine();
@@ -54,12 +55,12 @@ namespace CRenderTest
 
             RenderEntity entity = new RenderEntity(new Transform(Vector3.Zero),
                 new Model(
-                    vertices: new Vector3[] { Vector3.Zero, Vector3.UnitXPositive, Vector3.UnitYPositive },//, Vector3.UnitZPositive },
-                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(0, 2) },// new LinePrimitive(0, 3) },
+                    vertices: new Vector3[] { new Vector3(-.5f, .5f, 0), new Vector3(-.5f, -.5f, 0), new Vector3(.5f, -.5f, 0), new Vector3(.5f, .5f, 0) },
+                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0) },
                     uvs: null,
                     normals: null
                 ), null);
-            ICamera camera = new Camera_Orthographic(width: 10f, height: 10f, near: -10, far: 10,
+            ICamera camera = new Camera_Orthographic(width: 5f, height: 10f, near: -2.5f, far: 2.5f,
                 new Transform(
                 pos: Vector3.Zero,
                 rotation: new Vector3(0, JMath.PI_HALF, 0)));
@@ -131,9 +132,9 @@ namespace CRenderTest
         {
             RenderBuffer<float> buffer = new RenderBuffer<float>(10, 10, 3);
             buffer.WritePixel(0, 0, new GenericVector<float>(3) { 3, 6, 10 });
-            Assert.AreEqual(buffer[0][0].R, 3);
-            Assert.AreEqual(buffer[0][0].G, 6);
-            Assert.AreEqual(buffer[0][0].B, 10);
+            Assert.AreEqual(buffer.GetPixel(0, 0).R, 3);
+            Assert.AreEqual(buffer.GetPixel(0, 0).G, 6);
+            Assert.AreEqual(buffer.GetPixel(0, 0).B, 10);
         }
 
         [Test]
@@ -236,10 +237,10 @@ namespace CRenderTest
             Assert.AreEqual(world0.X, 1, 1e-5f);
             Assert.AreEqual(world0.Y, -1, 1e-5f);
             Assert.AreEqual(world0.Z, 1, 1e-5f);
-            Assert.AreEqual(world1.X, 0, 1e-5f);
+            Assert.AreEqual(world1.X, 1, 1e-5f);
             Assert.AreEqual(world1.Y, -1, 1e-5f);
             Assert.AreEqual(world1.Z, -1, 1e-5f);
-            Assert.AreEqual(world2.X, 0, 1e-5f);
+            Assert.AreEqual(world2.X, 1, 1e-5f);
             Assert.AreEqual(world2.Y, 1, 1e-5f);
             Assert.AreEqual(world2.Z, -1, 1e-5f);
         }
@@ -266,6 +267,45 @@ namespace CRenderTest
             Assert.AreEqual(world2.X, -1, 1e-5f);
             Assert.AreEqual(world2.Y, 1, 1e-5f);
             Assert.AreEqual(world2.Z, 1, 1e-5f);
+        }
+
+        [Test]
+        public static void TestMatrix_Rotation()
+        {
+            Transform transform = new Transform
+            {
+                Rotation = new Vector3(JMath.PI_HALF * .5f, 0, 0)
+            };
+            Matrix4x4 x_pi_quarter = transform.LocalToWorld;
+            transform.Rotation = new Vector3(0, JMath.PI_HALF * .5f, 0);
+            Matrix4x4 y_pi_quarter = transform.LocalToWorld;
+            transform.Rotation = new Vector3(0, 0, JMath.PI_HALF * .5f);
+            Matrix4x4 z_pi_quarter = transform.LocalToWorld;
+            Vector4 world0 = x_pi_quarter * Vector4.UnitZPositive_Vector;
+            Vector4 world1 = y_pi_quarter * Vector4.UnitXPositive_Vector;
+            Vector4 world2 = z_pi_quarter * Vector4.UnitYPositive_Vector;
+            Assert.AreEqual(world0.X, 0);
+            Assert.AreEqual(world0.Y * world0.Y, .5f, 1e-5f);
+            Assert.AreEqual(world0.Z * world0.Z, .5f, 1e-5f);
+            Assert.AreEqual(world1.X * world1.X, .5f, 1e-5f);
+            Assert.AreEqual(world1.Y, 0);
+            Assert.AreEqual(world1.Z * world1.Z, .5f, 1e-5f);
+            Assert.AreEqual(world2.X * world2.X, .5f, 1e-5f);
+            Assert.AreEqual(world2.Y * world2.Y, .5f, 1e-5f);
+            Assert.AreEqual(world2.Z, 0);
+        }
+
+        [Test]
+        public static void TestCamera_WorldToView_Orthographic()
+        {
+            ICamera camera = new Camera_Orthographic(width: 6, height: 4, near: -2, far: 4,
+                new Transform(
+                    pos: Vector3.One,
+                    rotation: new Vector3(0, JMath.PI_HALF, -JMath.PI_HALF * .5f)));
+            Vector4 view0 = camera.WorldToView * Vector4.UnitXNegative_Point;
+            Assert.AreEqual(view0.X, 0, 1e-5f);
+            Assert.AreEqual(view0.Y * view0.Y, .5f, 1e-5f);
+            Assert.AreEqual(view0.Z * view0.Z, .125f, 1e-5f);
         }
     }
 }

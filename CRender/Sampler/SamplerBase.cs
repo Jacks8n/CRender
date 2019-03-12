@@ -16,7 +16,7 @@ namespace CRender.Sampler
 
         public virtual GenericVector<T> Sample<T>(RenderBuffer<T> source, Vector2Int uv) where T : unmanaged
         {
-            return source[_repeatModeX.GetUV(uv.X, source.Width)][_repeatModeY.GetUV(uv.Y, source.Height)];
+            return source.GetPixel(_repeatModeX.GetUV(uv.X, source.Width), _repeatModeY.GetUV(uv.Y, source.Height));
         }
     }
 }

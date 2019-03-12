@@ -1,34 +1,34 @@
 ﻿namespace CRender.Structure
 {
-    public class CharRenderBuffer<T> where T : unmanaged
+    public class CharRenderBuffer<T> : IRenderBuffer<char> where T : unmanaged
     {
-        public int Width => _renderBuffer.Width;
+        public int Width => _targetBuffer.Width;
 
-        public int Height => _renderBuffer.Height;
+        public int Height => _targetBuffer.Height;
 
         private static readonly char[] COLOR_CHAR = { ' ', '.', '-', '+', '*', '#', '@' };
 
         private static readonly int COLOR_CHAR_COUNT = COLOR_CHAR.Length;
 
-        private readonly RenderBuffer<T> _renderBuffer;
+        private readonly IRenderBuffer<GenericVector<T>> _targetBuffer;
+
+        private readonly GenericVector<T>[] _targetBufferPixels;
 
         private readonly char[] _colorChars;
 
-        public CharRenderBuffer(RenderBuffer<T> renderBuffer)
+        public CharRenderBuffer(IRenderBuffer<GenericVector<T>> targetBuffer)
         {
-            _renderBuffer = renderBuffer;
-            _colorChars = new char[renderBuffer.Width * renderBuffer.Height];
+            _targetBuffer = targetBuffer;
+            _targetBufferPixels = targetBuffer.GetRenderBuffer();
+            _colorChars = new char[_targetBufferPixels.Length];
         }
 
-        public char[] CalculateColorChars()
+        public char[] GetRenderBuffer()
         {
             if (typeof(T) == typeof(float))
-            {
-                int charIndex = 0;
-                for (int v = 0; v < _renderBuffer.Height; v++)
-                    for (int u = 0; u < _renderBuffer.Width; u++)
-                        _colorChars[charIndex++] = GetColorChar((GenericVector<float>)(object)_renderBuffer[u][v]);
-            }
+                for (int i = 0; i < _targetBufferPixels.Length; i++)
+                    _colorChars[i] = GetColorChar((GenericVector<float>)(object)_targetBufferPixels[i]);
+
             return _colorChars;
         }
 

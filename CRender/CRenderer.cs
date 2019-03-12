@@ -8,7 +8,7 @@ namespace CRender
 
         public static void Render(CharRenderBuffer<float> buffer)
         {
-            char[] outputChars = buffer.CalculateColorChars();
+            char[] outputChars = buffer.GetRenderBuffer();
             if (CRenderSettings.IsCountFrames)
             {
                 _frameCounts++;
