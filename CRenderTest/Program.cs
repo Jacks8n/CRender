@@ -18,8 +18,10 @@ namespace CRenderTest
         {
             WindowHeight = 50;
             CRenderSettings.IsCountFrames = true;
-            TestRasterize();
-            //TestDrawLine();
+            WriteLine("Press any key to run test");
+            ReadKey();
+            //TestRasterize();
+            TestDrawLine();
             //TestRenderFrames();
             ReadKey();
         }
@@ -83,15 +85,18 @@ namespace CRenderTest
 
             RenderEntity entity = new RenderEntity(new Transform(Vector3.Zero),
                 new Model(
-                    vertices: new Vector3[] { new Vector3(-.5f, .5f, 0), new Vector3(-.5f, -.5f, 0), new Vector3(.5f, -.5f, 0), new Vector3(.5f, .5f, 0) },
-                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0) },
+                    vertices: new Vector3[] { new Vector3(-.5f, .5f, -.5f), new Vector3(-.5f, -.5f, -.5f), new Vector3(.5f, -.5f, -.5f),new Vector3(.5f, .5f, -.5f),
+                        new Vector3(-.5f, .5f, .5f), new Vector3(-.5f, -.5f, .5f), new Vector3(.5f, -.5f, .5f), new Vector3(.5f, .5f, .5f) },
+                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0),
+                        new LinePrimitive(4, 5), new LinePrimitive(5, 6), new LinePrimitive(6, 7), new LinePrimitive(7, 4),
+                        new LinePrimitive(0, 4), new LinePrimitive(1, 5), new LinePrimitive(2, 6), new LinePrimitive(3, 7)},
                     uvs: null,
                     normals: null
                 ), null);
-            ICamera camera = new Camera_Orthographic(width: 5f, height: 5f, near: -2.5f, far: 2.5f,
+            ICamera camera = new Camera_Orthographic(width: 3.5f, height: 3.5f, near: -2.5f, far: 2.5f,
                 new Transform(
                 pos: Vector3.Zero,
-                rotation: new Vector3(0, JMath.PI_HALF, 0)));
+                rotation: new Vector3(0, JMath.PI_HALF * .35f, -JMath.PI_HALF * 1.5f)));
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
             float framerate = 25f;
@@ -103,6 +108,7 @@ namespace CRenderTest
             {
                 pipeline.Draw(entitiesApply, camera);
                 CRenderer.Render(charBuffer);
+                entity.Transform.Rotation.X += angleStep;
                 entity.Transform.Rotation.Z += angleStep;
                 Thread.Sleep(frameInterval);
             }
