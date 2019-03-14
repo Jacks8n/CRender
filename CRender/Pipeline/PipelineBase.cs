@@ -35,7 +35,7 @@ namespace CRender.Pipeline
 
         public PipelineBase()
         {
-            _bufferSize = CRenderSettings.RenderSize;
+            _bufferSize = CRenderSettings.Resolution;
             _bufferSizeF = (Vector2)_bufferSize;
             _renderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 3);
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using CRender;
 using CRender.Math;
 using CRender.Pipeline;
@@ -16,9 +17,9 @@ namespace CRenderTest
         private static unsafe void Main(string[] args)
         {
             WindowHeight = 50;
-            //Rotation seems to be the bug
             CRenderSettings.IsCountFrames = true;
-            TestDrawLine();
+            TestRasterize();
+            //TestDrawLine();
             //TestRenderFrames();
             ReadKey();
         }
@@ -48,6 +49,33 @@ namespace CRenderTest
             }
         }
 
+        public static unsafe void TestRasterize()
+        {
+            Rasterizer.StartRasterize(CRenderSettings.ResolutionF);
+            RenderBuffer<float> tex0 = new RenderBuffer<float>(CRenderSettings.Resolution, 3);
+            CharRenderBuffer<float> texChar = new CharRenderBuffer<float>(tex0);
+            Vector2* points = stackalloc Vector2[4];
+
+            for (float i = 0; i < JMath.PI_TWO; i += .02f)
+            {
+                Vector2 dir = new Vector2(MathF.Cos(i) * .3f, MathF.Sin(i) * .3f);
+                Vector2 orthoDir = new Vector2(-dir.Y, dir.X);
+                points[0] = new Vector2(.5f, .5f) + dir;
+                points[1] = new Vector2(.5f, .5f) - dir;
+                points[2] = new Vector2(.5f, .5f) + orthoDir;
+                points[3] = new Vector2(.5f, .5f) - orthoDir;
+                Rasterizer.SetPoints(points);
+                Rasterizer.Line();
+                Rasterizer.Line();
+                tex0.WritePixel(Rasterizer.ContriveResult(), new GenericVector<float>(3) { 1f, 1f, 1f });
+                CRenderer.Render(texChar);
+                tex0.Clear();
+                Thread.Sleep(16);
+            }
+
+            Rasterizer.EndRasterize();
+        }
+
         public static void TestDrawLine()
         {
             PipelineBase<AppdataBasic, V2FBasic> pipeline = new PipelineBase<AppdataBasic, V2FBasic>();
@@ -60,7 +88,7 @@ namespace CRenderTest
                     uvs: null,
                     normals: null
                 ), null);
-            ICamera camera = new Camera_Orthographic(width: 5f, height: 10f, near: -2.5f, far: 2.5f,
+            ICamera camera = new Camera_Orthographic(width: 5f, height: 5f, near: -2.5f, far: 2.5f,
                 new Transform(
                 pos: Vector3.Zero,
                 rotation: new Vector3(0, JMath.PI_HALF, 0)));

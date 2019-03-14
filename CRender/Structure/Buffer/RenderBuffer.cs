@@ -1,4 +1,5 @@
 ﻿using System;
+using CRender.Math;
 
 namespace CRender.Structure
 {
@@ -15,6 +16,8 @@ namespace CRender.Structure
         private bool _initialized = false;
 
         public RenderBuffer() { }
+
+        public RenderBuffer(Vector2Int size, int channelCount) : this(size.X, size.Y, channelCount) { }
 
         public RenderBuffer(int width, int height, int channelCount) => Initialize(width, height, channelCount);
 
@@ -43,6 +46,12 @@ namespace CRender.Structure
             _pixels[UVToIndex(u, v)].Write(pixel);
         }
 
+        public virtual void WritePixel(Vector2Int[] uvs, GenericVector<T> pixel)
+        {
+            for (int i = 0; i < uvs.Length; i++)
+                _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(pixel);
+        }
+
         public GenericVector<T>[] GetRenderBuffer()
         {
             return _pixels;
@@ -56,7 +65,7 @@ namespace CRender.Structure
 
         private int UVToIndex(int u, int v)
         {
-            return u + v * Width;
+            return (Height - v - 1) * Width + u;
         }
     }
 }

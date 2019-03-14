@@ -9,7 +9,9 @@ namespace CRender
 
         public static int RenderHeight => Console.WindowHeight;
 
-        public static Vector2Int RenderSize => new Vector2Int(Console.WindowWidth, Console.WindowHeight);
+        public static Vector2Int Resolution => new Vector2Int(Console.WindowWidth, Console.WindowHeight);
+
+        public static Vector2 ResolutionF => new Vector2(Console.WindowWidth, Console.WindowHeight);
 
         public static bool IsCountFrames
         {

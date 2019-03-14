@@ -68,28 +68,47 @@ namespace CRender.Pipeline
             if (_pointsPtr[0] == _pointsPtr[1])
                 return;
 
+            float xSub = (_pointsPtr[1].X - _pointsPtr[0].X) * _resolution.X,
+                ySub = (_pointsPtr[1].Y - _pointsPtr[0].Y) * _resolution.Y;
+
             //0: X-major 1:Y-major
-            int dir = MathLib.Abs(_pointsPtr[0].X - _pointsPtr[1].X) > MathLib.Abs(_pointsPtr[0].Y - _pointsPtr[1].Y) ? 0 : 1;
+            int dir, otherDir;
+            int dirStep, otherDirStep;
+            float slopeAbs;
+            if ((xSub > 0 ? xSub : -xSub) >= (ySub > 0 ? ySub : -ySub))
+            {
+                dir = 0;
+                dirStep = xSub > 0 ? 1 : -1;
+                otherDirStep = ySub > 0 ? 1 : -1;
+                slopeAbs = ySub / xSub;
+            }
+            else
+            {
+                dir = 1;
+                dirStep = ySub > 0 ? 1 : -1;
+                otherDirStep = xSub > 0 ? 1 : -1;
+                slopeAbs = xSub / ySub;
+            }
+            otherDir = 1 - dir;
+            if (slopeAbs < 0)
+                slopeAbs = -slopeAbs;
 
-            float invSlope = (_pointsPtr[0][1 - dir] - _pointsPtr[1][1 - dir]) / (_pointsPtr[0][dir] - _pointsPtr[1][dir]);
-            invSlope = MathF.Abs(invSlope == 0 ? float.PositiveInfinity : 1f / invSlope);
-
-            //Smaller coordinate is taken
-            int startIndex = _pointsPtr[0][dir] < _pointsPtr[1][dir] ? 0 : 1;
-
-            float* startPoint = (float*)(_pointsPtr + startIndex);
+            Vector2Int resultPoint = new Vector2Int(JMath.RoundToInt(_pointsPtr[0].X * _resolution.X), JMath.RoundToInt(_pointsPtr[0].Y * _resolution.Y));
+            if (resultPoint.X == _resolution.X)
+                resultPoint.X--;
+            if (resultPoint.Y == _resolution.Y)
+                resultPoint.Y--;
 
             //End coordinate in Int
-            int end = (int)(_pointsPtr[1 - startIndex][dir] * _resolution[dir]);
+            int end = JMath.RoundToInt(_pointsPtr[1][dir] * _resolution[dir]);
 
-            Vector2Int resultPoint = new Vector2Int((int)(startPoint[0] * _resolution.X), (int)(startPoint[1] * _resolution.Y));
-            for (float frac = 0; resultPoint[dir] < end; frac++, resultPoint[dir]++)
+            for (float otherDirFrac = slopeAbs; resultPoint[dir] != end; otherDirFrac += slopeAbs, resultPoint[dir] += dirStep)
             {
                 _rasterizeBufferPtr[_rasterizeBufferUsed++] = resultPoint;
-                if (frac >= invSlope)
+                if (otherDirFrac >= 1f)
                 {
-                    resultPoint[1 - dir]++;
-                    frac = 0;
+                    resultPoint[otherDir] += otherDirStep;
+                    otherDirFrac--;
                 }
             }
             _pointsPtr += 2;

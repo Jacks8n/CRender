@@ -24,7 +24,7 @@ namespace CRender.Math
         /// <summary>
         /// Exclusive
         /// </summary>
-        public static bool InRange(float value,float min,float max)
+        public static bool InRange(float value, float min, float max)
         {
             return value > min && value < max;
         }
@@ -32,6 +32,13 @@ namespace CRender.Math
         public static float Lerp(float value, float from, float to)
         {
             return (to - from) * value + from;
+        }
+
+        public static GenericVector<float> Lerp(float value, GenericVector<float> from, GenericVector<float> to)
+        {
+            for (int i = 0; i < from.Length; i++)
+                from[i] = Lerp(value, from[i], to[i]);
+            return from;
         }
 
         public static float CoLerp(float value, float from, float to, float min, float max)
@@ -43,12 +50,9 @@ namespace CRender.Math
         {
             return value - (value % precision);
         }
-
-        public static GenericVector<float> Lerp(float value, GenericVector<float> from, GenericVector<float> to)
+        public static int RoundToInt(float value)
         {
-            for (int i = 0; i < from.Length; i++)
-                from[i] = Lerp(value, from[i], to[i]);
-            return from;
+            return value % 1f <= .5f ? (int)value : (int)value + 1;
         }
     }
 }
