@@ -1,6 +1,8 @@
-﻿namespace CRender.Math
+﻿using CRender.Structure;
+
+namespace CRender.Math
 {
-    public partial struct Matrix4x4
+    public unsafe partial struct Matrix4x4
     {
         private struct RotationData
         {
@@ -19,11 +21,15 @@
             }
         }
 
-        public static Matrix4x4 Transpose(Matrix4x4 matrix) => new Matrix4x4(
-            m11: matrix.M11, m21: matrix.M12, m31: matrix.M13, m41: matrix.M14,
-            m12: matrix.M21, m22: matrix.M22, m32: matrix.M23, m42: matrix.M24,
-            m13: matrix.M31, m23: matrix.M32, m33: matrix.M33, m43: matrix.M34,
-            m14: matrix.M41, m24: matrix.M42, m34: matrix.M43, m44: matrix.M44);
+        public static Matrix4x4* Transpose(Matrix4x4* matrix)
+        {
+            matrix->M21 = matrix->M12; matrix->M31 = matrix->M13; matrix->M41 = matrix->M14;
+            matrix->M12 = matrix->M21; matrix->M32 = matrix->M23; matrix->M42 = matrix->M24;
+            matrix->M13 = matrix->M31; matrix->M23 = matrix->M32; matrix->M43 = matrix->M34;
+            matrix->M14 = matrix->M41; matrix->M24 = matrix->M42; matrix->M34 = matrix->M43;
+
+            return matrix;
+        }
 
         public static Matrix4x4 Translation(Vector3 vector) => new Matrix4x4(
             m11: 1, m21: 0, m31: 0, m41: vector.X,

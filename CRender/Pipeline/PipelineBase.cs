@@ -5,10 +5,11 @@ using CRender.Pipeline.Structure;
 using CRender.Sampler;
 using CRender.Structure;
 
+using static CRender.Pipeline.ShaderValue;
+
 namespace CRender.Pipeline
 {
-    public class PipelineBase<TApp, TV2F>
-        where TApp : struct, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
+    public class PipelineBase<TApp, TV2F> : IPipeline where TApp : unmanaged, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
     {
         public RenderBuffer<float> RenderTarget => _renderTarget;
 
@@ -27,12 +28,6 @@ namespace CRender.Pipeline
 
         private readonly RenderBuffer<float> _renderTarget;
 
-        private Matrix4x4 _matrixObjectToWorld;
-
-        private Matrix4x4 _matrixWorldToView;
-
-        private Matrix4x4 _matrixObjectToView;
-
         public PipelineBase()
         {
             _bufferSize = CRenderSettings.Resolution;
@@ -42,40 +37,31 @@ namespace CRender.Pipeline
 
         #region Application
 
-        public RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
+        public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
             _renderTarget.Clear();
-            _matrixWorldToView = camera.WorldToView;
+            WorldToView = camera.WorldToView;
 
-            TApp appdata = new TApp();
-            TV2F[][] vertexV2FData = new TV2F[entities.Length][];
             IPrimitive[][] primitives = new IPrimitive[entities.Length][];
-            Vector2[][] screenCoords = new Vector2[entities.Length][];
+            TV2F** v2fData = stackalloc TV2F*[entities.Length];
+            Vector2** screenCoords = stackalloc Vector2*[entities.Length];
             for (int i = 0; i < entities.Length; i++)
             {
                 RenderEntity instanceCopy = entities[i].GetInstanceToApply();
 
-                _matrixObjectToWorld = instanceCopy.Transform.LocalToWorld;
-                _matrixObjectToView = _matrixWorldToView * _matrixObjectToWorld;
+                int vertexCount = instanceCopy.Model.Vertices.Length;
+                TV2F* v2fOutput = stackalloc TV2F[vertexCount];
+                Vector2* coordsOutput = stackalloc Vector2[vertexCount];
 
-                Vector3[] vertices = instanceCopy.Model.Vertices;
-                vertexV2FData[i] = new TV2F[vertices.Length];
-                screenCoords[i] = new Vector2[vertices.Length];
-                primitives[i] = instanceCopy.Model.Primitives;
-                for (int j = 0; j < vertices.Length; j++)
-                {
-                    appdata.AssignAppdata(ref instanceCopy.Model, j);
-                    TV2F v2f = Vertex(ref appdata);
-
-                    vertexV2FData[i][j] = v2f;
-                    screenCoords[i][j] = ViewToScreen(v2f.Vertex_VOut);
-                }
+                primitives[i] = ProcessGeometryStage(instanceCopy, v2fOutput, coordsOutput);
+                v2fData[i] = v2fOutput;
+                screenCoords[i] = coordsOutput;
             }
 
             //Octree is so annoying
             //Clipping();
 
-            Vector2Int[][][] rasterization = Rasterize(screenCoords, vertexV2FData, primitives);
+            Vector2Int[][][] rasterization = Rasterize(screenCoords, v2fData, primitives);
 
             GenericVector<float> whiteColor = new GenericVector<float>(3) { 1, 1, 1 };
             //Model
@@ -91,18 +77,30 @@ namespace CRender.Pipeline
             return _renderTarget;
         }
 
+        private unsafe IPrimitive[] ProcessGeometryStage(RenderEntity entity, TV2F* v2fOutput, Vector2* screenCoordOutput)
+        {
+            ObjectToWorld = entity.Transform.LocalToWorld;
+            ObjectToView = WorldToView * ObjectToWorld;
+
+            Vector3[] vertices = entity.Model.Vertices;
+            Material material = entity.Material;
+
+            IRenderData_App<TApp> appdata = new TApp();
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                appdata.AssignAppdata(ref entity.Model, i);
+                TV2F v2f = ShaderInvoker.Vertex(material.Shader as IVertexShader<TApp, TV2F>, appdata);
+
+                v2fOutput[i] = v2f;
+                screenCoordOutput[i] = ViewToScreen(v2f.Vertex_VOut);
+            }
+
+            return entity.Model.Primitives;
+        }
+
         #endregion
 
         #region GeometryProcessing
-
-        public virtual TV2F Vertex(ref TApp input)
-        {
-            return new TV2F
-            {
-                Vertex_VOut = _matrixObjectToView * input.Vertex_App,
-                UV_VOut = input.UV_App
-            };
-        }
 
         /// <summary>
         /// TODO
@@ -119,7 +117,7 @@ namespace CRender.Pipeline
 
         protected Vector2 ViewToScreen(Vector4 vpos) => new Vector2(vpos.Y * .5f + .5f, vpos.Z * .5f + .5f);
 
-        protected virtual unsafe Vector2Int[][][] Rasterize(Vector2[][] screenCoords, TV2F[][] modelV2Fs, IPrimitive[][] primitives)
+        protected virtual unsafe Vector2Int[][][] Rasterize(Vector2** screenCoords, TV2F** modelV2Fs, IPrimitive[][] primitives)
         {
             Rasterizer.StartRasterize(_bufferSizeF);
             Vector2Int[][][] rasterization = new Vector2Int[modelV2Fs.Length][][];
@@ -140,6 +138,9 @@ namespace CRender.Pipeline
                     {
                         case 2:
                             Rasterizer.Line();
+                            break;
+                        case 3:
+                            Rasterizer.Triangle();
                             break;
                         default:
                             throw new NotImplementedException("Rasterization for this kind of primitive is not supported");

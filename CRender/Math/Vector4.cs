@@ -57,8 +57,6 @@
         {
         }
 
-        public override string ToString() => $"{{ X:{X} Y:{Y} Z:{Z} W:{W} }}";
-
         public static Vector4 operator -(Vector4 value) => new Vector4(-value.X, -value.Y, -value.Z, -value.W);
 
         public static Vector4 operator +(Vector4 l, Vector4 r) => new Vector4(l.X + r.X, l.Y + r.Y, l.Z + r.Z, r.W + l.W);
@@ -66,5 +64,13 @@
         public static Vector4 operator -(Vector4 l, Vector4 r) => new Vector4(l.X - r.X, l.Y - r.Y, l.Z - r.Z, r.W - l.W);
 
         public static Vector4 operator *(Vector4 value, float scale) => new Vector4(value.X * scale, value.Y * scale, value.Z * scale, value.W * scale);
+
+        public static Vector4 operator *(Matrix4x4 l, Vector4 r) => new Vector4(
+                x: r.X * l.M11 + r.Y * l.M21 + r.Z * l.M31 + r.W * l.M41,
+                y: r.X * l.M12 + r.Y * l.M22 + r.Z * l.M32 + r.W * l.M42,
+                z: r.X * l.M13 + r.Y * l.M23 + r.Z * l.M33 + r.W * l.M43,
+                w: r.X * l.M14 + r.Y * l.M24 + r.Z * l.M34 + r.W * l.M44);
+
+        public override string ToString() => $"{{ X:{X} Y:{Y} Z:{Z} W:{W} }}";
     }
 }

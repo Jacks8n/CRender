@@ -2,39 +2,20 @@
 {
     public partial struct Matrix4x4
     {
-        public float M11 => M[0][0];
-        public float M12 => M[0][1];
-        public float M13 => M[0][2];
-        public float M14 => M[0][3];
-        public float M21 => M[1][0];
-        public float M22 => M[1][1];
-        public float M23 => M[1][2];
-        public float M24 => M[1][3];
-        public float M31 => M[2][0];
-        public float M32 => M[2][1];
-        public float M33 => M[2][2];
-        public float M34 => M[2][3];
-        public float M41 => M[3][0];
-        public float M42 => M[3][1];
-        public float M43 => M[3][2];
-        public float M44 => M[3][3];
-
-        /// <summary>
-        /// M(x, y) -> M[x - 1][y - 1]
-        /// </summary>
-        public readonly float[][] M;
+        public float M11, M21, M31, M41;
+        public float M12, M22, M32, M42;
+        public float M13, M23, M33, M43;
+        public float M14, M24, M34, M44;
 
         public Matrix4x4(float m11, float m21, float m31, float m41,
                          float m12, float m22, float m32, float m42,
                          float m13, float m23, float m33, float m43,
                          float m14, float m24, float m34, float m44)
         {
-            M = new float[][] {
-                new float[]{ m11, m12, m13, m14},
-                new float[]{ m21, m22, m23, m24},
-                new float[]{ m31, m32, m33, m34},
-                new float[]{ m41, m42, m43, m44},
-            };
+            M11 = m11; M21 = m21; M31 = m31; M41 = m41;
+            M12 = m12; M22 = m22; M32 = m32; M42 = m42;
+            M13 = m13; M23 = m23; M33 = m33; M43 = m43;
+            M14 = m14; M24 = m24; M34 = m34; M44 = m44;
         }
 
         public static Matrix4x4 operator *(Matrix4x4 l, Matrix4x4 r) => new Matrix4x4(
@@ -57,12 +38,6 @@
                 m42: l.M12 * r.M41 + l.M22 * r.M42 + l.M32 * r.M43 + l.M42 * r.M44,
                 m43: l.M13 * r.M41 + l.M23 * r.M42 + l.M33 * r.M43 + l.M43 * r.M44,
                 m44: l.M14 * r.M41 + l.M24 * r.M42 + l.M34 * r.M43 + l.M44 * r.M44);
-
-        public static Vector4 operator *(Matrix4x4 l, Vector4 r) => new Vector4(
-                x: r.X * l.M11 + r.Y * l.M21 + r.Z * l.M31 + r.W * l.M41,
-                y: r.X * l.M12 + r.Y * l.M22 + r.Z * l.M32 + r.W * l.M42,
-                z: r.X * l.M13 + r.Y * l.M23 + r.Z * l.M33 + r.W * l.M43,
-                w: r.X * l.M14 + r.Y * l.M24 + r.Z * l.M34 + r.W * l.M44);
 
         public override string ToString()
         {

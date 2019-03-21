@@ -1,11 +1,18 @@
-﻿namespace CRender.Structure
+﻿using CRender.Pipeline;
+
+namespace CRender.Structure
 {
-    public class Material : IAppliable<Material>
+    public class Material : IAppliable<Material> 
     {
         public RenderBuffer<float> MainTexture { get; private set; }
 
-        private Material _instanceToApply;
-        
+        public IShader Shader;
+
+        public Material(IShader shader)
+        {
+            Shader = shader;
+        }
+
         public Material GetInstanceToApply()
         {
             return this;

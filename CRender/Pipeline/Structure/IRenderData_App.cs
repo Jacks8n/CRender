@@ -3,7 +3,7 @@ using CRender.Structure;
 
 namespace CRender.Pipeline.Structure
 {
-    public interface IRenderData_App<T> where T : IRenderData_App<T>
+    public interface IRenderData_App<T> where T : unmanaged, IRenderData_App<T>
     {
         Vector4 Vertex_App { get; set; }
 

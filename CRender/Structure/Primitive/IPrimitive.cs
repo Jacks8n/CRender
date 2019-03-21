@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CRender.Structure
+﻿namespace CRender.Structure
 {
     public interface IPrimitive
     {
