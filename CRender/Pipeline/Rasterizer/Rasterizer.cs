@@ -10,6 +10,8 @@ namespace CRender.Pipeline
     /// </summary>
     public sealed unsafe partial class Rasterizer : IDisposable
     {
+        public int RasterzeResultLength => _rasterizeBufferUsed;
+
         /// <summary>
         /// Store result and shift <see cref="_rasterizeBufferUsed"/>
         /// </summary>
@@ -47,11 +49,18 @@ namespace CRender.Pipeline
             _pointsPtr = pointsPtr;
         }
 
+        public static Vector2Int* ContriveResultPtr()
+        {
+            int i = 0;
+            for (; i < _rasterizeBufferUsed; i++)
+                outputPtr[i] = _rasterizeBufferPtr[i];
+            return i;
+        }
+
         public static void ContriveResult(Vector2Int[] output, int start)
         {
             for (int i = 0; i < _rasterizeBufferUsed; i++)
                 output[start + i] = _rasterizeBufferPtr[i];
-            _rasterizeBufferUsed = 0;
         }
 
         public static Vector2Int[] ContriveResult()

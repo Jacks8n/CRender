@@ -11,7 +11,7 @@ namespace CRender.Pipeline
 {
     public class PipelineBase<TApp, TV2F> : IPipeline where TApp : unmanaged, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
     {
-        public RenderBuffer<float> RenderTarget => _renderTarget;
+        public RenderBuffer<float> RenderTarget { get; }
 
         #region TODO
 
@@ -26,20 +26,20 @@ namespace CRender.Pipeline
 
         private readonly Vector2Int _bufferSize;
 
-        private readonly RenderBuffer<float> _renderTarget;
+        private readonly Material _currentMaterial;
 
         public PipelineBase()
         {
             _bufferSize = CRenderSettings.Resolution;
             _bufferSizeF = (Vector2)_bufferSize;
-            _renderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 3);
+            RenderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 3);
         }
 
         #region Application
 
         public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
-            _renderTarget.Clear();
+            RenderTarget.Clear();
             WorldToView = camera.WorldToView;
 
             IPrimitive[][] primitives = new IPrimitive[entities.Length][];
@@ -71,10 +71,10 @@ namespace CRender.Pipeline
                     //PixelPos
                     for (int k = 0; k < rasterization[i][j].Length; k++)
                     {
-                        _renderTarget.WritePixel(rasterization[i][j][k].X, rasterization[i][j][k].Y, whiteColor);
+                        RenderTarget.WritePixel(rasterization[i][j][k].X, rasterization[i][j][k].Y, whiteColor);
                     }
 
-            return _renderTarget;
+            return RenderTarget;
         }
 
         private unsafe IPrimitive[] ProcessGeometryStage(RenderEntity entity, TV2F* v2fOutput, Vector2* screenCoordOutput)
@@ -89,7 +89,7 @@ namespace CRender.Pipeline
             for (int i = 0; i < vertices.Length; i++)
             {
                 appdata.AssignAppdata(ref entity.Model, i);
-                TV2F v2f = ShaderInvoker.Vertex(material.Shader as IVertexShader<TApp, TV2F>, appdata);
+                TV2F v2f = material.Shader.Vertex(material.Shader as IVertexShader<TApp, TV2F>, appdata);
 
                 v2fOutput[i] = v2f;
                 screenCoordOutput[i] = ViewToScreen(v2f.Vertex_VOut);
@@ -117,37 +117,32 @@ namespace CRender.Pipeline
 
         protected Vector2 ViewToScreen(Vector4 vpos) => new Vector2(vpos.Y * .5f + .5f, vpos.Z * .5f + .5f);
 
-        protected virtual unsafe Vector2Int[][][] Rasterize(Vector2** screenCoords, TV2F** modelV2Fs, IPrimitive[][] primitives)
+        protected virtual unsafe int Rasterize(in TV2F* modelV2Fs, in Vector2* screenCoords, in IPrimitive[] primitives)
         {
             Rasterizer.StartRasterize(_bufferSizeF);
-            Vector2Int[][][] rasterization = new Vector2Int[modelV2Fs.Length][][];
-
             Vector2* primitiveCoords = stackalloc Vector2[3];
-            for (int modelIndex = 0; modelIndex < modelV2Fs.Length; modelIndex++)
+
+            for (int primitiveIndex = 0; primitiveIndex < primitives.Length; primitiveIndex++)
             {
-                rasterization[modelIndex] = new Vector2Int[primitives[modelIndex].Length][];
-                for (int primitiveIndex = 0; primitiveIndex < primitives[modelIndex].Length; primitiveIndex++)
+                IPrimitive primitive = primitives[primitiveIndex];
+
+                for (int i = 0; i < primitive.Count; i++)
+                    primitiveCoords[i] = screenCoords[primitive.Indices[i]];
+                Rasterizer.SetPoints(primitiveCoords);
+
+                switch (primitive.Count)
                 {
-                    IPrimitive primitive = primitives[modelIndex][primitiveIndex];
-
-                    for (int j = 0; j < primitive.Count; j++)
-                        primitiveCoords[j] = screenCoords[modelIndex][primitive.Indices[j]];
-                    Rasterizer.SetPoints(primitiveCoords);
-
-                    switch (primitive.Count)
-                    {
-                        case 2:
-                            Rasterizer.Line();
-                            break;
-                        case 3:
-                            Rasterizer.Triangle();
-                            break;
-                        default:
-                            throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
-                            break;
-                    }
-                    rasterization[modelIndex][primitiveIndex] = Rasterizer.ContriveResult();
+                    case 2:
+                        Rasterizer.Line();
+                        break;
+                    case 3:
+                        Rasterizer.Triangle();
+                        break;
+                    default:
+                        throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
+                        break;
                 }
+                Rasterizer.ContriveResult();
             }
 
             Rasterizer.EndRasterize();
