@@ -9,7 +9,7 @@ using static CRender.Pipeline.ShaderValue;
 
 namespace CRender.Pipeline
 {
-    public class PipelineBase<TApp, TV2F> : IPipeline where TApp : unmanaged, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
+    public partial class PipelineBase<TApp, TV2F> : IPipeline where TApp : unmanaged, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
     {
         public RenderBuffer<float> RenderTarget { get; }
 
@@ -42,9 +42,11 @@ namespace CRender.Pipeline
             RenderTarget.Clear();
             WorldToView = camera.WorldToView;
 
-            IPrimitive[][] primitives = new IPrimitive[entities.Length][];
             TV2F** v2fData = stackalloc TV2F*[entities.Length];
             Vector2** screenCoords = stackalloc Vector2*[entities.Length];
+            Vector2Int** rasterization = stackalloc Vector2Int*[entities.Length];
+
+            BeginRasterize();
             for (int i = 0; i < entities.Length; i++)
             {
                 RenderEntity instanceCopy = entities[i].GetInstanceToApply();
@@ -53,15 +55,16 @@ namespace CRender.Pipeline
                 TV2F* v2fOutput = stackalloc TV2F[vertexCount];
                 Vector2* coordsOutput = stackalloc Vector2[vertexCount];
 
-                primitives[i] = ProcessGeometryStage(instanceCopy, v2fOutput, coordsOutput);
+                ProcessGeometryStage(instanceCopy, v2fOutput, coordsOutput);
                 v2fData[i] = v2fOutput;
                 screenCoords[i] = coordsOutput;
             }
+            EndRasterize();
 
             //Octree is so annoying
             //Clipping();
 
-            Vector2Int[][][] rasterization = Rasterize(screenCoords, v2fData, primitives);
+            Vector2Int[][][] rasterization = Rasterize(v2fData, screenCoords, primitives);
 
             GenericVector<float> whiteColor = new GenericVector<float>(3) { 1, 1, 1 };
             //Model
@@ -77,27 +80,6 @@ namespace CRender.Pipeline
             return RenderTarget;
         }
 
-        private unsafe IPrimitive[] ProcessGeometryStage(RenderEntity entity, TV2F* v2fOutput, Vector2* screenCoordOutput)
-        {
-            ObjectToWorld = entity.Transform.LocalToWorld;
-            ObjectToView = WorldToView * ObjectToWorld;
-
-            Vector3[] vertices = entity.Model.Vertices;
-            Material material = entity.Material;
-
-            IRenderData_App<TApp> appdata = new TApp();
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                appdata.AssignAppdata(ref entity.Model, i);
-                TV2F v2f = material.Shader.Vertex(material.Shader as IVertexShader<TApp, TV2F>, appdata);
-
-                v2fOutput[i] = v2f;
-                screenCoordOutput[i] = ViewToScreen(v2f.Vertex_VOut);
-            }
-
-            return entity.Model.Primitives;
-        }
-
         #endregion
 
         #region GeometryProcessing
@@ -106,7 +88,7 @@ namespace CRender.Pipeline
         /// TODO
         /// </summary>
         [Obsolete]
-        protected virtual void Clipping()
+        private void Clipping()
         {
             throw new NotImplementedException("Maybe you need to check your vision");
         }
@@ -115,38 +97,45 @@ namespace CRender.Pipeline
 
         #region Rasterization
 
-        protected Vector2 ViewToScreen(Vector4 vpos) => new Vector2(vpos.Y * .5f + .5f, vpos.Z * .5f + .5f);
+        private Vector2 ViewToScreen(Vector4 vpos) => new Vector2(vpos.Y * .5f + .5f, vpos.Z * .5f + .5f);
 
-        protected virtual unsafe int Rasterize(in TV2F* modelV2Fs, in Vector2* screenCoords, in IPrimitive[] primitives)
+        private void BeginRasterize()
         {
             Rasterizer.StartRasterize(_bufferSizeF);
-            Vector2* primitiveCoords = stackalloc Vector2[3];
+        }
 
-            for (int primitiveIndex = 0; primitiveIndex < primitives.Length; primitiveIndex++)
+        /// <summary>
+        /// Returns the number of result pixels
+        /// </summary>
+        /// <param name="modelV2Fs"><typeparamref name="TV2F"/> of every vertex</param>
+        /// <param name="screenCoords">Screen coordinate of every vertex</param>
+        /// <param name="result">Array to store rasterization result</param>
+        private unsafe int Rasterize(in TV2F* modelV2Fs, in Vector2* screenCoords, in IPrimitive primitive, Vector2Int* result)
+        {
+            Vector2* primitiveCoords = stackalloc Vector2[primitive.Count];
+
+            for (int i = 0; i < primitive.Count; i++)
+                primitiveCoords[i] = screenCoords[primitive.Indices[i]];
+            Rasterizer.SetPoints(primitiveCoords);
+
+            switch (primitive.Count)
             {
-                IPrimitive primitive = primitives[primitiveIndex];
-
-                for (int i = 0; i < primitive.Count; i++)
-                    primitiveCoords[i] = screenCoords[primitive.Indices[i]];
-                Rasterizer.SetPoints(primitiveCoords);
-
-                switch (primitive.Count)
-                {
-                    case 2:
-                        Rasterizer.Line();
-                        break;
-                    case 3:
-                        Rasterizer.Triangle();
-                        break;
-                    default:
-                        throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
-                        break;
-                }
-                Rasterizer.ContriveResult();
+                case 2:
+                    Rasterizer.Line();
+                    break;
+                case 3:
+                    Rasterizer.Triangle();
+                    break;
+                default:
+                    throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
+                    break;
             }
+            return Rasterizer.ContriveResultPtr(ref result);
+        }
 
+        private void EndRasterize()
+        {
             Rasterizer.EndRasterize();
-            return rasterization;
         }
 
         #endregion

@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using CRender.Math;
 using CRender.Structure;
+
+using static CRender.MarshalExt;
 
 namespace CRender.Pipeline
 {
@@ -40,7 +41,7 @@ namespace CRender.Pipeline
             _resolution = resolution;
             _discardableInterval = new Vector2(1e-3f / _resolution.X, 1e-3f / _resolution.Y);
             _pixelSize = new Vector2(1f / _resolution.X, 1f / _resolution.Y);
-            _rasterizeBufferPtr = (Vector2Int*)Marshal.AllocHGlobal(sizeof(Vector2Int) * (int)resolution.X * (int)resolution.Y);
+            _rasterizeBufferPtr = Alloc<Vector2Int>((int)resolution.X * (int)resolution.Y);
             _rasterizeBufferUsed = 0;
         }
 
@@ -49,12 +50,10 @@ namespace CRender.Pipeline
             _pointsPtr = pointsPtr;
         }
 
-        public static Vector2Int* ContriveResultPtr()
+        public static int ContriveResultPtr(ref Vector2Int* output)
         {
-            int i = 0;
-            for (; i < _rasterizeBufferUsed; i++)
-                outputPtr[i] = _rasterizeBufferPtr[i];
-            return i;
+            output = _rasterizeBufferPtr;
+            return _rasterizeBufferUsed;
         }
 
         public static void ContriveResult(Vector2Int[] output, int start)
@@ -76,7 +75,7 @@ namespace CRender.Pipeline
                 throw new Exception("Rasterization hasn't begun");
             _initialized = false;
 
-            Marshal.FreeHGlobal((IntPtr)_rasterizeBufferPtr);
+            Free(_rasterizeBufferPtr);
         }
 
         void IDisposable.Dispose()

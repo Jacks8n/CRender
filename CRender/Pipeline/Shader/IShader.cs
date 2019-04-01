@@ -6,7 +6,7 @@ namespace CRender.Pipeline
     public interface IShader<TApp, TFIn, TFOut>
         where TApp : unmanaged, IRenderData_App<TApp> where TFIn : unmanaged, IRenderData_FIn<TFIn>
     {
-        IRenderData_VOut Vertex(TApp appdata);
+        TFIn Vertex(TApp appdata);
 
         TFOut Fragment(TFIn input);
     }

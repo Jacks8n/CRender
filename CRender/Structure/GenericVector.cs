@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+
+using static CRender.MarshalExt;
 
 namespace CRender.Structure
 {
@@ -31,9 +32,14 @@ namespace CRender.Structure
 
         private int _addableIndex;
 
+        public static int SizeOf()
+        {
+            return sizeof(int) * 2 + sizeof(T*);
+        }
+
         public GenericVector(int size)
         {
-            _values = (T*)Marshal.AllocHGlobal(sizeof(T) * size);
+            _values = Alloc<T>(size);
             Length = size;
             _addableIndex = 0;
             for (int i = 0; i < Length; i++)
@@ -119,7 +125,7 @@ namespace CRender.Structure
 
         void IDisposable.Dispose()
         {
-            Marshal.FreeHGlobal((IntPtr)_values);
+            Free(_values);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
