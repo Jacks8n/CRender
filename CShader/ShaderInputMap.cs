@@ -6,7 +6,7 @@ namespace CShader
     {
         public int VertexPtrOffset { private get; set; }
 
-        private void* _targetPtr;
+        private void* _targetPtr = null;
 
         public void SetTargetInputStruct(void* targetPtr)
         {
@@ -15,7 +15,8 @@ namespace CShader
 
         public void SetVertex(Vector4 vertex)
         {
-            *((Vector4*)_targetPtr + VertexPtrOffset) = vertex;
+            if (_targetPtr != null)
+                *((Vector4*)_targetPtr + VertexPtrOffset) = vertex;
         }
     }
 }

@@ -10,13 +10,13 @@ namespace CShader
 
         private static readonly Dictionary<Type, ShaderInputMap> InterpretedInputMap = new Dictionary<Type, ShaderInputMap>();
 
-        public static ShaderInputMap Interprete(Type type)
+        public static ShaderInputMap Interpret(Type type)
         {
-            if (InterpretedInputMap.TryGetValue(type, out ShaderInputMap value))
-                return value;
+            if (InterpretedInputMap.TryGetValue(type, out ShaderInputMap inputMap))
+                return inputMap;
 
             MemberInfo[] members = type.GetMembers();
-            ShaderInputMap inputMap = new ShaderInputMap();
+            inputMap = new ShaderInputMap();
 
             int ptrOffset = 0;
             for (int i = 0; i < members.Length; i++)

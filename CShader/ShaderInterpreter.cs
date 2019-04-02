@@ -1,53 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace CShader
 {
     public static class ShaderInterpreter
     {
-        private class ShaderStageInput
-        {
-            public readonly ShaderInputMap VertexInputMap;
-
-            public readonly ShaderInputMap GeometryInputMap;
-
-            public readonly ShaderInputMap FragmentInputMap;
-
-            public ShaderStageInput(ShaderInputMap vertexInputMap, ShaderInputMap geometryInputMap, ShaderInputMap fragmentInputMap)
-            {
-                VertexInputMap = vertexInputMap;
-                GeometryInputMap = geometryInputMap;
-                FragmentInputMap = fragmentInputMap;
-            }
-        }
-
         private const string NAME_VERTEX = "Vertex";
         private const string NAME_GEOMETRY = "Geometry";
         private const string NAME_FRAGMENT = "Fragment";
 
-        private static readonly Dictionary<Type, ShaderStageInput> InterpretedShaderInputs = new Dictionary<Type, ShaderStageInput>();
+        private static readonly Dictionary<Type, ShaderInputCollection> InterpretedShaderInputs = new Dictionary<Type, ShaderInputCollection>();
 
-        public static void Interprete<T>() where T : class, IShaderStage
+        private static bool _initialized = false;
+
+        /// <summary>
+        /// Interpret all the shader found through reflection
+        /// </summary>
+        public static void InterpretAll()
         {
-            Type type = typeof(T);
-            if (InterpretedShaderInputs.ContainsKey(type))
+            if (_initialized)
                 return;
 
-            InterpretedShaderInputs.Add(type, new ShaderStageInput(
-                InterpreteMethod<T>(NAME_VERTEX),
-                InterpreteMethod<T>(NAME_GEOMETRY),
-                InterpreteMethod<T>(NAME_FRAGMENT)));
+            foreach (Type type in Assembly
+                .GetExecutingAssembly()
+                .DefinedTypes
+                .Where(item =>
+                    item.IsClass
+                    && item.ImplementedInterfaces.Contains(typeof(IShaderStage))))
+                Interpret(type);
+            _initialized = true;
         }
 
-        private static ShaderInputMap InterpreteMethod<T>(string method) where T : class, IShaderStage
+        public static ShaderInputCollection GetInterpretedShaderInput<T>() where T : class, IShaderStage
         {
-            MethodInfo vertexInfo = typeof(T).GetMethod(method);
+            if (!_initialized)
+                throw new Exception("Invoke InterpretAll() at first to interpret shader");
+
+            InterpretedShaderInputs.TryGetValue(typeof(T), out ShaderInputCollection inputCollection);
+            return inputCollection;
+        }
+
+        private static ShaderInputCollection Interpret(Type type)
+        {
+            if (InterpretedShaderInputs.TryGetValue(type, out ShaderInputCollection inputCollection))
+                return inputCollection;
+
+            inputCollection = new ShaderInputCollection(
+                InterpretMethod(type, NAME_VERTEX),
+                InterpretMethod(type, NAME_GEOMETRY),
+                InterpretMethod(type, NAME_FRAGMENT));
+            InterpretedShaderInputs.Add(type, inputCollection);
+            return inputCollection;
+        }
+
+        private static ShaderInputMap InterpretMethod(Type type, string method)
+        {
+            MethodInfo vertexInfo = type.GetMethod(method);
             if (vertexInfo != null)
             {
                 ParameterInfo[] parameters = vertexInfo.GetParameters();
                 if (parameters.Length == 1)
-                    return ShaderInputInterpreter.Interprete(parameters[0].ParameterType);
+                    return ShaderInputInterpreter.Interpret(parameters[0].ParameterType);
             }
             return null;
         }
