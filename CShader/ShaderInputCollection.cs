@@ -2,13 +2,13 @@
 {
     public class ShaderInputCollection
     {
-        public readonly ShaderInputMap VertexInputMap;
+        public readonly ShaderInOutMap VertexInputMap;
 
-        public readonly ShaderInputMap GeometryInputMap;
+        public readonly ShaderInOutMap GeometryInputMap;
 
-        public readonly ShaderInputMap FragmentInputMap;
+        public readonly ShaderInOutMap FragmentInputMap;
 
-        public ShaderInputCollection(ShaderInputMap vertexInputMap, ShaderInputMap geometryInputMap, ShaderInputMap fragmentInputMap)
+        public ShaderInputCollection(ShaderInOutMap vertexInputMap, ShaderInOutMap geometryInputMap, ShaderInOutMap fragmentInputMap)
         {
             VertexInputMap = vertexInputMap;
             GeometryInputMap = geometryInputMap;

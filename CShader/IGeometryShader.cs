@@ -1,7 +1,7 @@
 ﻿namespace CShader
 {
-    public interface IGeometryShader<TGIn> : IShaderStage where TGIn : unmanaged
+    public unsafe interface IGeometryShader
     {
-        void Geometry(TGIn input);
+        void Geometry(void* input, void* output);
     }
 }

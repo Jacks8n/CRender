@@ -55,14 +55,19 @@ namespace CShader
             return inputCollection;
         }
 
-        private static ShaderInputMap InterpretMethod(Type type, string method)
+        private static ShaderInOutMap InterpretMethod(Type type, string method)
         {
-            MethodInfo vertexInfo = type.GetMethod(method);
-            if (vertexInfo != null)
+            MethodInfo methodInfo = type.GetMethod(method);
+            if (methodInfo != null)
             {
-                ParameterInfo[] parameters = vertexInfo.GetParameters();
-                if (parameters.Length == 1)
-                    return ShaderInputInterpreter.Interpret(parameters[0].ParameterType);
+                ParameterInfo[] parameters = methodInfo.GetParameters();
+
+                if (parameters.Length == 2)
+                {
+                    ShaderInOutInterpreter.InterpretOutput(parameters[1]);
+                    return ShaderInOutInterpreter.InterpretInput(parameters[0]);
+                }
+                throw new Exception($"{method} must have only one parameter");
             }
             return null;
         }

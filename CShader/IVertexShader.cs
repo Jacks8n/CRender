@@ -1,7 +1,7 @@
 ﻿namespace CShader
 {
-    public interface IVertexShader<TVIn> : IShaderStage where TVIn : unmanaged
+    public unsafe interface IVertexShader
     {
-        void Vertex(TVIn input);
+        void Vertex(void* input, void* output);
     }
 }

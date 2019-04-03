@@ -10,7 +10,12 @@ namespace CRender
             return (T*)Marshal.AllocHGlobal(sizeof(T) * length);
         }
 
-        public static void Free<T>(T* ptr) where T : unmanaged
+        public static void ReAlloc(void* ptr, int length)
+        {
+            Marshal.ReAllocHGlobal((IntPtr)ptr, (IntPtr)length);
+        }
+
+        public static void Free(void* ptr) 
         {
             Marshal.FreeHGlobal((IntPtr)ptr);
         }

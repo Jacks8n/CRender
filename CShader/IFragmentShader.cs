@@ -1,7 +1,7 @@
 ﻿namespace CShader
 {
-    public interface IFragmentShader<TFIn> : IShaderStage where TFIn : unmanaged
+    public unsafe interface IFragmentShader
     {
-        void Fragment(TFIn input);
+        void Fragment(void* input, void* output);
     }
 }
