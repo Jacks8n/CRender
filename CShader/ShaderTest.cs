@@ -12,16 +12,31 @@ namespace CShader
         public Vector4 Position;
     }
 
-    public class ShaderTest : IVertexShader
+    public struct FragmentOutputTest
     {
-        public unsafe void Vertex(
-            [ShaderInput(typeof(VertexInputTest))] void* input,
-            [ShaderOutput(typeof(FragmentInputTest))]void* output)
+        public Vector4 Position;
+    }
+
+    public class ShaderTest : IVertexShader, IFragmentShader
+    {
+        unsafe void IShaderStage<IVertexShader>.Main(
+            [ShaderInput(typeof(VertexInputTest))] void* inputPtr,
+            [ShaderOutput(typeof(FragmentInputTest))] void* outputPtr)
         {
-            VertexInputTest* vin = (VertexInputTest*)input;
-            FragmentInputTest* vout = (FragmentInputTest*)output;
+            VertexInputTest* vin = (VertexInputTest*)inputPtr;
+            FragmentInputTest* vout = (FragmentInputTest*)outputPtr;
 
             vout->Position = vin->Position * 2;
+        }
+
+        unsafe void IShaderStage<IFragmentShader>.Main(
+            [ShaderInput(typeof(FragmentInputTest))] void* inputPtr,
+            [ShaderOutput(typeof(FragmentOutputTest))] void* outputPtr)
+        {
+            FragmentInputTest* fin = (FragmentInputTest*)inputPtr;
+            FragmentOutputTest* fout = (FragmentOutputTest*)outputPtr;
+
+            fout->Position = fin->Position + 1;
         }
     }
 }

@@ -6,9 +6,15 @@ namespace CShader
 {
     public static class ShaderInOutInterpreter
     {
-        private const string NAME_VERTEX = "Vertex";
+        private const string NAME_MEMBER_VERTEX = "Vertex";
 
         private static readonly Dictionary<Type, ShaderInOutMap> InterpretedInOutMap = new Dictionary<Type, ShaderInOutMap>();
+
+        public static ShaderInOutMap GetInterpretedMap<TInOut>()
+        {
+            InterpretedInOutMap.TryGetValue(typeof(TInOut),out ShaderInOutMap inoutMap);
+            return inoutMap;
+        }
 
         public static ShaderInOutMap InterpretInput(ParameterInfo inputType)
         {
@@ -37,7 +43,7 @@ namespace CShader
             {
                 switch (members[i].Name)
                 {
-                    case NAME_VERTEX:
+                    case NAME_MEMBER_VERTEX:
                         inoutMap.VertexPtrOffset = ptrOffset;
                         break;
                 }

@@ -1,12 +1,11 @@
 ﻿using CRender.Structure;
 using CRender.Math;
-using CRender.Pipeline.Structure;
 
 using static CRender.Pipeline.ShaderValue;
 
 namespace CRender.Pipeline
 {
-    public partial class PipelineBase<TApp, TV2F>
+    public partial class PipelineBase
     {
         protected unsafe void ProcessGeometryStage(RenderEntity entity, TV2F* v2fOutput, Vector2* screenCoordOutput)
         {

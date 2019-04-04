@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CRender.Math;
-using CRender.Pipeline.Structure;
 using CRender.Sampler;
 using CRender.Structure;
 
@@ -9,7 +8,7 @@ using static CRender.Pipeline.ShaderValue;
 
 namespace CRender.Pipeline
 {
-    public partial class PipelineBase<TApp, TV2F> : IPipeline where TApp : unmanaged, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
+    public partial class PipelineBase
     {
         public RenderBuffer<float> RenderTarget { get; }
 
@@ -136,15 +135,6 @@ namespace CRender.Pipeline
         private void EndRasterize()
         {
             Rasterizer.EndRasterize();
-        }
-
-        #endregion
-
-        #region PixelProcessing
-
-        public virtual GenericVector<float> Fragment(TV2F input)
-        {
-            return _sampler.Sample(_mainTexture, input.UV_VOut);
         }
 
         #endregion

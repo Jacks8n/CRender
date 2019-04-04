@@ -61,6 +61,8 @@
 
         public static Vector4 operator +(Vector4 l, Vector4 r) => new Vector4(l.X + r.X, l.Y + r.Y, l.Z + r.Z, r.W + l.W);
 
+        public static Vector4 operator +(Vector4 l, float r) => new Vector4(l.X + r, l.Y + r, l.Z + r, l.W + r);
+
         public static Vector4 operator -(Vector4 l, Vector4 r) => new Vector4(l.X - r.X, l.Y - r.Y, l.Z - r.Z, r.W - l.W);
 
         public static Vector4 operator *(Vector4 value, float scale) => new Vector4(value.X * scale, value.Y * scale, value.Z * scale, value.W * scale);

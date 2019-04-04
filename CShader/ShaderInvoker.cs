@@ -6,55 +6,33 @@ using static CRender.MarshalExt;
 
 namespace CShader
 {
-    public unsafe class ShaderInvoker : JSingleton<ShaderInvoker>, IDisposable
+    public unsafe class ShaderInvoker<TStage> : JSingleton<ShaderInvoker<TStage>>, IDisposable where TStage : IShaderStage<TStage>
     {
-        private static ShaderInputCollection _currentInputCollection = null;
+        private TStage _currentShader;
 
-        private static IVertexShader _currentVertexShader = null;
+        private void* _inputBufferPtr = null;
 
-        private static IGeometryShader _currentGeometryShader = null;
+        private void* _outputBufferPtr = null;
 
-        private static IFragmentShader _currentFragmentShader = null;
+        private ShaderInOutMap _currentInputMap = null;
 
-        private static void* _vertexInputBufferPtr = null, _geometryInputBufferPtr = null, _fragmentInputBufferPtr = null;
+        private ShaderInOutMap _currentOutputMap = null;
 
-        public static void ChangeActiveShader<T>(T shader) where T : class, IShaderStage
+        public void ChangeActiveShader<TShader>() where TShader : class, TStage
         {
-            _currentInputCollection = ShaderInterpreter.GetInterpretedShaderInput<T>();
+            ShaderInOutMap[] inoutMaps = ShaderInterpreter<TStage>.GetInterpretedInOut<TShader>();
+            _currentInputMap = inoutMaps[0];
+            _currentOutputMap = inoutMaps[1];
 
-            if (_currentInputCollection.VertexInputMap != null)
-            {
-                _currentVertexShader = shader as IVertexShader;
-                AllocInOutBuffer(ref _vertexInputBufferPtr, _currentInputCollection.VertexInputMap);
-            }
-            else
-                _currentVertexShader = null;
-
-            if (_currentInputCollection.GeometryInputMap != null)
-            {
-                _currentGeometryShader = shader as IGeometryShader;
-                AllocInOutBuffer(ref _geometryInputBufferPtr, _currentInputCollection.GeometryInputMap);
-            }
-            else
-                _currentGeometryShader = null;
-
-            if (_currentInputCollection.FragmentInputMap != null)
-            {
-                _currentFragmentShader = shader as IFragmentShader;
-                AllocInOutBuffer(ref _fragmentInputBufferPtr, _currentInputCollection.FragmentInputMap);
-            }
-            else
-                _currentFragmentShader = null;
+            AllocInOutBuffer(ref _inputBufferPtr, _currentInputMap);
+            AllocInOutBuffer(ref _outputBufferPtr, _currentOutputMap);
         }
 
-        public static ShaderInOutMap InvokeVertex(Vector4 vertex)
+        public ShaderInOutMap Invoke(Vector4 vertex)
         {
-            if (_currentVertexShader == null)
-                return null;
-            //TODO geometry stage is optional, so it shouldn't be written as fixed
-            _currentInputCollection.VertexInputMap.Vertex = vertex;
-            _currentVertexShader.Vertex(_vertexInputBufferPtr, _geometryInputBufferPtr);
-            return _currentInputCollection.GeometryInputMap;
+            _currentInputMap.Vertex = vertex;
+            _currentShader.Main(_inputBufferPtr, _outputBufferPtr);
+            return _currentOutputMap;
         }
 
         private static void AllocInOutBuffer(ref void* ptr, ShaderInOutMap target)
@@ -68,9 +46,7 @@ namespace CShader
 
         void IDisposable.Dispose()
         {
-            Free(_vertexInputBufferPtr);
-            Free(_geometryInputBufferPtr);
-            Free(_fragmentInputBufferPtr);
+            Free(_inputBufferPtr);
         }
     }
 }
