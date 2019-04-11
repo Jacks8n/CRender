@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace CRender
+namespace CUtility.Extension
 {
     public class ConsoleExt : IDisposable
     {

@@ -1,28 +1,37 @@
-﻿using CRender.Math;
+﻿using System;
+using CUtility.Math;
+using static CUtility.Extension.MarshalExt;
 
 namespace CShader
 {
-    public unsafe class ShaderInOutMap
+    public unsafe class ShaderInOutMap : IDisposable
     {
         public Vector4 Vertex
         {
-            get => _targetPtr != null ? *((Vector4*)_targetPtr + VertexPtrOffset) : Vector4.Zero;
+            get => TargetPtr != null ? *(Vector4*)(TargetPtr + VertexPtrOffset) : Vector4.Zero;
             set
             {
-                if (_targetPtr != null)
-                    *((Vector4*)_targetPtr + VertexPtrOffset) = value;
+                if (TargetPtr != null)
+                    *(Vector4*)(VertexPtrOffset + TargetPtr) = value;
             }
         }
 
-        public int TotalSize;
+        public int VertexPtrOffset { private get; set; } = 0;
 
-        public int VertexPtrOffset { private get; set; } = -1;
+        public byte* TargetPtr { get; private set; } = null;
 
-        private void* _targetPtr = null;
-
-        public void SetTargetInOutPtr(void* targetPtr)
+        public void AllocInOutBuffer(int size)
         {
-            _targetPtr = targetPtr;
+            if (TargetPtr == null)
+                TargetPtr = Alloc<byte>(size);
+            else
+                ReAlloc(TargetPtr, size);
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (TargetPtr != null)
+                Free(TargetPtr);
         }
     }
 }

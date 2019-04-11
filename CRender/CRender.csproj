@@ -18,11 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Math\ArithmeticPrinciple.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Math\ArithmeticPrinciple.txt" />
+    <ProjectReference Include="..\CRenderExtension\CUtility.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 ﻿using System;
-using CRender.Math;
+using CUtility.Math;
 
 namespace CRender.Pipeline
 {

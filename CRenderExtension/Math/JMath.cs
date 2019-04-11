@@ -1,7 +1,6 @@
 ﻿using System;
-using CRender.Structure;
 
-namespace CRender.Math
+namespace CUtility.Math
 {
     public static class JMath
     {
@@ -34,11 +33,18 @@ namespace CRender.Math
             return (to - from) * value + from;
         }
 
-        public static GenericVector<float> Lerp(float value, GenericVector<float> from, GenericVector<float> to)
+        public static GenericVector<T> Lerp<T>(float value, GenericVector<T> from, GenericVector<T> to) where T : unmanaged
         {
+            if (from.Length != to.Length)
+                throw new Exception("Two inputs' length differs");
+
+            GenericVector<T> result = new GenericVector<T>(from.Length);
             for (int i = 0; i < from.Length; i++)
-                from[i] = Lerp(value, from[i], to[i]);
-            return from;
+            {
+                if (typeof(T) == typeof(float))
+                    result[i] = (T)(object)Lerp(value, (float)(object)from[i], (float)(object)to[i]);
+            }
+            return result;
         }
 
         public static float CoLerp(float value, float from, float to, float min, float max)

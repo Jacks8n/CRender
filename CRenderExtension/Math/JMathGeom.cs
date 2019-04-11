@@ -1,6 +1,6 @@
 ﻿using MathLib = System.Math;
 
-namespace CRender.Math
+namespace CUtility.Math
 {
     public static class JMathGeom
     {

@@ -1,4 +1,4 @@
-﻿namespace CRender.Math
+﻿namespace CUtility.Math
 {
     public partial struct Matrix4x4
     {

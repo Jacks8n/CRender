@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using CRender.Math;
+using CUtility.Math;
 
-namespace CRender.Math
+namespace CUtility.Math
 {
     public class Octree<T> where T : IOctreeElement<T>
     {

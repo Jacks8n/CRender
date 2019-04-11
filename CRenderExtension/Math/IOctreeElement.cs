@@ -1,4 +1,4 @@
-﻿namespace CRender.Math
+﻿namespace CUtility.Math
 {
     public interface IOctreeElement<T> where T : IOctreeElement<T>
     {

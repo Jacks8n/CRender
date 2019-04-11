@@ -1,4 +1,6 @@
-﻿namespace CRender.Sampler
+﻿using CUtility;
+
+namespace CRender.Sampler
 {
     public class SamplerRepeat_Repeat : JSingleton<SamplerRepeat_Repeat>, ISamplerRepeat
     {

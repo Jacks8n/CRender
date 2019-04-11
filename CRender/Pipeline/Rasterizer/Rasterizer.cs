@@ -1,8 +1,8 @@
 ﻿using System;
-using CRender.Math;
+using CUtility.Math;
 using CRender.Structure;
 
-using static CRender.MarshalExt;
+using static CUtility.Extension.MarshalExt;
 
 namespace CRender.Pipeline
 {

@@ -9,6 +9,8 @@ namespace CShader
     {
         private static readonly Dictionary<Type, ShaderInOutMap[]> InterpretedShaderInputs = new Dictionary<Type, ShaderInOutMap[]>();
 
+        private static readonly Type[] _paramTypes = new Type[] { typeof(void*), typeof(void*), typeof(IShaderStage<TStage>) };
+
         private static bool _initialized = false;
 
         static ShaderInterpreter()
@@ -26,7 +28,7 @@ namespace CShader
                 return;
 
             foreach (Type type in Assembly
-                .GetExecutingAssembly()
+                .GetCallingAssembly()
                 .DefinedTypes
                 .Where(item =>
                     item.IsClass
@@ -43,14 +45,14 @@ namespace CShader
 
         private static void InterpretMethod(Type shaderType)
         {
-            MethodInfo methodInfo = shaderType.GetMethod($"IShaderStage<{typeof(TStage)}>.Main");
+            MethodInfo methodInfo = shaderType.GetMethod("Main", _paramTypes);
             if (methodInfo == null)
                 return;
 
             ParameterInfo[] parameters = methodInfo.GetParameters();
             InterpretedShaderInputs.Add(shaderType, new ShaderInOutMap[] {
                 ShaderInOutInterpreter.InterpretInput(parameters[0]),
-                ShaderInOutInterpreter.InterpretInput(parameters[1]) });
+                ShaderInOutInterpreter.InterpretOutput(parameters[1]) });
         }
     }
 }

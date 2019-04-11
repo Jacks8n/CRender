@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace CRender.Math
+namespace CUtility.Math
 {
     [System.Diagnostics.DebuggerDisplay("X: {X} Y: {Y}")]
     [StructLayout(LayoutKind.Sequential)]

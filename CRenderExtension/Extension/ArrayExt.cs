@@ -1,4 +1,4 @@
-﻿namespace CRender
+﻿namespace CUtility.Extension
 {
     public static class ArrayExt
     {

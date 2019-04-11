@@ -1,6 +1,6 @@
 ﻿namespace CShader
 {
-    public unsafe interface IFragmentShader : IShaderStage<IFragmentShader>
+    public interface IFragmentShader : IShaderStage<IFragmentShader>
     {
     }
 }

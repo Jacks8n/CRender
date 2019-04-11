@@ -1,6 +1,6 @@
 ﻿namespace CShader
 {
-    public unsafe interface IVertexShader : IShaderStage<IVertexShader>
+    public interface IVertexShader : IShaderStage<IVertexShader>
     {
     }
 }

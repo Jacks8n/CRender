@@ -1,6 +1,6 @@
 ﻿namespace CShader
 {
-    public unsafe interface IGeometryShader : IShaderStage<IGeometryShader>
+    public interface IGeometryShader : IShaderStage<IGeometryShader>
     {
     }
 }

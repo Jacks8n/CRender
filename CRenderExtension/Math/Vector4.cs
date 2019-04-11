@@ -1,4 +1,4 @@
-﻿namespace CRender.Math
+﻿namespace CUtility.Math
 {
     [System.Diagnostics.DebuggerDisplay("X:{X} Y:{Y} Z:{Z} W:{W}")]
     public struct Vector4

@@ -1,5 +1,5 @@
 ﻿
-CRender.Math PRINCIPLE:
+CUtility.Math PRINCIPLE:
 
 0. Left hand coordinate, because it's convenient to imagine with left hand while my right hand is busy
     I.   Thumb         <=> Z Axis

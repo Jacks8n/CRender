@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-using static CRender.MarshalExt;
+using static CUtility.Extension.MarshalExt;
 
-namespace CRender.Structure
+namespace CUtility.Math
 {
     public unsafe struct GenericVector<T> : IEnumerable<T>, IDisposable where T : unmanaged
     {

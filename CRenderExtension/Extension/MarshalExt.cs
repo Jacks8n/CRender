@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace CRender
+namespace CUtility.Extension
 {
     public unsafe static class MarshalExt
     {

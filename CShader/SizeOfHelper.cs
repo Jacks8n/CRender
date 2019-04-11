@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace CShader
 {
@@ -28,6 +31,15 @@ namespace CShader
                 return sizeof(double);
             else if (type == typeof(decimal))
                 return sizeof(decimal);
+
+            IEnumerable<FieldInfo> fields = type.GetRuntimeFields().Where((field) => field.Attributes == FieldAttributes.Public);
+            if (fields.Count() > 0)
+            {
+                int size = 0;
+                foreach (FieldInfo field in fields)
+                    size += SizeOf(field.FieldType);
+                return size;
+            }
 
             throw new Exception($"Can't get the size of {type}");
         }

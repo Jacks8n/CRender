@@ -12,7 +12,7 @@ namespace CShader
 
         public static ShaderInOutMap GetInterpretedMap<TInOut>()
         {
-            InterpretedInOutMap.TryGetValue(typeof(TInOut),out ShaderInOutMap inoutMap);
+            InterpretedInOutMap.TryGetValue(typeof(TInOut), out ShaderInOutMap inoutMap);
             return inoutMap;
         }
 
@@ -35,21 +35,22 @@ namespace CShader
             if (InterpretedInOutMap.TryGetValue(type, out ShaderInOutMap inoutMap))
                 return inoutMap;
 
-            MemberInfo[] members = type.GetMembers();
+            FieldInfo[] fields = type.GetFields();
             inoutMap = new ShaderInOutMap();
 
             int ptrOffset = 0;
-            for (int i = 0; i < members.Length; i++)
+            for (int i = 0; i < fields.Length; i++)
             {
-                switch (members[i].Name)
+                FieldInfo field = fields[i];
+                switch (field.Name)
                 {
                     case NAME_MEMBER_VERTEX:
                         inoutMap.VertexPtrOffset = ptrOffset;
                         break;
                 }
-                ptrOffset += SizeOfHelper.SizeOf(members[i].ReflectedType);
+                ptrOffset += SizeOfHelper.SizeOf(field.FieldType);
             }
-            inoutMap.TotalSize = ptrOffset;
+            inoutMap.AllocInOutBuffer(ptrOffset);
 
             InterpretedInOutMap.Add(type, inoutMap);
             return inoutMap;

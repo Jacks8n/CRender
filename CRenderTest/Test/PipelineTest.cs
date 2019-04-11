@@ -1,8 +1,7 @@
 ﻿using System.Threading;
 using CRender;
-using CRender.Math;
+using CUtility.Math;
 using CRender.Pipeline;
-using CRender.Pipeline.Structure;
 using CRender.Structure;
 
 namespace CRenderTest
@@ -36,7 +35,7 @@ namespace CRenderTest
 
         public static void TestDrawLine()
         {
-            EstablishTestScene<AppdataBasic, V2FBasic>(out var pipeline, out var charBuffer, out var camera);
+            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
 
             RenderEntity entity = new RenderEntity(new Transform(Vector3.Zero),
                 new Model(
@@ -55,7 +54,7 @@ namespace CRenderTest
 
         public static void TestRenderTriangle()
         {
-            EstablishTestScene<AppdataBasic, V2FBasic>(out var pipeline, out var charBuffer, out var camera);
+            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
 
             RenderEntity entity = new RenderEntity(new Transform(),
                 new Model(
@@ -70,10 +69,9 @@ namespace CRenderTest
         }
 
         /// <param name="camera">It orients the origin</param>
-        private static void EstablishTestScene<TApp, TV2F>(out PipelineBase<TApp, TV2F> pipeline, out CharRenderBuffer<float> charBuffer, out ICamera camera)
-            where TApp : unmanaged, IRenderData_App<TApp> where TV2F : unmanaged, IRenderData_VOut, IRenderData_FIn<TV2F>
+        private static void EstablishTestScene(out Pipeline pipeline, out CharRenderBuffer<float> charBuffer, out ICamera camera)
         {
-            pipeline = new PipelineBase<TApp, TV2F>();
+            pipeline = new Pipeline();
             charBuffer = new CharRenderBuffer<float>(pipeline.RenderTarget);
             camera = new Camera_Orthographic(width: 3.5f, height: 3.5f, near: -2.5f, far: 2.5f,
                 new Transform(

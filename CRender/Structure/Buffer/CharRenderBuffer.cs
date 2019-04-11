@@ -1,4 +1,6 @@
-﻿namespace CRender.Structure
+﻿using CUtility.Math;
+
+namespace CRender.Structure
 {
     public class CharRenderBuffer<T> : IRenderBuffer<char> where T : unmanaged
     {

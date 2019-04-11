@@ -1,12 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <LangVersion>7.3</LangVersion> 
-    <AssemblyName>CRenderTest</AssemblyName>
-    <RootNamespace>CRenderTest</RootNamespace>
-    <StartupObject>CRenderTest.Program</StartupObject>
+    <StartupObject>CShaderTest.Program</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>false</Optimize>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -17,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CRender\CRender.csproj" />
     <ProjectReference Include="..\CShader\CShader.csproj" />
   </ItemGroup>
 

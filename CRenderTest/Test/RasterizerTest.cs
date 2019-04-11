@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using CRender;
-using CRender.Math;
+using CUtility.Math;
 using CRender.Pipeline;
 using CRender.Structure;
 using NUnit.Framework;

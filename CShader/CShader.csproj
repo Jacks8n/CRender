@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CRender\CRender.csproj" />
+    <ProjectReference Include="..\CRenderExtension\CUtility.csproj" />
   </ItemGroup>
 
 </Project>

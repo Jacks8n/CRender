@@ -1,6 +1,7 @@
-﻿using CRender.Math;
+﻿using CShader;
+using CUtility.Math;
 
-namespace CShader
+namespace CShaderTest
 {
     public struct VertexInputTest
     {
@@ -17,21 +18,27 @@ namespace CShader
         public Vector4 Position;
     }
 
-    public class ShaderTest : IVertexShader, IFragmentShader
+    public class TestShader : IVertexShader, IFragmentShader
     {
-        unsafe void IShaderStage<IVertexShader>.Main(
+        /// <summary>
+        /// Outputs 2.5 times the <paramref name="inputPtr"/>'s pointing value
+        /// </summary>
+        public unsafe void Main(
             [ShaderInput(typeof(VertexInputTest))] void* inputPtr,
-            [ShaderOutput(typeof(FragmentInputTest))] void* outputPtr)
+            [ShaderOutput(typeof(FragmentInputTest))] void* outputPtr, IShaderStage<IVertexShader> _)
         {
             VertexInputTest* vin = (VertexInputTest*)inputPtr;
             FragmentInputTest* vout = (FragmentInputTest*)outputPtr;
 
-            vout->Position = vin->Position * 2;
+            vout->Position = vin->Position * 2.5f;
         }
 
-        unsafe void IShaderStage<IFragmentShader>.Main(
+        /// <summary>
+        /// Outputs <paramref name="inputPtr"/>'s pointing value with every channel added 1
+        /// </summary>
+        public unsafe void Main(
             [ShaderInput(typeof(FragmentInputTest))] void* inputPtr,
-            [ShaderOutput(typeof(FragmentOutputTest))] void* outputPtr)
+            [ShaderOutput(typeof(FragmentOutputTest))] void* outputPtr, IShaderStage<IFragmentShader> _)
         {
             FragmentInputTest* fin = (FragmentInputTest*)inputPtr;
             FragmentOutputTest* fout = (FragmentOutputTest*)outputPtr;

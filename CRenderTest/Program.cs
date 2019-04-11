@@ -16,7 +16,7 @@ namespace CRenderTest
             ReadKey();
 
             //PipelineTest.TestRasterize();
-            PipelineTest.TestDrawLine();
+            //PipelineTest.TestDrawLine();
             //PipelineTest.TestRenderFrames();
 
             ReadKey();

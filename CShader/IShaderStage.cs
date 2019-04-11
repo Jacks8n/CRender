@@ -1,9 +1,8 @@
-﻿using CRender.Pipeline;
-
-namespace CShader
+﻿namespace CShader
 {
     public unsafe interface IShaderStage<T> : IShader where T : IShaderStage<T>
     {
-        void Main(void* inputPtr, void* outputPtr);
+        /// <param name="_">A placeholder, it should be null</param>
+        void Main(void* inputPtr, void* outputPtr, IShaderStage<T> _);
     }
 }

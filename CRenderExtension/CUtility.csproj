@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Math\ArithmeticPrinciple.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Math\ArithmeticPrinciple.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Math\IOctreeElement.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\JMath.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\JMathGeom.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Matrix4x4.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Matrix4x4Function.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Octree.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Shapes.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Vector2.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Vector2Int.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Vector3.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+    <Compile Update="Math\Vector4.cs">
+      <CustomToolNamespace></CustomToolNamespace>
+    </Compile>
+  </ItemGroup>
+
+</Project>

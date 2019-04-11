@@ -1,4 +1,4 @@
-﻿using CRender.Math;
+﻿using CUtility.Math;
 
 namespace CRender.Structure
 {

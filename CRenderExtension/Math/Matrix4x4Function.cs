@@ -1,6 +1,4 @@
-﻿using CRender.Structure;
-
-namespace CRender.Math
+﻿namespace CUtility.Math
 {
     public unsafe partial struct Matrix4x4
     {

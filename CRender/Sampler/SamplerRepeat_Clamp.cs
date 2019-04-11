@@ -1,4 +1,5 @@
-﻿using CRender.Math;
+﻿using CUtility;
+using CUtility.Math;
 
 namespace CRender.Sampler
 {

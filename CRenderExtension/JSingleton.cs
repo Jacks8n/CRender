@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CRender
+namespace CUtility
 {
     public abstract class JSingleton<T> where T : JSingleton<T>, new()
     {
