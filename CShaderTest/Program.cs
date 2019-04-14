@@ -1,7 +1,7 @@
-﻿using CShader;
+﻿using System.Diagnostics;
+using CShader;
 using CUtility.Math;
 using NUnit.Framework;
-
 using static System.Console;
 
 namespace CShaderTest
@@ -9,8 +9,29 @@ namespace CShaderTest
     [TestFixture]
     class Program
     {
-        static void Main(string[] args)
+        const int itr_count = 16;
+
+        static unsafe void Main(string[] args)
         {
+            var shader = new TestShader();
+            ShaderInterpreter<IVertexShader>.Interpret<TestShader>();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            ShaderInvoker<IVertexShader>.ChangeActiveShader(shader);
+            Vector4[] input = new Vector4[itr_count];
+            for (int i = 0; i < 480000 / itr_count; i++)
+            {
+                for (int j = 0; j < itr_count; j++)
+                {
+                    input[j].X = i;
+                    input[j].Y = i;
+                    input[j].Z = i;
+                    input[j].W = i;
+                }
+                ShaderInvoker<IVertexShader>.Invoke(itr_count, input);
+            }
+            sw.Stop();
+            WriteLine(sw.ElapsedMilliseconds);
             ReadKey();
         }
 
@@ -22,16 +43,16 @@ namespace CShaderTest
         }
 
         [Test]
-        public void TestShaderInvoke()
+        public unsafe void TestShaderInvoke()
         {
             TestShaderInterpret();
             var shader = new TestShader();
             ShaderInvoker<IVertexShader>.ChangeActiveShader(shader);
             ShaderInvoker<IFragmentShader>.ChangeActiveShader(shader);
 
-            Vector4 pos = new Vector4(-1f, 2f, -3f, 4f);
-            Vector4 vertexResult = ShaderInvoker<IVertexShader>.Invoke(pos).Vertex;
-            Vector4 fragmentResult = ShaderInvoker<IFragmentShader>.Invoke(pos).Vertex;
+            Vector4[] pos = new Vector4[] { new Vector4(-1f, 2f, -3f, 4f) };
+            Vector4 vertexResult = *ShaderInvoker<IVertexShader>.Invoke(1, pos).VertexPtr;
+            Vector4 fragmentResult = *ShaderInvoker<IFragmentShader>.Invoke(1, pos).VertexPtr;
 
             Assert.AreEqual(vertexResult, new Vector4(-2.5f, 5f, -7.5f, 10f));
             Assert.AreEqual(fragmentResult, new Vector4(0f, 3f, -2f, 5f));

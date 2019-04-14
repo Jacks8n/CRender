@@ -11,13 +11,13 @@ namespace CRender.Structure
         /// <summary>
         /// Optional
         /// </summary>
-        public Material Material;
+        public IMaterial Material;
 
         private RenderEntity _instanceToApply;
 
         private RenderEntity() { }
 
-        public RenderEntity(Transform transform, Model model, Material material)
+        public RenderEntity(Transform transform, Model model, IMaterial material)
         {
             Transform = transform;
             Model = model;
@@ -30,7 +30,7 @@ namespace CRender.Structure
                 _instanceToApply = new RenderEntity();
             _instanceToApply.Transform = Transform.GetInstanceToApply();
             _instanceToApply.Model = Model.GetInstanceToApply();
-            _instanceToApply.Material = Material?.GetInstanceToApply();
+            _instanceToApply.Material = Material;
             return _instanceToApply;
         }
 

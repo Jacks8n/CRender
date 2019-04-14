@@ -20,15 +20,22 @@ namespace CShader
         }
 
         /// <summary>
-        /// Interpret all the shader found through reflection
+        /// Interpret all the shader found in the calling assembly through reflection
         /// </summary>
         public static void InterpretAll()
+        {
+            InterpretAll(Assembly.GetCallingAssembly());
+        }
+
+        /// <summary>
+        /// Interpret all the shader found through reflection
+        /// </summary>
+        public static void InterpretAll(Assembly targetAssembly)
         {
             if (_initialized)
                 return;
 
-            foreach (Type type in Assembly
-                .GetCallingAssembly()
+            foreach (Type type in targetAssembly
                 .DefinedTypes
                 .Where(item =>
                     item.IsClass
@@ -37,10 +44,16 @@ namespace CShader
             _initialized = true;
         }
 
-        public static ShaderInOutMap[] GetInterpretedInOut<TShader>() where TShader : class, TStage
+        public static ShaderInOutMap[] GetInterpretedInOut(Type type)
         {
-            InterpretedShaderInputs.TryGetValue(typeof(TShader), out ShaderInOutMap[] inoutMap);
-            return inoutMap;
+            if (InterpretedShaderInputs.TryGetValue(type, out ShaderInOutMap[] inoutMap))
+                return inoutMap;
+            throw new Exception($"{type} hasn't been interpreted");
+        }
+
+        public static void Interpret<T>() where T : class, TStage
+        {
+            InterpretMethod(typeof(T));
         }
 
         private static void InterpretMethod(Type shaderType)

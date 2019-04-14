@@ -15,7 +15,7 @@ namespace CUtility.Extension
             Marshal.ReAllocHGlobal((IntPtr)ptr, (IntPtr)length);
         }
 
-        public static void Free(void* ptr) 
+        public static void Free(void* ptr)
         {
             Marshal.FreeHGlobal((IntPtr)ptr);
         }

@@ -15,8 +15,8 @@ namespace CRenderTest
             WriteLine("Press any key to run test");
             ReadKey();
 
-            //PipelineTest.TestRasterize();
-            //PipelineTest.TestDrawLine();
+            //PipelineTest.TestRenderTriangle();
+            PipelineTest.TestDrawLine();
             //PipelineTest.TestRenderFrames();
 
             ReadKey();

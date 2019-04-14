@@ -1,19 +1,19 @@
-﻿using CRender.Pipeline;
+﻿using CShader;
+using System;
+using CRender.Pipeline;
 
 namespace CRender.Structure
 {
-    public class Material : IAppliable<Material> 
+    public class Material<T> : IMaterial where T : class, IShader
     {
-        public IShader Shader;
+        public Type ShaderType { get; }
 
-        public Material(IShader shader)
+        public IShader Shader { get; }
+
+        public Material(T shader)
         {
+            ShaderType = typeof(T);
             Shader = shader;
-        }
-
-        public Material GetInstanceToApply()
-        {
-            return this;
         }
     }
 }

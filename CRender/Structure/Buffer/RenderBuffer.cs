@@ -41,14 +41,20 @@ namespace CRender.Structure
             return ref _pixels[UVToIndex(u, v)];
         }
 
-        public virtual void WritePixel(int u, int v, GenericVector<T> pixel)
+        public void WritePixel(int u, int v, GenericVector<T> pixel)
         {
             _pixels[UVToIndex(u, v)].Write(pixel);
         }
 
-        public virtual void WritePixel(Vector2Int[] uvs, GenericVector<T> pixel)
+        public void WritePixel(Vector2Int[] uvs, GenericVector<T> pixel)
         {
             for (int i = 0; i < uvs.Length; i++)
+                _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(pixel);
+        }
+
+        public unsafe void WritePixel(Vector2Int* uvs, int pixelCount, GenericVector<T> pixel)
+        {
+            for (int i = 0; i < pixelCount; i++)
                 _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(pixel);
         }
 

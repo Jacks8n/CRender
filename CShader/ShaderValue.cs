@@ -1,6 +1,6 @@
 ﻿using CUtility.Math;
 
-namespace CRender.Pipeline
+namespace CShader
 {
     public static class ShaderValue
     {

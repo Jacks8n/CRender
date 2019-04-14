@@ -45,7 +45,7 @@ namespace CShader
                 switch (field.Name)
                 {
                     case NAME_MEMBER_VERTEX:
-                        inoutMap.VertexPtrOffset = ptrOffset;
+                        inoutMap.SetVertexOffset(ptrOffset);
                         break;
                 }
                 ptrOffset += SizeOfHelper.SizeOf(field.FieldType);

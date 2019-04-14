@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using CUtility.Math;
 using CRender.Sampler;
 using CRender.Structure;
-
-using static CRender.Pipeline.ShaderValue;
+using CShader;
+using CUtility.Math;
 
 namespace CRender.Pipeline
 {
@@ -12,20 +11,11 @@ namespace CRender.Pipeline
     {
         public RenderBuffer<float> RenderTarget { get; }
 
-        #region TODO
-
-        //TODO
-        private readonly RenderBuffer<float> _mainTexture;
-
-        private readonly Sampler_Point _sampler = new Sampler_Point(SamplerRepeat_Repeat.Instance, SamplerRepeat_Repeat.Instance);
-
-        #endregion
+        private static readonly IMaterial DEFAULT_MATERIAL = new Material<ShaderDefault>(ShaderDefault.Instance);
 
         private readonly Vector2 _bufferSizeF;
 
         private readonly Vector2Int _bufferSize;
-
-        private readonly Material _currentMaterial;
 
         public Pipeline()
         {
@@ -39,53 +29,57 @@ namespace CRender.Pipeline
         public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
             RenderTarget.Clear();
-            WorldToView = camera.WorldToView;
 
-            Vector2** screenCoords = stackalloc Vector2*[entities.Length];
-            Vector2Int** rasterization = stackalloc Vector2Int*[entities.Length];
+            int entityCount = entities.Length;
+            Fragment** rasterizedFragments = stackalloc Fragment*[entityCount];
+            int* primitiveCounts = stackalloc int[entityCount];
 
             BeginRasterize();
-            for (int i = 0; i < entities.Length; i++)
+            ShaderValue.WorldToView = camera.WorldToView;
+            for (int i = 0; i < entityCount; i++)
             {
                 RenderEntity instanceCopy = entities[i].GetInstanceToApply();
+                var material = instanceCopy.Material ?? DEFAULT_MATERIAL;
+                Vector4[] vertices = instanceCopy.Model.Vertices;
+                IPrimitive[] primitives = instanceCopy.Model.Primitives;
+                int vertexCount = vertices.Length;
 
-                #region Vertex
+                ShaderValue.ObjectToWorld = instanceCopy.Transform.LocalToWorld;
+                ShaderValue.ObjectToView = ShaderValue.WorldToView * ShaderValue.ObjectToWorld;
 
-                ObjectToWorld = instanceCopy.Transform.LocalToWorld;
-                ObjectToView = WorldToView * ObjectToWorld;
+                ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
 
-
-
-                #endregion
-
-                int vertexCount = instanceCopy.Model.Vertices.Length;
                 Vector2* coordsOutput = stackalloc Vector2[vertexCount];
-
-                Vector3[] vertices = instanceCopy.Model.Vertices;
-                Material material = instanceCopy.Material;
+                Vector4* vertexOutput = stackalloc Vector4[vertexCount];
 
                 for (int j = 0; j < vertexCount; j++)
                 {
-                    screenCoordOutput[j] = ViewToScreen(v2f.Vertex_VOut);
+                    ShaderInOutMap outputMap = ShaderInvoker<IVertexShader>.Invoke(j, vertices);
+                    vertexOutput[j] = *outputMap.VertexPtr;
+                    coordsOutput[j] = ViewToScreen(*outputMap.VertexPtr);
                 }
-                screenCoords[i] = coordsOutput;
-            }
-            EndRasterize();
 
+                Fragment* fragment = stackalloc Fragment[primitives.Length];
+                primitiveCounts[i] = primitives.Length;
+                for (int j = 0; j < primitives.Length; j++)
+                {
+                    fragment[j].PixelCount = Rasterize(coordsOutput, primitives[j], ref fragment[j].Rasterization);
+                }
+                rasterizedFragments[i] = fragment;
+            }
             //Octree is so annoying
+            //TODO: View frustum clip, triangle clip, pixel clip
             //Clipping();
 
-            GenericVector<float> whiteColor = new GenericVector<float>(3) { 1, 1, 1 };
-            //Model
-            for (int i = 0; i < rasterization.Length; i++)
-                //Primitive
-                for (int j = 0; j < rasterization[i].Length; j++)
-                    //PixelPos
-                    for (int k = 0; k < rasterization[i][j].Length; k++)
-                    {
-                        RenderTarget.WritePixel(rasterization[i][j][k].X, rasterization[i][j][k].Y, whiteColor);
-                    }
+            //This is not the proper way to output, just to check result as soon as possible
+            GenericVector<float> white = new GenericVector<float>(3) { 1, 1, 1 };
+            for (int i = 0; i < entityCount; i++)
+                for (int j = 0; j < primitiveCounts[i]; j++)
+                {
+                    RenderTarget.WritePixel(rasterizedFragments[i][j].Rasterization, rasterizedFragments[i][j].PixelCount, white);
+                }
 
+            EndRasterize();
             return RenderTarget;
         }
 

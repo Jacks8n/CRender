@@ -1,4 +1,5 @@
 ﻿using CRender.Structure;
+using CUtility.Math;
 using NUnit.Framework;
 
 namespace CRenderTest

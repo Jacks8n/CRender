@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CRenderExtension\CUtility.csproj" />
+    <ProjectReference Include="..\CShader\CShader.csproj" />
   </ItemGroup>
 
 </Project>

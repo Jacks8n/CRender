@@ -1,4 +1,6 @@
 ﻿using CShader;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using CUtility.Math;
 
 namespace CShaderTest

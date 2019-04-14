@@ -1,8 +1,7 @@
 ﻿using System;
 using CRender.Structure;
 using CUtility.Math;
-
-using static CRender.Pipeline.ShaderValue;
+using CShader;
 
 namespace CRender.Pipeline
 {
@@ -23,7 +22,7 @@ namespace CRender.Pipeline
         /// <param name="modelV2Fs"><typeparamref name="TV2F"/> of every vertex</param>
         /// <param name="screenCoords">Screen coordinate of every vertex</param>
         /// <param name="result">Array to store rasterization result</param>
-        private unsafe int Rasterize(in Vector2* screenCoords, in IPrimitive primitive, Vector2Int* result)
+        private unsafe int Rasterize(in Vector2* screenCoords, in IPrimitive primitive,ref Vector2Int* result)
         {
             Vector2* primitiveCoords = stackalloc Vector2[primitive.Count];
 
