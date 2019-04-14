@@ -39,7 +39,7 @@ namespace CRender.Pipeline
             for (int i = 0; i < entityCount; i++)
             {
                 RenderEntity instanceCopy = entities[i].GetInstanceToApply();
-                var material = instanceCopy.Material ?? DEFAULT_MATERIAL;
+                IMaterial material = instanceCopy.Material ?? DEFAULT_MATERIAL;
                 Vector4[] vertices = instanceCopy.Model.Vertices;
                 IPrimitive[] primitives = instanceCopy.Model.Primitives;
                 int vertexCount = vertices.Length;

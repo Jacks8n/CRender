@@ -43,7 +43,7 @@ namespace CRenderTest
                         new Vector4(-.5f, .5f, .5f,1f), new Vector4(-.5f, -.5f, .5f,1f), new Vector4(.5f, -.5f, .5f,1f), new Vector4(.5f, .5f, .5f,1f) },
                     primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0),
                         new LinePrimitive(4, 5), new LinePrimitive(5, 6), new LinePrimitive(6, 7), new LinePrimitive(7, 4),
-                        new LinePrimitive(0, 4), new LinePrimitive(1, 5), new LinePrimitive(2, 6), new LinePrimitive(3, 7)},
+                    new LinePrimitive(0, 4), new LinePrimitive(1, 5), new LinePrimitive(2, 6), new LinePrimitive(3, 7)},
                     uvs: null,
                     normals: null
                 ), null);
