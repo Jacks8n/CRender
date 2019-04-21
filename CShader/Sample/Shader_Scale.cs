@@ -8,8 +8,7 @@ using VOutdata = CShader.ShaderInOutDefault.VOutData_Base;
 namespace CShader
 {
     /// <summary>
-    /// <para>Remember to invoke <see cref="BeInterpret"/> once</para>
-    /// Only supports VertexStage so far
+    /// Only supports VertexStage
     /// </summary>
     public unsafe class Shader_Scale : JSingleton<Shader_Scale>, IVertexShader
     {

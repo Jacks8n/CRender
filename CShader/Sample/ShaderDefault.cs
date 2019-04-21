@@ -8,8 +8,7 @@ using static CShader.ShaderValue;
 namespace CShader
 {
     /// <summary>
-    /// <para>Remember to invoke <see cref="BeInterpret"/> once</para>
-    /// Only supports VertexStage so far
+    /// Only supports VertexStage
     /// </summary>
     public unsafe class ShaderDefault : JSingleton<ShaderDefault>, IVertexShader
     {
