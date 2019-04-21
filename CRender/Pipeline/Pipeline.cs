@@ -36,19 +36,21 @@ namespace CRender.Pipeline
 
             BeginRasterize();
             ShaderValue.WorldToView = camera.WorldToView;
+            ShaderValue.Time = CRenderer.CurrentSecond;
+            ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
             for (int i = 0; i < entityCount; i++)
             {
                 RenderEntity instanceCopy = entities[i].GetInstanceToApply();
                 IMaterial material = instanceCopy.Material ?? DEFAULT_MATERIAL;
                 Vector4[] vertices = instanceCopy.Model.Vertices;
                 IPrimitive[] primitives = instanceCopy.Model.Primitives;
-                int vertexCount = vertices.Length;
 
                 ShaderValue.ObjectToWorld = instanceCopy.Transform.LocalToWorld;
                 ShaderValue.ObjectToView = ShaderValue.WorldToView * ShaderValue.ObjectToWorld;
 
                 ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
 
+                int vertexCount = vertices.Length;
                 Vector2* coordsOutput = stackalloc Vector2[vertexCount];
                 Vector4* vertexOutput = stackalloc Vector4[vertexCount];
 
@@ -59,14 +61,14 @@ namespace CRender.Pipeline
                     coordsOutput[j] = ViewToScreen(*outputMap.VertexPtr);
                 }
 
-                Fragment* fragment = stackalloc Fragment[primitives.Length];
+                Fragment* fragments = stackalloc Fragment[primitives.Length];
                 primitiveCounts[i] = primitives.Length;
                 for (int j = 0; j < primitives.Length; j++)
-                {
-                    fragment[j].PixelCount = Rasterize(coordsOutput, primitives[j], ref fragment[j].Rasterization);
-                }
-                rasterizedFragments[i] = fragment;
+                    Rasterize(coordsOutput, primitives[j], fragments + j);
+                rasterizedFragments[i] = fragments;
             }
+            EndRasterize();
+
             //Octree is so annoying
             //TODO: View frustum clip, triangle clip, pixel clip
             //Clipping();
@@ -79,7 +81,6 @@ namespace CRender.Pipeline
                     RenderTarget.WritePixel(rasterizedFragments[i][j].Rasterization, rasterizedFragments[i][j].PixelCount, white);
                 }
 
-            EndRasterize();
             return RenderTarget;
         }
 

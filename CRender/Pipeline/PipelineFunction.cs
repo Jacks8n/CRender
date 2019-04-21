@@ -1,7 +1,9 @@
 ﻿using System;
 using CRender.Structure;
-using CUtility.Math;
 using CShader;
+using CUtility.Math;
+
+using static CUtility.Extension.MarshalExt;
 
 namespace CRender.Pipeline
 {
@@ -17,18 +19,15 @@ namespace CRender.Pipeline
         }
 
         /// <summary>
-        /// Returns the number of result pixels
+        /// Rasterize <paramref name="primitive"/> and stores the result in <paramref name="result"/>
         /// </summary>
-        /// <param name="modelV2Fs"><typeparamref name="TV2F"/> of every vertex</param>
         /// <param name="screenCoords">Screen coordinate of every vertex</param>
-        /// <param name="result">Array to store rasterization result</param>
-        private unsafe int Rasterize(in Vector2* screenCoords, in IPrimitive primitive,ref Vector2Int* result)
+        private unsafe void Rasterize(in Vector2* screenCoords, in IPrimitive primitive, Fragment* result)
         {
-            Vector2* primitiveCoords = stackalloc Vector2[primitive.Count];
-
+            Vector2* coords = stackalloc Vector2[primitive.Count];
             for (int i = 0; i < primitive.Count; i++)
-                primitiveCoords[i] = screenCoords[primitive.Indices[i]];
-            Rasterizer.SetPoints(primitiveCoords);
+                coords[i] = screenCoords[primitive.Indices[i]];
+            Rasterizer.SetPoints(coords);
 
             switch (primitive.Count)
             {
@@ -42,9 +41,13 @@ namespace CRender.Pipeline
                     throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
                     break;
             }
-            return Rasterizer.ContriveResultPtr(ref result);
+            result->Initialize(Rasterizer.RasterizeResultLength);
+            Rasterizer.ContriveResult(result->Rasterization);
         }
 
+        /// <summary>
+        /// This function will also dispose contrived results
+        /// </summary>
         private void EndRasterize()
         {
             Rasterizer.EndRasterize();

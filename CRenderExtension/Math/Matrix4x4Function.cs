@@ -79,6 +79,12 @@
                 m13: 0, m23: 0, m33: scale.Z, m43: 0,
                 m14: 0, m24: 0, m34: 0, m44: 1);
 
+        public static Matrix4x4 Scale(float scale) => new Matrix4x4(
+                m11: scale, m21: 0, m31: 0, m41: 0,
+                m12: 0, m22: scale, m32: 0, m42: 0,
+                m13: 0, m23: 0, m33: scale, m43: 0,
+                m14: 0, m24: 0, m34: 0, m44: 1);
+
         /// <summary>
         /// Positive X oriented, Y is <paramref name="width"/>,Z is <paramref name="height"/>
         /// </summary>

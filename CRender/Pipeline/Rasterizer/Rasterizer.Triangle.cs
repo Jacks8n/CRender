@@ -33,13 +33,13 @@ namespace CRender.Pipeline
         /// <param name="width">The length of the horizontal edge, its sign indicates the direction</param>
         private static void Triangle_HorizontalEdge(Vector2* apex, Vector2* bottom, float width)
         {
-            if (JMath.InRange(width, -_discardableInterval.X, _discardableInterval.X))
+            if (JMath.InRange(width, -_discardInterval.X, _discardInterval.X))
                 return;
 
             float height = bottom->Y - apex->Y;
             float scaledHeight = height * _resolution.Y;
 
-            if (JMath.InRange(scaledHeight, -_discardableInterval.Y, _discardableInterval.Y))
+            if (JMath.InRange(scaledHeight, -_discardInterval.Y, _discardInterval.Y))
                 return;
 
             float scaledWidth = width * _resolution.X;
@@ -58,7 +58,7 @@ namespace CRender.Pipeline
             {
                 for (float i = 0; i <= width; i += horizontalStepDir)
                 {
-                    OutputRasterization = result;
+                    OutputRasterization(result);
                     result.X++;
                 }
                 width += widthSlope;

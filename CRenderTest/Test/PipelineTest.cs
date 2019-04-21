@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using CShader;
 using CRender;
 using CUtility.Math;
 using CRender.Pipeline;
@@ -37,16 +38,17 @@ namespace CRenderTest
         {
             EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
 
-            RenderEntity entity = new RenderEntity(new Transform(Vector3.Zero),
-                new Model(
-                    vertices: new Vector4[] { new Vector4(-.5f, .5f, -.5f,1f), new Vector4(-.5f, -.5f, -.5f,1f), new Vector4(.5f, -.5f, -.5f,1f),new Vector4(.5f, .5f, -.5f,1f),
-                        new Vector4(-.5f, .5f, .5f,1f), new Vector4(-.5f, -.5f, .5f,1f), new Vector4(.5f, -.5f, .5f,1f), new Vector4(.5f, .5f, .5f,1f) },
-                    primitives: new IPrimitive[] { new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0),
+            RenderEntity entity = new RenderEntity(
+                transform: new Transform(Vector3.Zero),
+                model: new Model(
+                    vertices: new Vector4[] { new Vector4(-.5f, .5f, -.5f, 1f), new Vector4(-.5f, -.5f, -.5f, 1f), new Vector4(.5f, -.5f, -.5f, 1f),new Vector4(.5f, .5f, -.5f, 1f),
+                        new Vector4(-.5f, .5f, .5f,1f), new Vector4(-.5f, -.5f, .5f, 1f), new Vector4(.5f, -.5f, .5f, 1f), new Vector4(.5f, .5f, .5f, 1f) },
+                    primitives: new IPrimitive[] {new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0),
                         new LinePrimitive(4, 5), new LinePrimitive(5, 6), new LinePrimitive(6, 7), new LinePrimitive(7, 4),
                     new LinePrimitive(0, 4), new LinePrimitive(1, 5), new LinePrimitive(2, 6), new LinePrimitive(3, 7)},
                     uvs: null,
-                    normals: null
-                ), null);
+                    normals: null),
+                material: new Material<Shader_Scale>(Shader_Scale.Instance));
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
             DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);

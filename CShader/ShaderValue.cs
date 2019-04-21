@@ -9,5 +9,9 @@ namespace CShader
         public static Matrix4x4 WorldToView;
 
         public static Matrix4x4 ObjectToView;
+
+        public static float Time;
+
+        public static float SinTime;
     }
 }

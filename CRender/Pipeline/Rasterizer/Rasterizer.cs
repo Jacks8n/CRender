@@ -11,24 +11,17 @@ namespace CRender.Pipeline
     /// </summary>
     public sealed unsafe partial class Rasterizer : IDisposable
     {
-        public int RasterzeResultLength => _rasterizeBufferUsed;
-
-        /// <summary>
-        /// Store result and shift <see cref="_rasterizeBufferUsed"/>
-        /// </summary>
-        private static Vector2Int OutputRasterization { set => _rasterizeBufferPtr[_rasterizeBufferUsed++] = value; }
+        public static int RasterizeResultLength { get; private set; } = 0;
 
         private static bool _initialized = false;
 
         private static Vector2 _resolution = Vector2.Zero;
 
-        private static Vector2 _discardableInterval = Vector2.Zero;
+        private static Vector2 _discardInterval = Vector2.Zero;
 
         private static Vector2 _pixelSize = Vector2.One;
 
         private static Vector2Int* _rasterizeBufferPtr = null;
-
-        private static int _rasterizeBufferUsed = 0;
 
         private static Vector2* _pointsPtr = null;
 
@@ -39,10 +32,10 @@ namespace CRender.Pipeline
             _initialized = true;
 
             _resolution = resolution;
-            _discardableInterval = new Vector2(1e-3f / _resolution.X, 1e-3f / _resolution.Y);
+            _discardInterval = new Vector2(1e-2f / _resolution.X, 1e-2f / _resolution.Y);
             _pixelSize = new Vector2(1f / _resolution.X, 1f / _resolution.Y);
             _rasterizeBufferPtr = Alloc<Vector2Int>((int)resolution.X * (int)resolution.Y);
-            _rasterizeBufferUsed = 0;
+            RasterizeResultLength = 0;
         }
 
         public static void SetPoints(Vector2* pointsPtr)
@@ -50,21 +43,26 @@ namespace CRender.Pipeline
             _pointsPtr = pointsPtr;
         }
 
-        public static int ContriveResultPtr(ref Vector2Int* output)
+        public static int ContriveResult(Vector2Int* output)
         {
-            output = _rasterizeBufferPtr;
-            return _rasterizeBufferUsed;
+            for (int i = 0; i < RasterizeResultLength; i++)
+                output[i] = _rasterizeBufferPtr[i];
+
+            int temp = RasterizeResultLength;
+            RasterizeResultLength = 0;
+            return temp;
         }
 
         public static void ContriveResult(Vector2Int[] output, int start)
         {
-            for (int i = 0; i < _rasterizeBufferUsed; i++)
+            for (int i = 0; i < RasterizeResultLength; i++)
                 output[start + i] = _rasterizeBufferPtr[i];
+            RasterizeResultLength = 0;
         }
 
         public static Vector2Int[] ContriveResult()
         {
-            Vector2Int[] result = new Vector2Int[_rasterizeBufferUsed];
+            Vector2Int[] result = new Vector2Int[RasterizeResultLength];
             ContriveResult(result, 0);
             return result;
         }
@@ -76,6 +74,14 @@ namespace CRender.Pipeline
             _initialized = false;
 
             Free(_rasterizeBufferPtr);
+        }
+
+        /// <summary>
+        /// Store result and shift <see cref="RasterizeResultLength"/>
+        /// </summary>
+        private static void OutputRasterization(Vector2Int value)
+        {
+            _rasterizeBufferPtr[RasterizeResultLength++] = value;
         }
 
         void IDisposable.Dispose()

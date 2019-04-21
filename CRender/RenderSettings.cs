@@ -24,6 +24,8 @@ namespace CRender
             }
         }
 
+        public static bool IsShowFPS { get; set; }
+
         private static bool _isCountFrames;
     }
 }

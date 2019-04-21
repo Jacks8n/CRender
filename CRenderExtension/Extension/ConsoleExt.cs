@@ -3,10 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace CUtility.Extension
 {
-    public class ConsoleExt : IDisposable
+    public class ConsoleExt : JSingleton<ConsoleExt>, IDisposable
     {
-        private static readonly ConsoleExt _instance = new ConsoleExt();
-
         private struct _COORD
         {
             public short X, Y;
@@ -38,7 +36,7 @@ namespace CUtility.Extension
 
         private readonly IntPtr _outputBuffer0, _outputBuffer1;
 
-        private ConsoleExt()
+        public ConsoleExt()
         {
             _outputBuffer0 = CreateConsoleScreenBuffer(GENERIC_WRITE, FILE_SHARE_WRITE, IntPtr.Zero, CONSOLE_TEXTMODE_BUFFER, IntPtr.Zero);
             _outputBuffer1 = CreateConsoleScreenBuffer(GENERIC_WRITE, FILE_SHARE_WRITE, IntPtr.Zero, CONSOLE_TEXTMODE_BUFFER, IntPtr.Zero);
@@ -47,8 +45,8 @@ namespace CUtility.Extension
 
         public static void Output(char[] value)
         {
-            WriteToBufferAndShow(value, _instance._outputBuffer0);
-            WriteToBufferAndShow(value, _instance._outputBuffer1);
+            WriteToBufferAndShow(value, Instance._outputBuffer0);
+            WriteToBufferAndShow(value, Instance._outputBuffer1);
         }
 
         private static void WriteToBufferAndShow(char[] value, IntPtr buffer)

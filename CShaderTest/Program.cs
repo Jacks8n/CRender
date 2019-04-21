@@ -51,11 +51,26 @@ namespace CShaderTest
             ShaderInvoker<IFragmentShader>.ChangeActiveShader(shader);
 
             Vector4[] pos = new Vector4[] { new Vector4(-1f, 2f, -3f, 4f) };
-            Vector4 vertexResult = *ShaderInvoker<IVertexShader>.Invoke(1, pos).VertexPtr;
-            Vector4 fragmentResult = *ShaderInvoker<IFragmentShader>.Invoke(1, pos).VertexPtr;
+            Vector4 vertexResult = *ShaderInvoker<IVertexShader>.Invoke(0, pos).VertexPtr;
+            Vector4 fragmentResult = *ShaderInvoker<IFragmentShader>.Invoke(0, pos).VertexPtr;
 
             Assert.AreEqual(vertexResult, new Vector4(-2.5f, 5f, -7.5f, 10f));
             Assert.AreEqual(fragmentResult, new Vector4(0f, 3f, -2f, 5f));
+        }
+
+        [Test]
+        public unsafe void TestVertexShaderTransform()
+        {
+            var shader = ShaderDefault.Instance;
+            ShaderInvoker<IVertexShader>.ChangeActiveShader(shader);
+            ShaderValue.ObjectToView = Matrix4x4.Translation(Vector3.One);
+
+            Vector4[] pos = new Vector4[] { Vector4.UnitXPositive_Point, Vector4.UnitYPositive_Point, Vector4.UnitZPositive_Point };
+            for (int i = 0; i < pos.Length; i++)
+            {
+                var output = ShaderInvoker<IVertexShader>.Invoke(i, pos);
+                Assert.AreEqual(*output.VertexPtr, new Vector4(pos[i].XYZ + Vector3.One, 1));
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ namespace CRenderTest
         {
             WindowHeight = 50;
             CRenderSettings.IsCountFrames = true;
+            CRenderSettings.IsShowFPS = true;
             WriteLine("Press any key to run test");
             ReadKey();
 
