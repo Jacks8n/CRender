@@ -1,4 +1,6 @@
-﻿using CUtility;
+﻿using System;
+using CUtility;
+using CUtility.Math;
 
 using static CShader.ShaderValue;
 
@@ -7,24 +9,23 @@ using VOutData = CShader.ShaderInOutDefault.VOutData_Base;
 
 namespace CShader.Sample
 {
-    /// <summary>
-    /// Only supports VertexStage
-    /// </summary>
-    public unsafe class Shader_Scale : JSingleton<Shader_Scale>, IVertexShader
+    public class Shader_Distort : JSingleton<Shader_Distort>, IVertexShader
     {
-        static Shader_Scale()
+        static Shader_Distort()
         {
-            ShaderInterpreter<IVertexShader>.Interpret<Shader_Scale>();
+            ShaderInterpreter<IVertexShader>.Interpret<Shader_Distort>();
         }
 
-        public void Main(
+        public unsafe void Main(
             [ShaderInput(typeof(AppData))] void* inputPtr,
             [ShaderOutput(typeof(VOutData))] void* outputPtr, IShaderStage<IVertexShader> _)
         {
             AppData* appPtr = (AppData*)inputPtr;
             VOutData* vOutPtr = (VOutData*)outputPtr;
 
-            vOutPtr->Vertex = ObjectToView * appPtr->Vertex * (SinTime * .3f + 1);
+            Vector4 pos = appPtr->Vertex;
+            pos.Z /= MathF.Sin(pos.X + pos.Y + Time * 5f);
+            vOutPtr->Vertex = ObjectToView * pos;
         }
     }
 }

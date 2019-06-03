@@ -25,7 +25,7 @@ namespace CRender.Structure
 
         private readonly Transform _instanceToApply;
 
-        public Transform()
+        private Transform()
         {
             Position = POSITION_DEFAULT;
             Rotation = ROTATION_DEFAULT;

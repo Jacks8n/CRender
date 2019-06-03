@@ -21,22 +21,29 @@ namespace CRender.Pipeline
             Vector2* bottomPtr = _pointsPtr + sortedIndices[0];
             Vector2* midPtr = _pointsPtr + sortedIndices[1];
             Vector2* topPtr = _pointsPtr + sortedIndices[2];
-            float midSplitX = JMath.CoLerp(midPtr->Y, bottomPtr->X, topPtr->X, bottomPtr->Y, topPtr->Y);
-            Triangle_HorizontalEdge(topPtr, midPtr, midSplitX - midPtr->X);
-            Triangle_HorizontalEdge(bottomPtr, midPtr, midSplitX - midPtr->X);
+            if (JMath.Approximate(midPtr->Y, topPtr->Y))
+                Triangle_HorizontalEdge(bottomPtr, topPtr, midPtr->X - topPtr->X);
+            else if (JMath.Approximate(midPtr->Y, bottomPtr->Y))
+                Triangle_HorizontalEdge(topPtr, midPtr, bottomPtr->X - midPtr->X);
+            else
+            {
+                float midSplitX = JMath.Lerp(JMath.Ratio(midPtr->Y, bottomPtr->X, topPtr->X), bottomPtr->Y, topPtr->Y);
+                Triangle_HorizontalEdge(topPtr, midPtr, midSplitX - midPtr->X);
+                Triangle_HorizontalEdge(bottomPtr, midPtr, midSplitX - midPtr->X);
+            }
         }
 
         /// <summary>
         /// Rasterize a triangle one of whose edges is horizontal
         /// </summary>
-        /// <param name="bottom">A vertex of the horizontal edge</param>
-        /// <param name="width">The length of the horizontal edge, its sign indicates the direction</param>
-        private static void Triangle_HorizontalEdge(Vector2* apex, Vector2* bottom, float width)
+        /// <param name="bottomLeft">A vertex of the horizontal edge</param>
+        /// <param name="width">The length of the horizontal edge, whose sign indicates the direction</param>
+        private static void Triangle_HorizontalEdge(Vector2* apex, Vector2* bottomLeft, float width)
         {
             if (JMath.InRange(width, -_discardInterval.X, _discardInterval.X))
                 return;
 
-            float height = bottom->Y - apex->Y;
+            float height = bottomLeft->Y - apex->Y;
             float scaledHeight = height * _resolution.Y;
 
             if (JMath.InRange(scaledHeight, -_discardInterval.Y, _discardInterval.Y))
@@ -46,22 +53,22 @@ namespace CRender.Pipeline
             float widthSlope = scaledWidth / scaledHeight;
             int horizontalStepDir = MathF.Sign(width);
             int verticalStepDir = MathF.Sign(scaledHeight);
-            float anotherBottomX = bottom->X + width;
-            float apexBottomXDis = bottom->X - apex->X;
+            float anotherBottomX = bottomLeft->X + width;
+            float apexBottomXDis = bottomLeft->X - apex->X;
             float apexAnotherXDis = anotherBottomX - apex->X;
             float horizontalStart = apex->X;
             float horizontalStartSlope = (MathF.Abs(apexBottomXDis) > MathF.Abs(apexAnotherXDis) ? apexBottomXDis : apexAnotherXDis) / MathF.Abs(height);
-            int verticalEnd = JMath.RoundToInt(bottom->Y * _resolution.Y);
+            int verticalEnd = JMath.RoundToInt(bottomLeft->Y * _resolution.Y);
 
             Vector2Int result = new Vector2Int(JMath.RoundToInt(apex->X * _resolution.X), JMath.RoundToInt(apex->Y * _resolution.Y));
             for (; result.Y != verticalEnd; result.Y += verticalStepDir)
             {
-                for (float i = 0; i <= width; i += horizontalStepDir)
+                for (float i = 0; i <= scaledWidth; i += horizontalStepDir)
                 {
                     OutputRasterization(result);
                     result.X++;
                 }
-                width += widthSlope;
+                scaledWidth += widthSlope;
                 horizontalStart += horizontalStartSlope;
                 result.X = JMath.RoundToInt(horizontalStart);
             }

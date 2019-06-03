@@ -1,9 +1,9 @@
 ﻿using System.Threading;
-using CShader;
 using CRender;
-using CUtility.Math;
 using CRender.Pipeline;
 using CRender.Structure;
+using CShader.Sample;
+using CUtility.Math;
 
 namespace CRenderTest
 {
@@ -48,7 +48,7 @@ namespace CRenderTest
                     new LinePrimitive(0, 4), new LinePrimitive(1, 5), new LinePrimitive(2, 6), new LinePrimitive(3, 7)},
                     uvs: null,
                     normals: null),
-                material: new Material<Shader_Scale>(Shader_Scale.Instance));
+                material: new Material<Shader_Distort>(Shader_Distort.Instance));
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
             DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);
@@ -58,7 +58,8 @@ namespace CRenderTest
         {
             EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
 
-            RenderEntity entity = new RenderEntity(new Transform(),
+            RenderEntity entity = new RenderEntity(
+                transform: new Transform(Vector3.Zero),
                 new Model(
                     vertices: new Vector4[] { new Vector4(1, 0, 0, 1), new Vector4(0, 1, 0, 1), new Vector4(0, -1, 0, 1) },
                     primitives: new IPrimitive[] { new TrianglePrimitive(0, 1, 2) },

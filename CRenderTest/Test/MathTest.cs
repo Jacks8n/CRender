@@ -56,7 +56,7 @@ namespace CRenderTest
         [Test]
         public static void TestLocalToWorldMatrix_Rotation()
         {
-            Transform transform = new Transform();
+            Transform transform = new Transform(Vector3.Zero);
             transform.Rotation.X = JMath.PI_HALF;
             Matrix4x4 x_pi_half = transform.LocalToWorld;
             transform.Rotation.Y = JMath.PI_HALF;
@@ -80,7 +80,7 @@ namespace CRenderTest
         [Test]
         public static void TestWorldToLocalMatrix_Rotation()
         {
-            Transform transform = new Transform();
+            Transform transform = new Transform(Vector3.Zero);
             transform.Rotation.X = JMath.PI_HALF;
             Matrix4x4 x_pi_half = transform.WorldToLocal;
             transform.Rotation.Y = JMath.PI_HALF;
@@ -104,7 +104,7 @@ namespace CRenderTest
         [Test]
         public static void TestMatrix_Rotation()
         {
-            Transform transform = new Transform
+            Transform transform = new Transform(Vector3.Zero)
             {
                 Rotation = new Vector3(JMath.PI_HALF * .5f, 0, 0)
             };

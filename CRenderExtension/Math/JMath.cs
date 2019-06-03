@@ -10,6 +10,8 @@ namespace CUtility.Math
 
         public const float PI_HALF = 1.5707963267948966192313216916398f;
 
+        public const float Approximation = 1e-5f;
+
         public static Vector3 Sin(Vector3 vector)
         {
             return new Vector3(MathF.Sin(vector.X), MathF.Sin(vector.Y), MathF.Sin(vector.Z));
@@ -21,11 +23,24 @@ namespace CUtility.Math
         }
 
         /// <summary>
+        /// If <paramref name="left"/> approximates<paramref name="right"/> w.r.t. <see cref="Approximation"/>
+        /// </summary>
+        public static bool Approximate(float left, float right)
+        {
+            return MathF.Abs(left - right) < Approximation;
+        }
+
+        /// <summary>
         /// Exclusive
         /// </summary>
         public static bool InRange(float value, float min, float max)
         {
             return value > min && value < max;
+        }
+
+        public static float Ratio(float value, float from, float to)
+        {
+            return (value - from) / (to - from);
         }
 
         public static float Lerp(float value, float from, float to)
@@ -39,17 +54,11 @@ namespace CUtility.Math
                 throw new Exception("Two inputs' length differs");
 
             GenericVector<T> result = new GenericVector<T>(from.Length);
-            for (int i = 0; i < from.Length; i++)
-            {
-                if (typeof(T) == typeof(float))
-                    result[i] = (T)(object)Lerp(value, (float)(object)from[i], (float)(object)to[i]);
-            }
-            return result;
-        }
 
-        public static float CoLerp(float value, float from, float to, float min, float max)
-        {
-            return (max - min) * (value / (to - from)) + min;
+            if (typeof(T) == typeof(float))
+                for (int i = 0; i < from.Length; i++)
+                    result[i] = (T)(object)Lerp(value, (float)(object)from[i], (float)(object)to[i]);
+            return result;
         }
 
         public static float Floor(float value, float precision)
