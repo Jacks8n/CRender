@@ -25,6 +25,11 @@
 
         public float X, Y, Z;
 
+        public Vector3(float xyz)
+        {
+            X = Y = Z = xyz;
+        }
+
         public Vector3(float x, float y, float z)
         {
             X = x;

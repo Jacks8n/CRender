@@ -49,30 +49,31 @@ namespace CRender.Pipeline
             if (JMath.InRange(scaledHeight, -_discardInterval.Y, _discardInterval.Y))
                 return;
 
-            float scaledWidth = width * _resolution.X;
+            float scaledWidth = MathF.Abs(width) * _resolution.X;
             float widthSlope = scaledWidth / scaledHeight;
             int horizontalStepDir = MathF.Sign(width);
+            float horizontalStepDirF = MathF.Abs(horizontalStepDir);
             int verticalStepDir = MathF.Sign(scaledHeight);
             float anotherBottomX = bottomLeft->X + width;
             float apexBottomXDis = bottomLeft->X - apex->X;
             float apexAnotherXDis = anotherBottomX - apex->X;
-            float horizontalStart = apex->X;
+            float horizontalStart = apex->X * _resolution.X;
             float horizontalStartSlope = (MathF.Abs(apexBottomXDis) > MathF.Abs(apexAnotherXDis) ? apexBottomXDis : apexAnotherXDis) / MathF.Abs(height);
             int verticalEnd = JMath.RoundToInt(bottomLeft->Y * _resolution.Y);
 
-            Vector2Int result = new Vector2Int(JMath.RoundToInt(apex->X * _resolution.X), JMath.RoundToInt(apex->Y * _resolution.Y));
+            Vector2Int result = new Vector2Int(JMath.RoundToInt(horizontalStart), JMath.RoundToInt(apex->Y * _resolution.Y));
             for (; result.Y != verticalEnd; result.Y += verticalStepDir)
             {
-                for (float i = 0; i <= scaledWidth; i += horizontalStepDir)
+                for (float i = 0; i <= scaledWidth; i += horizontalStepDirF)
                 {
                     OutputRasterization(result);
-                    result.X++;
+                    result.X += horizontalStepDir;
                 }
                 scaledWidth += widthSlope;
                 horizontalStart += horizontalStartSlope;
                 result.X = JMath.RoundToInt(horizontalStart);
             }
+            _pointsPtr += 3;
         }
-
     }
 }

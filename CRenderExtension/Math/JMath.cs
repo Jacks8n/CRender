@@ -10,6 +10,10 @@ namespace CUtility.Math
 
         public const float PI_HALF = 1.5707963267948966192313216916398f;
 
+        public const float Sqrt2 = 1.414213562373095f;
+
+        public const float Sqrt3 = 1.732050807568877f;
+
         public const float Approximation = 1e-5f;
 
         public static Vector3 Sin(Vector3 vector)

@@ -3,6 +3,7 @@ using CRender;
 using CRender.Pipeline;
 using CRender.Structure;
 using CShader.Sample;
+using CUtility;
 using CUtility.Math;
 
 namespace CRenderTest
@@ -40,14 +41,7 @@ namespace CRenderTest
 
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
-                model: new Model(
-                    vertices: new Vector4[] { new Vector4(-.5f, .5f, -.5f, 1f), new Vector4(-.5f, -.5f, -.5f, 1f), new Vector4(.5f, -.5f, -.5f, 1f),new Vector4(.5f, .5f, -.5f, 1f),
-                        new Vector4(-.5f, .5f, .5f,1f), new Vector4(-.5f, -.5f, .5f, 1f), new Vector4(.5f, -.5f, .5f, 1f), new Vector4(.5f, .5f, .5f, 1f) },
-                    primitives: new IPrimitive[] {new LinePrimitive(0, 1), new LinePrimitive(1, 2), new LinePrimitive(2, 3), new LinePrimitive(3, 0),
-                        new LinePrimitive(4, 5), new LinePrimitive(5, 6), new LinePrimitive(6, 7), new LinePrimitive(7, 4),
-                    new LinePrimitive(0, 4), new LinePrimitive(1, 5), new LinePrimitive(2, 6), new LinePrimitive(3, 7)},
-                    uvs: null,
-                    normals: null),
+                model: Model.Cube(),
                 material: new Material<Shader_Distort>(Shader_Distort.Instance));
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
@@ -61,7 +55,7 @@ namespace CRenderTest
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
                 new Model(
-                    vertices: new Vector4[] { new Vector4(1, 0, 0, 1), new Vector4(0, 1, 0, 1), new Vector4(0, -1, 0, 1) },
+                    vertices: new Vector4[] { new Vector4(-.5f, -.25f, 0, 1f), new Vector4(.5f, -.25f, 0, 1f), new Vector4(0, .5f, 0, 1f) },
                     primitives: new IPrimitive[] { new TrianglePrimitive(0, 1, 2) },
                     uvs: null,
                     normals: null),
@@ -89,14 +83,22 @@ namespace CRenderTest
             int totalFrame = (int)(framerate * time);
             float angleStep = JMath.PI_TWO / totalFrame;
             int frameInterval = (int)(1000f / framerate);
+
+            JTimer timer = new JTimer();
+            timer.Start();
             for (int i = 0; i < totalFrame; i++)
             {
+                CRenderer.UpdateRenderInfo();
                 pipeline.Draw(entitiesApply, camera);
-                CRenderer.Render(charBuffer);
                 entitiesApply[0].Transform.Rotation.X += angleStep;
                 entitiesApply[0].Transform.Rotation.Z += angleStep;
-                Thread.Sleep(frameInterval);
+
+                int elapsed = (int)timer.DeltaMS;
+                if (elapsed < frameInterval)
+                    Thread.Sleep(frameInterval - elapsed);
+                CRenderer.Render(charBuffer);
             }
+            timer.Stop();
         }
     }
 }

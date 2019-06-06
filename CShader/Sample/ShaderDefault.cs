@@ -10,14 +10,14 @@ namespace CShader
     /// <summary>
     /// Only supports VertexStage
     /// </summary>
-    public unsafe class ShaderDefault : JSingleton<ShaderDefault>, IVertexShader
+    public class ShaderDefault : JSingleton<ShaderDefault>, IVertexShader
     {
         static ShaderDefault()
         {
             ShaderInterpreter<IVertexShader>.Interpret<ShaderDefault>();
         }
 
-        public void Main(
+        public unsafe void Main(
             [ShaderInput(typeof(AppData))] void* inputPtr,
             [ShaderOutput(typeof(VOutdata))] void* outputPtr, IShaderStage<IVertexShader> _)
         {

@@ -1,45 +1,40 @@
-﻿using CRender.Structure;
+﻿using System;
+using CUtility.Math;
+using CRender.Structure;
+using CUtility;
 using CUtility.Extension;
 
 namespace CRender
 {
     public static class CRenderer
     {
-        public static float LastFrameElapsed { get; private set; } = 0;
+        public static float CurrentSecond { get; private set; }
 
-        public static float CurrentSecond { get; private set; } = 0;
+        public static int DeltaMS { get; private set; }
 
-        private static long _currentRenderTick = 0;
-
-        private static long _lastRenderTick = 0;
-
-        private static readonly long _beginRenderTick = 0;
+        private static readonly JTimer _timer = new JTimer();
 
         private static int _frameCounts = 0;
 
-        private static int _renderingBufferWidth = 0;
-
         static CRenderer()
         {
-            _currentRenderTick = _beginRenderTick = System.DateTime.Now.Ticks;
+            _timer.Start();
+        }
+
+        public static void UpdateRenderInfo()
+        {
+            DeltaMS = (int)_timer.DeltaMS;
+            CurrentSecond += DeltaMS * .001f;
         }
 
         public static void Render(CharRenderBuffer<float> buffer)
         {
-            _lastRenderTick = _currentRenderTick;
-            _currentRenderTick = System.DateTime.Now.Ticks;
-
-            LastFrameElapsed = (_currentRenderTick - _lastRenderTick) * 1e-7f;
-            CurrentSecond = (_currentRenderTick - _beginRenderTick) * 1e-7f;
-
             char[] outputChars = buffer.GetRenderBuffer();
-            _renderingBufferWidth = buffer.Width;
-
-            int cursorPos = _renderingBufferWidth - 1;
+            int cursorPos = buffer.Width - 1;
             if (CRenderSettings.IsCountFrames)
                 cursorPos = DisplayString(outputChars, DisplayNumber(outputChars, cursorPos, _frameCounts) - 1, "Frame:") - 1;
             if (CRenderSettings.IsShowFPS)
-                cursorPos = DisplayString(outputChars, DisplayNumber(outputChars, cursorPos, (int)(1f / LastFrameElapsed)) - 1, "FPS:") - 1;
+                cursorPos = DisplayString(outputChars, DisplayNumber(outputChars, cursorPos, JMath.RoundToInt(1000f / DeltaMS)) - 1, "FPS:") - 1;
 
             _frameCounts++;
             ConsoleExt.Output(outputChars);

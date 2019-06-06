@@ -2,10 +2,10 @@
 using CUtility;
 using CUtility.Math;
 
-using static CShader.ShaderValue;
-
 using AppData = CShader.ShaderInOutDefault.AppData_Base;
 using VOutData = CShader.ShaderInOutDefault.VOutData_Base;
+
+using static CShader.ShaderValue;
 
 namespace CShader.Sample
 {
@@ -24,7 +24,7 @@ namespace CShader.Sample
             VOutData* vOutPtr = (VOutData*)outputPtr;
 
             Vector4 pos = appPtr->Vertex;
-            pos.Z /= MathF.Sin(pos.X + pos.Y + Time * 5f);
+            pos.Z *= MathF.Sin(pos.X + pos.Y + Time * .5f);
             vOutPtr->Vertex = ObjectToView * pos;
         }
     }
