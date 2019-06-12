@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CShader", "CShader\CShader.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CShaderTest", "CShaderTest\CShaderTest.csproj", "{D1722D46-64C2-4B92-8682-28665F039305}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUtility", "CRenderExtension\CUtility.csproj", "{B5AE5E6F-DAC0-4562-B8EA-A647BCFAB9D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CUtility", "CUtility\CUtility.csproj", "{BF07703B-0315-4429-907F-D2476304FFDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{D1722D46-64C2-4B92-8682-28665F039305}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1722D46-64C2-4B92-8682-28665F039305}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1722D46-64C2-4B92-8682-28665F039305}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5AE5E6F-DAC0-4562-B8EA-A647BCFAB9D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5AE5E6F-DAC0-4562-B8EA-A647BCFAB9D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5AE5E6F-DAC0-4562-B8EA-A647BCFAB9D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5AE5E6F-DAC0-4562-B8EA-A647BCFAB9D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF07703B-0315-4429-907F-D2476304FFDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF07703B-0315-4429-907F-D2476304FFDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF07703B-0315-4429-907F-D2476304FFDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF07703B-0315-4429-907F-D2476304FFDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
