@@ -18,6 +18,7 @@ A soft renderer can output to command line interface, which is fully written in 
 |  CShader|CUtility|Independent shader system. **Library**|
 |  CShaderTest|CShader, NUnit|Unity tests and samples for `CShader`. **Executable**|
 |  CUtility|None|Math, extensions etc. **Library**|
+
 Thus, at least the projects `CUtility`,`CShader`,`CRender` is required to build, and `CRenderTest` contains some samples to invoke render functions
 
 ## Write Shaders
