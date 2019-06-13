@@ -8,9 +8,9 @@ A soft renderer can output to command line interface, which is fully written in 
 - [ ] Performance optimization
 ...
 
-#Introduction
+# Introduction
 
-##How to build
+## How to build
 |  Projecct|Dependency|Description|
 |--|--|--|
 |  CRender|CUtility, CShader|Main pipeline, rendering objects. **Library**|
@@ -20,7 +20,7 @@ A soft renderer can output to command line interface, which is fully written in 
 |  CUtility|None|Math, extensions etc. **Library**|
 Thus, at least the projects `CUtility`,`CShader`,`CRender` is required to build, and `CRenderTest` contains some samples to invoke render functions
 
-##Write Shaders
+## Write Shaders
 `CShader` provides a unconventional manner to write shaders, it depends on pointers
 
 It's recommended to see `CShaderTest.TestShader` or `CShader.ShaderDefault` to confirm how to start a shader, here we use the former to illustrate
