@@ -41,6 +41,8 @@ namespace CUtility.Math
 
         public static Vector2 operator *(Vector2 vector, float scale) => new Vector2(vector.X * scale, vector.Y * scale);
 
+        public static Vector2 operator *(Vector2 l, Vector2 r) => new Vector2(l.X * r.X, l.Y * r.Y);
+
         public static Vector2 operator /(Vector2 vector, float scale) => new Vector2(vector.X / scale, vector.Y / scale);
 
         public static bool operator ==(Vector2 l, Vector2 r) => l.X == r.X && l.Y == r.Y;

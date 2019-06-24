@@ -25,7 +25,7 @@ namespace CRenderTest
                 points[1] = new Vector2(.5f, .5f) - dir;
                 points[2] = new Vector2(.5f, .5f) + orthoDir;
                 points[3] = new Vector2(.5f, .5f) - orthoDir;
-                Rasterizer.SetPoints(points);
+                Rasterizer.SetVertices(points);
                 Rasterizer.Line();
                 Rasterizer.Line();
                 tex0.WritePixel(Rasterizer.ContriveResult(), new GenericVector<float>(3) { 1f, 1f, 1f });
@@ -51,7 +51,7 @@ namespace CRenderTest
         {
             Vector2* line = stackalloc Vector2[2] { Vector2.Zero, Vector2.One };
             Rasterizer.StartRasterize(new Vector2(100, 100));
-            Rasterizer.SetPoints(line);
+            Rasterizer.SetVertices(line);
             Rasterizer.Line();
             var resultArr = Rasterizer.ContriveResult();
             Assert.AreEqual(resultArr.Length, 100, 1);

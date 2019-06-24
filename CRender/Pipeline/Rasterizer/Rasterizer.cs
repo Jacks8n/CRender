@@ -17,13 +17,11 @@ namespace CRender.Pipeline
 
         private static Vector2 _resolution = Vector2.Zero;
 
-        private static Vector2 _discardInterval = Vector2.Zero;
-
         private static Vector2 _pixelSize = Vector2.One;
 
         private static Vector2Int* _rasterizeBufferPtr = null;
 
-        private static Vector2* _pointsPtr = null;
+        private static Vector2* _verticesPtr = null;
 
         public static void StartRasterize(Vector2 resolution)
         {
@@ -32,15 +30,14 @@ namespace CRender.Pipeline
             _initialized = true;
 
             _resolution = resolution;
-            _discardInterval = new Vector2(1e-2f / _resolution.X, 1e-2f / _resolution.Y);
             _pixelSize = new Vector2(1f / _resolution.X, 1f / _resolution.Y);
             _rasterizeBufferPtr = Alloc<Vector2Int>((int)resolution.X * (int)resolution.Y);
             RasterizeResultLength = 0;
         }
 
-        public static void SetPoints(Vector2* pointsPtr)
+        public static void SetVertices(Vector2* verticesPtr)
         {
-            _pointsPtr = pointsPtr;
+            _verticesPtr = verticesPtr;
         }
 
         public static int ContriveResult(Vector2Int* output)

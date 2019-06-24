@@ -43,18 +43,29 @@ namespace CUtility.Math
             return from.Y == to.Y ?
                        from.Y > to.Y ?
                            int.MinValue : int.MaxValue :
-                   (from.Y - to.Y) / from.X - to.X;
+                   (from.Y - to.Y) / (from.X - to.X);
         }
 
         /// <summary>
-        /// Return whether <paramref name="point"/> is upper than <paramref name="target"/>, -1: lower 0:overlap 1:upper
+        /// -1: <paramref name="l"/> is higher than <paramref name="r"/> 1: vice versa 0: overlapped
         /// </summary>
-        public static int IsUpper(Vector2 point, Vector2 target)
+        public static int LexicoCompareRightDown(Vector2 l, Vector2 r)
         {
-            return point.Y > target.Y ? 1 :
-                   point.Y < target.Y ? -1 :
-                   point.X < target.X ? 1 :
-                   point.X > target.X ? -1 : 0;
+            return l.X > r.X ? 1 :
+                   l.X < r.X ? -1 :
+                   l.Y < r.Y ? 1 :
+                   l.Y > r.Y ? -1 : 0;
+        }
+
+        /// <summary>
+        /// -1: <paramref name="l"/> is higher than <paramref name="r"/> 1: vice versa 0: overlapped
+        /// </summary>
+        public static int LexicoCompareDownRight(Vector2 l, Vector2 r)
+        {
+            return l.Y < r.Y ? 1 :
+                   l.Y > r.Y ? -1 :
+                   l.X > r.X ? 1 :
+                   l.X < r.X ? -1 : 0;
         }
     }
 }

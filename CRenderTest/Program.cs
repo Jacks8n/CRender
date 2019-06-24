@@ -8,16 +8,16 @@ namespace CRenderTest
     [TestFixture]
     public class Program
     {
-        private static unsafe void Main(string[] args)
+        private static void Main(string[] args)
         {
-            WindowHeight = 50;
-            CRenderSettings.IsCountFrames = true;
-            CRenderSettings.IsShowFPS = true;
             WriteLine("Press any key to run test");
             ReadKey();
+            CRenderSettings.SetFontSize(5);
+            CRenderSettings.IsCountFrames = true;
+            CRenderSettings.IsShowFPS = true;
 
-            //PipelineTest.TestRenderTriangle();
-            PipelineTest.TestDrawLine();
+            PipelineTest.TestRenderTriangle();
+            //PipelineTest.TestDrawLine();
             //PipelineTest.TestRenderFrames();
             //RasterizerTest.TestRasterize();
 

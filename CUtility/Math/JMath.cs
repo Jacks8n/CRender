@@ -10,11 +10,11 @@ namespace CUtility.Math
 
         public const float PI_HALF = 1.5707963267948966192313216916398f;
 
-        public const float Sqrt2 = 1.414213562373095f;
+        public const float SQRT2 = 1.414213562373095f;
 
-        public const float Sqrt3 = 1.732050807568877f;
+        public const float SQRT3 = 1.732050807568877f;
 
-        public const float Approximation = 1e-5f;
+        public const float EPSILON = 1e-5f;
 
         public static Vector3 Sin(Vector3 vector)
         {
@@ -27,11 +27,16 @@ namespace CUtility.Math
         }
 
         /// <summary>
-        /// If <paramref name="left"/> approximates<paramref name="right"/> w.r.t. <see cref="Approximation"/>
+        /// If <paramref name="left"/> approximates<paramref name="right"/> w.r.t. <see cref="EPSILON"/>
         /// </summary>
-        public static bool Approximate(float left, float right)
+        public static bool Approx(float left, float right)
         {
-            return MathF.Abs(left - right) < Approximation;
+            return left - right < EPSILON && left - right > -EPSILON;
+        }
+
+        public static int ApproxSign(float value)
+        {
+            return value < -EPSILON ? -1 : value > EPSILON ? 1 : 0;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using CUtility.Math;
+using CUtility.Extension;
 
 namespace CRender
 {
@@ -25,6 +26,10 @@ namespace CRender
         }
 
         public static bool IsShowFPS { get; set; }
+
+        public static void SetFontSize(short size) => ConsoleExt.SetFontSize(size, size);
+
+        public static void SetFontSize(short width, short height) => ConsoleExt.SetFontSize(width, height);
 
         private static bool _isCountFrames;
     }

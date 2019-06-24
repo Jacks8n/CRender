@@ -76,14 +76,14 @@ namespace CRender.Structure
 
                 normals: hasNormals ?
                 new Vector3[] {
-                    new Vector3(-JMath.Sqrt3),
-                    new Vector3(JMath.Sqrt3, -JMath.Sqrt3, -JMath.Sqrt3),
-                    new Vector3(JMath.Sqrt3, JMath.Sqrt3, -JMath.Sqrt3),
-                    new Vector3(-JMath.Sqrt3, JMath.Sqrt3, -JMath.Sqrt3),
-                    new Vector3(-JMath.Sqrt3, -JMath.Sqrt3, JMath.Sqrt3),
-                    new Vector3(JMath.Sqrt3, -JMath.Sqrt3, JMath.Sqrt3),
-                    new Vector3(JMath.Sqrt3),
-                    new Vector3(-JMath.Sqrt3, JMath.Sqrt3, JMath.Sqrt3), }
+                    new Vector3(-JMath.SQRT3),
+                    new Vector3(JMath.SQRT3, -JMath.SQRT3, -JMath.SQRT3),
+                    new Vector3(JMath.SQRT3, JMath.SQRT3, -JMath.SQRT3),
+                    new Vector3(-JMath.SQRT3, JMath.SQRT3, -JMath.SQRT3),
+                    new Vector3(-JMath.SQRT3, -JMath.SQRT3, JMath.SQRT3),
+                    new Vector3(JMath.SQRT3, -JMath.SQRT3, JMath.SQRT3),
+                    new Vector3(JMath.SQRT3),
+                    new Vector3(-JMath.SQRT3, JMath.SQRT3, JMath.SQRT3), }
                 : null
                 );
         }

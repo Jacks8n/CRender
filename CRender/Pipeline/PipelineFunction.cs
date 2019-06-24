@@ -27,7 +27,7 @@ namespace CRender.Pipeline
             Vector2* coords = stackalloc Vector2[primitive.Count];
             for (int i = 0; i < primitive.Count; i++)
                 coords[i] = screenCoords[primitive.Indices[i]];
-            Rasterizer.SetPoints(coords);
+            Rasterizer.SetVertices(coords);
 
             switch (primitive.Count)
             {

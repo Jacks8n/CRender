@@ -18,7 +18,7 @@ namespace CShader
             if (InOutBufferPtr == null)
                 InOutBufferPtr = Alloc<byte>(size);
             else
-                ReAlloc(InOutBufferPtr, size);
+                InOutBufferPtr = ReAlloc(InOutBufferPtr, size);
 
             SetVertexOffset(_vertexPtrOffset);
         }

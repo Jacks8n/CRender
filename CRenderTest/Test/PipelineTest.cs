@@ -62,7 +62,8 @@ namespace CRenderTest
                 material: null);
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
-            DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);
+            pipeline.Draw(entitiesApply, camera);
+            CRenderer.Render(charBuffer);
         }
 
         /// <param name="camera">It orients the origin</param>

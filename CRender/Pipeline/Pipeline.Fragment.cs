@@ -20,7 +20,7 @@ namespace CRender.Pipeline
                 if (PixelCount == 0)
                     Rasterization = Alloc<Vector2Int>(size);
                 else
-                    ReAlloc(Rasterization, size);
+                    Rasterization = ReAlloc(Rasterization, size);
                 PixelCount = size;
             }
 

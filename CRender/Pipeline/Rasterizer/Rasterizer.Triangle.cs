@@ -1,79 +1,81 @@
 ﻿using System;
 using CUtility.Math;
 
+using static CUtility.Math.JMathGeom;
+
 namespace CRender.Pipeline
 {
     public sealed unsafe partial class Rasterizer
     {
         public static void Triangle()
         {
-            //Map values from -1 to 1 on values from 0 to 1
-            int ut01 = (JMathGeom.IsUpper(_pointsPtr[0], _pointsPtr[1]) + 1) >> 1;
-            int ut02 = (JMathGeom.IsUpper(_pointsPtr[0], _pointsPtr[2]) + 1) >> 1;
-            int ut12 = (JMathGeom.IsUpper(_pointsPtr[1], _pointsPtr[2]) + 1) >> 1;
+            int topIndex = Highest(_verticesPtr[0], _verticesPtr[1], _verticesPtr[2]), midIndex;
 
-            //Ascend
-            int* sortedIndices = stackalloc int[3];
-            sortedIndices[ut01 + ut02] = 0;
-            sortedIndices[1 - ut01 + ut12] = 1;
-            sortedIndices[2 - ut02 - ut12] = 2;
+            switch (topIndex)
+            {
+                case 0:
+                    midIndex = LexicoCompareDownRight(_verticesPtr[1], _verticesPtr[2]) < 0 ? 1 : 2;
+                    break;
+                case 1:
+                    midIndex = LexicoCompareDownRight(_verticesPtr[0], _verticesPtr[2]) + 1;
+                    break;
+                case 2:
+                    midIndex = LexicoCompareDownRight(_verticesPtr[0], _verticesPtr[1]) < 0 ? 0 : 1;
+                    break;
+                default:
+                    midIndex = 1;
+                    break;
+            }
 
-            Vector2* bottomPtr = _pointsPtr + sortedIndices[0];
-            Vector2* midPtr = _pointsPtr + sortedIndices[1];
-            Vector2* topPtr = _pointsPtr + sortedIndices[2];
-            if (JMath.Approximate(midPtr->Y, topPtr->Y))
-                Triangle_HorizontalEdge(bottomPtr, topPtr, midPtr->X - topPtr->X);
-            else if (JMath.Approximate(midPtr->Y, bottomPtr->Y))
-                Triangle_HorizontalEdge(topPtr, midPtr, bottomPtr->X - midPtr->X);
+            Vector2 top = _verticesPtr[topIndex] * _resolution, mid = _verticesPtr[midIndex] * _resolution, bottom = _verticesPtr[3 - topIndex - midIndex] * _resolution;
+            if (JMath.Approx(top.Y, mid.Y))
+                HorizontalEdgeTriangle(bottom, top.X, mid.X, top.Y);
+            else if (JMath.Approx(mid.Y, bottom.Y))
+                HorizontalEdgeTriangle(top, mid.X, bottom.X, mid.Y);
             else
             {
-                float midSplitX = JMath.Lerp(JMath.Ratio(midPtr->Y, bottomPtr->X, topPtr->X), bottomPtr->Y, topPtr->Y);
-                Triangle_HorizontalEdge(topPtr, midPtr, midSplitX - midPtr->X);
-                Triangle_HorizontalEdge(bottomPtr, midPtr, midSplitX - midPtr->X);
+                float midSectionX = JMath.Lerp(JMath.Ratio(mid.Y, top.Y, bottom.Y), top.X, bottom.X);
+                if (midSectionX < mid.X)
+                {
+                    float temp = midSectionX;
+                    midSectionX = mid.X;
+                    mid.X = temp;
+                }
+                HorizontalEdgeTriangle(top, mid.X, midSectionX, mid.Y);
+                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, false);
             }
+
+            _verticesPtr += 3;
         }
 
-        /// <summary>
-        /// Rasterize a triangle one of whose edges is horizontal
-        /// </summary>
-        /// <param name="bottomLeft">A vertex of the horizontal edge</param>
-        /// <param name="width">The length of the horizontal edge, whose sign indicates the direction</param>
-        private static void Triangle_HorizontalEdge(Vector2* apex, Vector2* bottomLeft, float width)
+        private static int Highest(Vector2 v0, Vector2 v1, Vector2 v2)
         {
-            if (JMath.InRange(width, -_discardInterval.X, _discardInterval.X))
-                return;
+            return
+                v0.Y > v1.Y ?
+                    v0.Y > v2.Y ?
+                        0 : 2
+                : v1.Y > v2.Y ?
+                    1 : 2;
+        }
 
-            float height = bottomLeft->Y - apex->Y;
-            float scaledHeight = height * _resolution.Y;
+        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool drawBottomEdge = true)
+        {
+            float leftSlope = (apex.X - leftBottomX) / (apex.Y - bottomY);
+            float rightSlope = (apex.X - rightBottomX) / (apex.Y - bottomY);
 
-            if (JMath.InRange(scaledHeight, -_discardInterval.Y, _discardInterval.Y))
-                return;
-
-            float scaledWidth = MathF.Abs(width) * _resolution.X;
-            float widthSlope = scaledWidth / scaledHeight;
-            int horizontalStepDir = MathF.Sign(width);
-            float horizontalStepDirF = MathF.Abs(horizontalStepDir);
-            int verticalStepDir = MathF.Sign(scaledHeight);
-            float anotherBottomX = bottomLeft->X + width;
-            float apexBottomXDis = bottomLeft->X - apex->X;
-            float apexAnotherXDis = anotherBottomX - apex->X;
-            float horizontalStart = apex->X * _resolution.X;
-            float horizontalStartSlope = (MathF.Abs(apexBottomXDis) > MathF.Abs(apexAnotherXDis) ? apexBottomXDis : apexAnotherXDis) / MathF.Abs(height);
-            int verticalEnd = JMath.RoundToInt(bottomLeft->Y * _resolution.Y);
-
-            Vector2Int result = new Vector2Int(JMath.RoundToInt(horizontalStart), JMath.RoundToInt(apex->Y * _resolution.Y));
-            for (; result.Y != verticalEnd; result.Y += verticalStepDir)
+            int dir = apex.Y > bottomY ? 1 : -1;
+            int endY = JMath.RoundToInt(apex.Y), endX;
+            Vector2Int result = new Vector2Int(0, JMath.RoundToInt(bottomY));
+            for (; result.Y != endY; result.Y += dir)
             {
-                for (float i = 0; i <= scaledWidth; i += horizontalStepDirF)
-                {
+                result.X = JMath.RoundToInt(leftBottomX);
+                endX = JMath.RoundToInt(rightBottomX);
+                for (; result.X <= endX; result.X++)
                     OutputRasterization(result);
-                    result.X += horizontalStepDir;
-                }
-                scaledWidth += widthSlope;
-                horizontalStart += horizontalStartSlope;
-                result.X = JMath.RoundToInt(horizontalStart);
+
+                leftBottomX += leftSlope;
+                rightBottomX += rightSlope;
             }
-            _pointsPtr += 3;
         }
     }
 }
