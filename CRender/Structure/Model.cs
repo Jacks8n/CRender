@@ -67,10 +67,10 @@ namespace CRender.Structure
                     new TrianglePrimitive(3, 0, 4),
                     new TrianglePrimitive(4, 5, 6),
                     new TrianglePrimitive(6, 7, 4),
-                    new TrianglePrimitive(4, 5, 1),
-                    new TrianglePrimitive(5, 6, 2),
-                    new TrianglePrimitive(6, 7, 3),
-                    new TrianglePrimitive(7, 4, 0), },
+                    new TrianglePrimitive(4, 5, 0),
+                    new TrianglePrimitive(5, 6, 1),
+                    new TrianglePrimitive(6, 7, 2),
+                    new TrianglePrimitive(7, 4, 3), },
 
                 uvs: null,
 
@@ -86,6 +86,25 @@ namespace CRender.Structure
                     new Vector3(-JMath.SQRT3, JMath.SQRT3, JMath.SQRT3), }
                 : null
                 );
+        }
+
+        public static Model Plane(float size = 1f)
+        {
+            size *= .5f;
+            return new Model(
+                vertices: new Vector4[] 
+                {
+                    new Vector4(size, size, 0f, 1f),
+                    new Vector4(size, -size, 0f, 1f),
+                    new Vector4(-size, -size, 0f, 1f),
+                    new Vector4(-size, size, 0f, 1f)
+                },
+                primitives: new IPrimitive[]
+                {
+                    new TrianglePrimitive(0, 1, 2),
+                    new TrianglePrimitive(0, 2, 3),
+                },
+                uvs: null, normals: null);
         }
     }
 }

@@ -12,11 +12,13 @@ namespace CRenderTest
         {
             WriteLine("Press any key to run test");
             ReadKey();
-            CRenderSettings.SetFontSize(5);
+            CRenderSettings.SetFontSize(10);
             CRenderSettings.IsCountFrames = true;
             CRenderSettings.IsShowFPS = true;
 
-            PipelineTest.TestRenderTriangle();
+            PipelineTest.TestRenderFaces();
+            //PipelineTest.TestRenderCube();
+            //PipelineTest.TestRenderTriangle();
             //PipelineTest.TestDrawLine();
             //PipelineTest.TestRenderFrames();
             //RasterizerTest.TestRasterize();

@@ -62,8 +62,33 @@ namespace CRenderTest
                 material: null);
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
-            pipeline.Draw(entitiesApply, camera);
-            CRenderer.Render(charBuffer);
+            DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);
+        }
+
+        public static void TestRenderFaces()
+        {
+            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
+
+            RenderEntity entity = new RenderEntity(
+                transform: new Transform(Vector3.Zero),
+                model: Model.Plane(),
+                material: null);
+            RenderEntity[] entitiesApply = new RenderEntity[] { entity };
+
+            DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);
+        }
+
+        public static void TestRenderCube()
+        {
+            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
+
+            RenderEntity entity = new RenderEntity(
+                transform: new Transform(Vector3.Zero),
+                model: Model.Cube(isWireframe: false),
+                material: null);
+            RenderEntity[] entitiesApply = new RenderEntity[] { entity };
+
+            DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);
         }
 
         /// <param name="camera">It orients the origin</param>

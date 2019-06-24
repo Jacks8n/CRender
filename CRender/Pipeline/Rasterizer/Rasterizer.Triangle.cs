@@ -42,7 +42,7 @@ namespace CRender.Pipeline
                     mid.X = temp;
                 }
                 HorizontalEdgeTriangle(top, mid.X, midSectionX, mid.Y);
-                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, false);
+                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, skipBottomEdge: true);
             }
 
             _verticesPtr += 3;
@@ -58,18 +58,22 @@ namespace CRender.Pipeline
                     1 : 2;
         }
 
-        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool drawBottomEdge = true)
+        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool skipBottomEdge = false)
         {
-            float leftSlope = (apex.X - leftBottomX) / (apex.Y - bottomY);
-            float rightSlope = (apex.X - rightBottomX) / (apex.Y - bottomY);
-
             int dir = apex.Y > bottomY ? 1 : -1;
-            int endY = JMath.RoundToInt(apex.Y), endX;
-            Vector2Int result = new Vector2Int(0, JMath.RoundToInt(bottomY));
+            float ySub = dir > 0 ? apex.Y - bottomY : bottomY - apex.Y;
+            float leftSlope = (apex.X - leftBottomX) / ySub;
+            float rightSlope = (apex.X - rightBottomX) / ySub;
+
+            int endY = (int)apex.Y + dir, endX;
+            Vector2Int result = new Vector2Int(0, (int)bottomY);
+
+            if (skipBottomEdge)
+                result.Y += dir;
             for (; result.Y != endY; result.Y += dir)
             {
-                result.X = JMath.RoundToInt(leftBottomX);
-                endX = JMath.RoundToInt(rightBottomX);
+                result.X = (int)leftBottomX;
+                endX = (int)rightBottomX;
                 for (; result.X <= endX; result.X++)
                     OutputRasterization(result);
 
