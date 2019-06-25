@@ -4,7 +4,7 @@ namespace CRender.Structure
 {
     public interface ICamera : IRenderObject
     {
-        Matrix4x4 WorldToView { get; }
+        unsafe Matrix4x4* WorldToView { get; }
 
         float Width { get; }
 

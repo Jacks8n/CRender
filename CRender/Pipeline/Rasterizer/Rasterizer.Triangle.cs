@@ -66,7 +66,8 @@ namespace CRender.Pipeline
             float rightSlope = (apex.X - rightBottomX) / ySub;
 
             int endY = (int)apex.Y + dir, endX;
-            Vector2Int result = new Vector2Int(0, (int)bottomY);
+            Vector2Int result = Vector2Int.Zero;
+            result.Y = (int)bottomY;
 
             if (skipBottomEdge)
                 result.Y += dir;

@@ -1,10 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace CUtility.Extension
 {
     public unsafe static class MarshalExt
     {
+        private static List<IntPtr> _ptrsToFree = new List<IntPtr>();
+
+        static MarshalExt()
+        {
+            ConsoleEvent.OnCtrlClose += () =>
+              {
+                  for (int i = 0; i < _ptrsToFree.Count; i++)
+                      Marshal.FreeHGlobal(_ptrsToFree[i]);
+              };
+        }
+
         public static T* Alloc<T>(int length = 1) where T : unmanaged
         {
             return AllocBytes<T>(sizeof(T) * length);
@@ -25,6 +37,13 @@ namespace CUtility.Extension
             if (ptr == null)
                 return;
             Marshal.FreeHGlobal((IntPtr)ptr);
+        }
+
+        public static void FreeWhenExit(void* ptr)
+        {
+            if (ptr == null)
+                return;
+            _ptrsToFree.Add((IntPtr)ptr);
         }
     }
 }

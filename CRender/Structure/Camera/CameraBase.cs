@@ -4,7 +4,7 @@ namespace CRender.Structure
 {
     public abstract class CameraBase : ICamera
     {
-        public abstract Matrix4x4 WorldToView { get; }
+        public abstract unsafe Matrix4x4* WorldToView { get; }
 
         public Transform Transform { get; }
 

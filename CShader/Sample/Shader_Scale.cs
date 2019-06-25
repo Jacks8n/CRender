@@ -1,6 +1,8 @@
 ﻿using CUtility;
+using CUtility.Math;
 
 using static CShader.ShaderValue;
+using static CUtility.Math.Matrix4x4;
 
 using AppData = CShader.ShaderInOutDefault.AppData_Base;
 using VOutData = CShader.ShaderInOutDefault.VOutData_Base;
@@ -24,7 +26,8 @@ namespace CShader.Sample
             AppData* appPtr = (AppData*)inputPtr;
             VOutData* vOutPtr = (VOutData*)outputPtr;
 
-            vOutPtr->Vertex = ObjectToView * appPtr->Vertex * (SinTime * .3f + 1);
+            Vector4 vertex = appPtr->Vertex * (SinTime * .3f + 1);
+            Mul(ObjectToView, &vertex, &vOutPtr->Vertex);
         }
     }
 }

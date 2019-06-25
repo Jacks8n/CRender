@@ -109,6 +109,7 @@ namespace CRenderTest
             int totalFrame = (int)(framerate * time);
             float angleStep = JMath.PI_TWO / totalFrame;
             int frameInterval = (int)(1000f / framerate);
+            int elapsed;
 
             JTimer timer = new JTimer();
             timer.Start();
@@ -119,7 +120,7 @@ namespace CRenderTest
                 entitiesApply[0].Transform.Rotation.X += angleStep;
                 entitiesApply[0].Transform.Rotation.Z += angleStep;
 
-                int elapsed = (int)timer.DeltaMS;
+                elapsed = (int)timer.DeltaMS;
                 if (elapsed < frameInterval)
                     Thread.Sleep(frameInterval - elapsed);
                 CRenderer.Render(charBuffer);

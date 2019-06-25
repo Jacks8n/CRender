@@ -30,7 +30,8 @@ namespace CRender.Pipeline
             _initialized = true;
 
             _resolution = resolution;
-            _pixelSize = new Vector2(1f / _resolution.X, 1f / _resolution.Y);
+            _pixelSize.X = 1f / _resolution.X;
+            _pixelSize.Y = 1f / _resolution.Y;
             _rasterizeBufferPtr = Alloc<Vector2Int>((int)resolution.X * (int)resolution.Y);
             RasterizeResultLength = 0;
         }

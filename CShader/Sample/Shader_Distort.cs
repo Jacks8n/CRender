@@ -6,6 +6,7 @@ using AppData = CShader.ShaderInOutDefault.AppData_Base;
 using VOutData = CShader.ShaderInOutDefault.VOutData_Base;
 
 using static CShader.ShaderValue;
+using static CUtility.Math.Matrix4x4;
 
 namespace CShader.Sample
 {
@@ -25,7 +26,7 @@ namespace CShader.Sample
 
             Vector4 pos = appPtr->Vertex;
             pos.Z *= MathF.Sin(pos.X + pos.Y + Time * .5f);
-            vOutPtr->Vertex = ObjectToView * pos;
+            Mul(ObjectToView, &pos, &vOutPtr->Vertex);
         }
     }
 }

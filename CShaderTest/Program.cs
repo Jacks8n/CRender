@@ -46,7 +46,7 @@ namespace CShaderTest
         public unsafe void TestShaderInvoke()
         {
             TestShaderInterpret();
-            var shader = new TestShader();
+            TestShader shader = new TestShader();
             ShaderInvoker<IVertexShader>.ChangeActiveShader(shader);
             ShaderInvoker<IFragmentShader>.ChangeActiveShader(shader);
 
@@ -63,7 +63,7 @@ namespace CShaderTest
         {
             var shader = ShaderDefault.Instance;
             ShaderInvoker<IVertexShader>.ChangeActiveShader(shader);
-            ShaderValue.ObjectToView = Matrix4x4.Translation(Vector3.One);
+            Matrix4x4.Translation(Vector3.One, ShaderValue.ObjectToView);
 
             Vector4[] pos = new Vector4[] { Vector4.UnitXPositive_Point, Vector4.UnitYPositive_Point, Vector4.UnitZPositive_Point };
             for (int i = 0; i < pos.Length; i++)

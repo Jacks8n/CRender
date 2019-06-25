@@ -5,7 +5,7 @@ using static CUtility.Extension.MarshalExt;
 
 namespace CUtility.Extension
 {
-    public class ConsoleExt : JSingleton<ConsoleExt>, IDisposable
+    public class ConsoleExt
     {
         /// <summary>
         /// https://docs.microsoft.com/en-us/windows/console/coord-str
@@ -81,7 +81,16 @@ namespace CUtility.Extension
             _outputBuffer1 = CreateConsoleScreenBuffer(GENERIC_READ_WRITE, FILE_SHARE_WRITE, IntPtr.Zero, CONSOLE_TEXTMODE_BUFFER, IntPtr.Zero);
             SetConsoleActiveScreenBuffer(_outputBuffer1);
 
-            _consoleFontInfoExPtr = GetFont(_outputBuffer0);
+            _consoleFontInfoExPtr = Alloc<_CONSOLE_FONT_INFOEX>();
+            _consoleFontInfoExPtr->cbSize = (uint)sizeof(_CONSOLE_FONT_INFOEX);
+            GetCurrentConsoleFontEx(_outputBuffer0, MAXIMUM_WINDOW, _consoleFontInfoExPtr);
+
+            ConsoleEvent.OnCtrlClose += () =>
+             {
+                 Free(_consoleFontInfoExPtr);
+                 CloseHandle(_outputBuffer0);
+                 CloseHandle(_outputBuffer1);
+             };
         }
 
         public static void Output(char[] value)
@@ -98,26 +107,10 @@ namespace CUtility.Extension
             SetCurrentConsoleFontEx(_outputBuffer1, bMaximumWindow: MAXIMUM_WINDOW, _consoleFontInfoExPtr);
         }
 
-        private static unsafe _CONSOLE_FONT_INFOEX* GetFont(IntPtr buffer)
-        {
-            _CONSOLE_FONT_INFOEX* infoPtr = Alloc<_CONSOLE_FONT_INFOEX>();
-            infoPtr->cbSize = (uint)sizeof(_CONSOLE_FONT_INFOEX);
-
-            GetCurrentConsoleFontEx(buffer, bMaximumWindow: MAXIMUM_WINDOW, infoPtr);
-            return infoPtr;
-        }
-
         private static void WriteToBufferAndShow(char[] value, IntPtr buffer)
         {
             WriteConsoleOutputCharacter(buffer, value, (uint)value.Length, COORD_ZERO, out _);
             SetConsoleActiveScreenBuffer(buffer);
-        }
-
-        unsafe void IDisposable.Dispose()
-        {
-            Free(_consoleFontInfoExPtr);
-            CloseHandle(_outputBuffer0);
-            CloseHandle(_outputBuffer1);
         }
 
 #if DEBUG

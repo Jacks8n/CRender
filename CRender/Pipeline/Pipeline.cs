@@ -4,18 +4,23 @@ using CRender.Sampler;
 using CRender.Structure;
 using CShader;
 using CUtility.Math;
+using CUtility.Collection;
+
+using static CUtility.Math.Matrix4x4;
 
 namespace CRender.Pipeline
 {
     public partial class Pipeline : IPipeline
     {
-        public RenderBuffer<float> RenderTarget { get; }
+        private static readonly Material<ShaderDefault> DEFAULT_MATERIAL = new Material<ShaderDefault>(ShaderDefault.Instance);
 
-        private static readonly IMaterial DEFAULT_MATERIAL = new Material<ShaderDefault>(ShaderDefault.Instance);
+        public RenderBuffer<float> RenderTarget { get; }
 
         private readonly Vector2 _bufferSizeF;
 
         private readonly Vector2Int _bufferSize;
+
+        private readonly UnsafeList<Fragment> _rasterizedFragments = new UnsafeList<Fragment>();
 
         public Pipeline()
         {
@@ -29,13 +34,13 @@ namespace CRender.Pipeline
         public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
             RenderTarget.Clear();
+            _rasterizedFragments.Clear();
 
             int entityCount = entities.Length;
-            Fragment** rasterizedFragments = stackalloc Fragment*[entityCount];
             int* primitiveCounts = stackalloc int[entityCount];
 
             BeginRasterize();
-            ShaderValue.WorldToView = camera.WorldToView;
+            *ShaderValue.WorldToView = *camera.WorldToView;
             ShaderValue.Time = CRenderer.CurrentSecond;
             ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
             for (int i = 0; i < entityCount; i++)
@@ -45,8 +50,8 @@ namespace CRender.Pipeline
                 Vector4[] vertices = instanceCopy.Model.Vertices;
                 IPrimitive[] primitives = instanceCopy.Model.Primitives;
 
-                ShaderValue.ObjectToWorld = instanceCopy.Transform.LocalToWorld;
-                ShaderValue.ObjectToView = ShaderValue.WorldToView * ShaderValue.ObjectToWorld;
+                *ShaderValue.ObjectToWorld = *instanceCopy.Transform.LocalToWorld;
+                Mul(ShaderValue.WorldToView, ShaderValue.ObjectToWorld, ShaderValue.ObjectToView);
 
                 ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
 
@@ -61,11 +66,10 @@ namespace CRender.Pipeline
                     coordsOutput[j] = ViewToScreen(*outputMap.VertexPtr);
                 }
 
-                Fragment* fragments = stackalloc Fragment[primitives.Length];
                 primitiveCounts[i] = primitives.Length;
                 for (int j = 0; j < primitives.Length; j++)
-                    Rasterize(coordsOutput, primitives[j], fragments + j);
-                rasterizedFragments[i] = fragments;
+                    Rasterize(coordsOutput, primitives[j], _rasterizedFragments.GetPtr(_rasterizedFragments.Count + j));
+                _rasterizedFragments.AddEmpty(primitives.Length);
             }
             EndRasterize();
 
@@ -75,10 +79,12 @@ namespace CRender.Pipeline
 
             //This is not the proper way to output, just to check result as soon as possible
             GenericVector<float> white = new GenericVector<float>(3) { 1, 1, 1 };
+            int fragmentIndex = 0;
             for (int i = 0; i < entityCount; i++)
                 for (int j = 0; j < primitiveCounts[i]; j++)
                 {
-                    RenderTarget.WritePixel(rasterizedFragments[i][j].Rasterization, rasterizedFragments[i][j].PixelCount, white);
+                    RenderTarget.WritePixel(_rasterizedFragments[fragmentIndex].Rasterization, _rasterizedFragments[fragmentIndex].PixelCount, white);
+                    fragmentIndex++;
                 }
 
             return RenderTarget;

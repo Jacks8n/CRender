@@ -335,3 +335,4 @@ ASALocalRun/
 
 # Visual Studio Code
 .vscode/
+*.diagsession
