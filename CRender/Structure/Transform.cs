@@ -6,7 +6,7 @@ using static CUtility.Extension.MarshalExt;
 
 namespace CRender.Structure
 {
-    public unsafe class Transform : IAppliable<Transform>
+    public unsafe class Transform
     {
         private readonly static Matrix4x4* TRANSLATION_MATRIX_TEMP;
 
@@ -42,13 +42,8 @@ namespace CRender.Structure
 
         private static readonly Vector3 SCALE_DEFAULT = Vector3.One;
 
-        private readonly Transform _instanceToApply;
-
-        private Transform()
+        public Transform() : this(POSITION_DEFAULT)
         {
-            Position = POSITION_DEFAULT;
-            Rotation = ROTATION_DEFAULT;
-            Scale = SCALE_DEFAULT;
         }
 
         public Transform(Vector3 pos) : this(pos, ROTATION_DEFAULT)
@@ -64,15 +59,6 @@ namespace CRender.Structure
             Position = pos;
             Rotation = rotation;
             Scale = scale;
-            _instanceToApply = new Transform();
-        }
-
-        public Transform GetInstanceToApply()
-        {
-            _instanceToApply.Position = Position;
-            _instanceToApply.Rotation = Rotation;
-            _instanceToApply.Scale = Scale;
-            return _instanceToApply;
         }
     }
 }

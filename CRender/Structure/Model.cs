@@ -4,7 +4,7 @@ using CUtility.Extension;
 
 namespace CRender.Structure
 {
-    public struct Model : IAppliable<Model>
+    public struct Model
     {
         public readonly Vector4[] Vertices;
 
@@ -20,11 +20,6 @@ namespace CRender.Structure
             Primitives = primitives;
             UVs = uvs;
             Normals = normals;
-        }
-
-        public Model GetInstanceToApply()
-        {
-            return new Model(Vertices.GetCopy(), Primitives, UVs?.GetCopy(), Normals?.GetCopy());//, Bound);
         }
 
         /// <summary>

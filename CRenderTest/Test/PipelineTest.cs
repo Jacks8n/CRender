@@ -42,7 +42,7 @@ namespace CRenderTest
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
                 model: Model.Cube(),
-                material: new Material<Shader_Distort>(Shader_Distort.Instance));
+                material: Material.NewMaterial(Shader_Distort.Instance));
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
             DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);

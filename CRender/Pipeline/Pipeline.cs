@@ -12,7 +12,7 @@ namespace CRender.Pipeline
 {
     public partial class Pipeline : IPipeline
     {
-        private static readonly Material<ShaderDefault> DEFAULT_MATERIAL = new Material<ShaderDefault>(ShaderDefault.Instance);
+        private static readonly Material DEFAULT_MATERIAL = Material.NewMaterial(ShaderDefault.Instance);
 
         public RenderBuffer<float> RenderTarget { get; }
 
@@ -45,12 +45,12 @@ namespace CRender.Pipeline
             ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
             for (int i = 0; i < entityCount; i++)
             {
-                RenderEntity instanceCopy = entities[i].GetInstanceToApply();
-                IMaterial material = instanceCopy.Material ?? DEFAULT_MATERIAL;
-                Vector4[] vertices = instanceCopy.Model.Vertices;
-                IPrimitive[] primitives = instanceCopy.Model.Primitives;
+                RenderEntity currentEntity = entities[i];
+                Material material = currentEntity.Material ?? DEFAULT_MATERIAL;
+                Vector4[] vertices = currentEntity.Model.Vertices;
+                IPrimitive[] primitives = currentEntity.Model.Primitives;
 
-                *ShaderValue.ObjectToWorld = *instanceCopy.Transform.LocalToWorld;
+                *ShaderValue.ObjectToWorld = *currentEntity.Transform.LocalToWorld;
                 Mul(ShaderValue.WorldToView, ShaderValue.ObjectToWorld, ShaderValue.ObjectToView);
 
                 ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
@@ -76,6 +76,8 @@ namespace CRender.Pipeline
             //Octree is so annoying
             //TODO: View frustum clip, triangle clip, pixel clip
             //Clipping();
+
+            //Interpolation
 
             //This is not the proper way to output, just to check result as soon as possible
             GenericVector<float> white = new GenericVector<float>(3) { 1, 1, 1 };
