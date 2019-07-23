@@ -1,4 +1,6 @@
 ﻿using System;
+using CUtility.StupidWrapper;
+using CUtility.Collection;
 using CUtility.Math;
 using CRender.Structure;
 
@@ -11,7 +13,7 @@ namespace CRender.Pipeline
     /// </summary>
     public sealed unsafe partial class Rasterizer : IDisposable
     {
-        public static int RasterizeResultLength { get; private set; } = 0;
+        public static int RasterizedPixelCount { get; private set; } = 0;
 
         private static bool _initialized = false;
 
@@ -21,7 +23,7 @@ namespace CRender.Pipeline
 
         private static Vector2Int* _rasterizeBufferPtr = null;
 
-        private static Vector2* _verticesPtr = null;
+        private static readonly UnsafeList<float> _fragmentDataPtr = new UnsafeList<float>();
 
         public static void StartRasterize(Vector2 resolution)
         {
@@ -33,34 +35,29 @@ namespace CRender.Pipeline
             _pixelSize.X = 1f / _resolution.X;
             _pixelSize.Y = 1f / _resolution.Y;
             _rasterizeBufferPtr = Alloc<Vector2Int>((int)resolution.X * (int)resolution.Y);
-            RasterizeResultLength = 0;
-        }
-
-        public static void SetVertices(Vector2* verticesPtr)
-        {
-            _verticesPtr = verticesPtr;
+            RasterizedPixelCount = 0;
         }
 
         public static int ContriveResult(Vector2Int* output)
         {
-            for (int i = 0; i < RasterizeResultLength; i++)
+            for (int i = 0; i < RasterizedPixelCount; i++)
                 output[i] = _rasterizeBufferPtr[i];
 
-            int temp = RasterizeResultLength;
-            RasterizeResultLength = 0;
+            int temp = RasterizedPixelCount;
+            RasterizedPixelCount = 0;
             return temp;
         }
 
         public static void ContriveResult(Vector2Int[] output, int start)
         {
-            for (int i = 0; i < RasterizeResultLength; i++)
+            for (int i = 0; i < RasterizedPixelCount; i++)
                 output[start + i] = _rasterizeBufferPtr[i];
-            RasterizeResultLength = 0;
+            RasterizedPixelCount = 0;
         }
 
         public static Vector2Int[] ContriveResult()
         {
-            Vector2Int[] result = new Vector2Int[RasterizeResultLength];
+            Vector2Int[] result = new Vector2Int[RasterizedPixelCount];
             ContriveResult(result, 0);
             return result;
         }
@@ -72,14 +69,16 @@ namespace CRender.Pipeline
             _initialized = false;
 
             Free(_rasterizeBufferPtr);
+            _fragmentDataPtr.Clear();
         }
 
         /// <summary>
-        /// Store result and shift <see cref="RasterizeResultLength"/>
+        /// Store result and shift <see cref="RasterizedPixelCount"/>
         /// </summary>
-        private static void OutputRasterization(Vector2Int value)
+        private static void OutputRasterization(Vector2Int pixelCoord, UnsafeList<float> fragmentData)
         {
-            _rasterizeBufferPtr[RasterizeResultLength++] = value;
+            _rasterizeBufferPtr[RasterizedPixelCount++] = pixelCoord;
+            _fragmentDataPtr.AddRange(fragmentData);
         }
 
         void IDisposable.Dispose()

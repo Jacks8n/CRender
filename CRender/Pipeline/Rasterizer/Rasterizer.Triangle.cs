@@ -7,27 +7,32 @@ namespace CRender.Pipeline
 {
     public sealed unsafe partial class Rasterizer
     {
-        public static void Triangle()
+        public static void Triangle(Vector2* verticesPtr)
         {
-            int topIndex = Highest(_verticesPtr[0], _verticesPtr[1], _verticesPtr[2]), midIndex;
+            int topIndex =
+                verticesPtr->Y > verticesPtr[1].Y ?
+                    verticesPtr->Y > verticesPtr[2].Y ?
+                        0 : 2
+                : verticesPtr[1].Y > verticesPtr[2].Y ?
+                    1 : 2, midIndex;
 
             switch (topIndex)
             {
                 case 0:
-                    midIndex = LexicoCompareDownRight(_verticesPtr[1], _verticesPtr[2]) < 0 ? 1 : 2;
+                    midIndex = LexicoCompareDownRight(verticesPtr[1], verticesPtr[2]) < 0 ? 1 : 2;
                     break;
                 case 1:
-                    midIndex = LexicoCompareDownRight(_verticesPtr[0], _verticesPtr[2]) + 1;
+                    midIndex = LexicoCompareDownRight(verticesPtr[0], verticesPtr[2]) + 1;
                     break;
                 case 2:
-                    midIndex = LexicoCompareDownRight(_verticesPtr[0], _verticesPtr[1]) < 0 ? 0 : 1;
+                    midIndex = LexicoCompareDownRight(verticesPtr[0], verticesPtr[1]) < 0 ? 0 : 1;
                     break;
                 default:
                     midIndex = 1;
                     break;
             }
 
-            Vector2 top = _verticesPtr[topIndex] * _resolution, mid = _verticesPtr[midIndex] * _resolution, bottom = _verticesPtr[3 - topIndex - midIndex] * _resolution;
+            Vector2 top = verticesPtr[topIndex] * _resolution, mid = verticesPtr[midIndex] * _resolution, bottom = verticesPtr[3 - topIndex - midIndex] * _resolution;
             if (JMath.Approx(top.Y, mid.Y))
                 HorizontalEdgeTriangle(bottom, top.X, mid.X, top.Y);
             else if (JMath.Approx(mid.Y, bottom.Y))
@@ -44,18 +49,6 @@ namespace CRender.Pipeline
                 HorizontalEdgeTriangle(top, mid.X, midSectionX, mid.Y);
                 HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, skipBottomEdge: true);
             }
-
-            _verticesPtr += 3;
-        }
-
-        private static int Highest(Vector2 v0, Vector2 v1, Vector2 v2)
-        {
-            return
-                v0.Y > v1.Y ?
-                    v0.Y > v2.Y ?
-                        0 : 2
-                : v1.Y > v2.Y ?
-                    1 : 2;
         }
 
         private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool skipBottomEdge = false)

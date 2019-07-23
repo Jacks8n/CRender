@@ -32,11 +32,6 @@ namespace CUtility.Math
 
         private int _addableIndex;
 
-        public static int SizeOf()
-        {
-            return sizeof(int) * 2 + sizeof(T*);
-        }
-
         public GenericVector(int size)
         {
             _values = Alloc<T>(size);
@@ -66,17 +61,17 @@ namespace CUtility.Math
             _addableIndex = other.Length;
         }
 
+        public void Add(T item)
+        {
+            if (_addableIndex < Length)
+                _values[_addableIndex++] = item;
+        }
+
         public void Clear()
         {
             _addableIndex = 0;
             for (int i = 0; i < Length; i++)
                 _values[i] = default;
-        }
-
-        public void Add(T item)
-        {
-            if (_addableIndex < Length)
-                _values[_addableIndex++] = item;
         }
 
         public static GenericVector<T> operator +(GenericVector<T> l, GenericVector<T> r)

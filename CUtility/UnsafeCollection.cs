@@ -23,7 +23,7 @@ namespace CUtility.Collection
             _itemsPtr[r] = temp;
         }
 
-        public T* GetPtr(int offset = 0)
+        public T* GetPointer(int offset = 0)
         {
             return _itemsPtr + offset;
         }
@@ -50,6 +50,12 @@ namespace CUtility.Collection
             TItem* ptr = (TItem*)(_itemsPtr + index);
             for (int i = 0; i < items.Length; i++)
                 ptr[i] = items[i];
+        }
+
+        public void Assign(int index, T* items, int count)
+        {
+            while (--count >= 0)
+                _itemsPtr[index + count] = items[count];
         }
 
         public TItem Read<TItem>(int index) where TItem : unmanaged

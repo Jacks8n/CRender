@@ -7,6 +7,8 @@ namespace CUtility.Collection
 {
     public unsafe class UnsafeList<T> : UnsafeCollection<T> where T : unmanaged
     {
+        private const int DEFAULT_CAPACITY = 4;
+
         public override T this[int index]
         {
 #if DEBUG
@@ -22,7 +24,7 @@ namespace CUtility.Collection
 
         public int Capacity { get; private set; }
 
-        public UnsafeList(int capacity = 4)
+        public UnsafeList(int capacity = DEFAULT_CAPACITY)
         {
             _itemsPtr = Alloc<T>(capacity);
             _lengthPtr = Alloc<int>(1);
@@ -34,18 +36,35 @@ namespace CUtility.Collection
         public void Add(T item)
         {
             if (Count == Capacity)
-                ExtendCapacity(Capacity);
+                AdjustCapacity(Capacity + Capacity);
             _itemsPtr[_lengthPtr[0]++] = item;
         }
 
-        /// <summary>
-        /// The new items added are not guaranteed to be default(T)
-        /// </summary>
-        public void AddEmpty(int count)
+        public void AddRange<TCollection>(TCollection collection) where TCollection : UnsafeCollection<T>
         {
-            _lengthPtr[0] += count;
-            if (_lengthPtr[0] > Capacity)
-                _lengthPtr[0] = Capacity;
+            if (collection.Count + Count > Capacity)
+                AdjustCapacity(collection.Count + Count);
+            Assign(Count, collection.GetPointer(), collection.Count);
+            _lengthPtr[0] += collection.Count;
+        }
+
+        public void EnsureVacant(int count)
+        {
+            if (count < Capacity)
+                return;
+            if (count > Capacity + Capacity)
+                AdjustCapacity(count);
+            else
+                AdjustCapacity(Capacity + Capacity);
+        }
+
+        public T* ArchivePointer()
+        {
+            Clear();
+            _itemsPtr = Alloc<T>(DEFAULT_CAPACITY);
+            Capacity = 0;
+            T* ptr = _itemsPtr;
+            return ptr;
         }
 
         public void Clear()
@@ -60,10 +79,13 @@ namespace CUtility.Collection
             return this[--_lengthPtr[0]];
         }
 
-        private void ExtendCapacity(int amount)
+        private void AdjustCapacity(int capacity)
         {
-            _itemsPtr = ReAlloc(_itemsPtr, Count + amount);
-            Capacity += amount;
+            _itemsPtr = ReAlloc(_itemsPtr, capacity);
+            if (capacity > Capacity)
+                for (int i = Count; i < capacity; i++)
+                    _itemsPtr[i] = default;
+            Capacity = capacity;
         }
     }
 }

@@ -1,41 +1,39 @@
 ﻿using System;
 using CUtility;
-using CUtility.Math;
 
 namespace CShader
 {
     public unsafe class ShaderInvoker<TStage> : JSingleton<ShaderInvoker<TStage>> where TStage : IShaderStage<TStage>
     {
-        private TStage _currentShader;
+        public static ShaderInOutMap ActiveInputMap { get; private set; }
 
-        private ShaderInOutMap _currentInputMap = null;
+        public static ShaderInOutMap ActiveOutputMap { get; private set; }
 
-        private ShaderInOutMap _currentOutputMap = null;
+        private static TStage _activeShader;
 
-        public static void ChangeActiveShader<T>(T shader) where T : IShader
+        private static Type _activeShaderType;
+
+        public static bool ChangeActiveShader<T>(T shader) where T : IShader
         {
-            ChangeActiveShader(typeof(T), shader);
+            return ChangeActiveShader(typeof(T), shader);
         }
 
-        public static void ChangeActiveShader(Type shaderType, IShader shader)
+        public static bool ChangeActiveShader(Type shaderType, IShader shader)
         {
+            if (_activeShaderType == shaderType)
+                return false;
+
             ShaderInOutMap[] inoutMaps = ShaderInterpreter<TStage>.GetInterpretedInOut(shaderType);
-            Instance._currentInputMap = inoutMaps[0];
-            Instance._currentOutputMap = inoutMaps[1];
-
-            Instance._currentShader = (TStage)shader;
+            ActiveInputMap = inoutMaps[0];
+            ActiveOutputMap = inoutMaps[1];
+            _activeShader = (TStage)shader;
+            _activeShaderType = shaderType;
+            return true;
         }
 
-        /// <summary>
-        /// Invoke shader set through <see cref="ChangeActiveShader{TShader}(TShader)"/>, set unnecessary arrays to null
-        /// </summary>
-        /// <param name="index">Index of vertex data to use</param>
-        public static ShaderInOutMap Invoke(int index, Vector4[] vertices = null)
+        public static void Invoke()
         {
-            if (vertices != null)
-                *Instance._currentInputMap.VertexPtr = vertices[index];
-            Instance._currentShader.Main(Instance._currentInputMap.InOutBufferPtr, Instance._currentOutputMap.InOutBufferPtr, null);
-            return Instance._currentOutputMap;
+            _activeShader.Main(ActiveInputMap.InOutBufferPtr, ActiveOutputMap.InOutBufferPtr, null);
         }
     }
 }

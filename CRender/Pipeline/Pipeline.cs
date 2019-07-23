@@ -10,7 +10,7 @@ using static CUtility.Math.Matrix4x4;
 
 namespace CRender.Pipeline
 {
-    public partial class Pipeline : IPipeline
+    public partial class Pipeline : IPipeline, IDisposable
     {
         private static readonly Material DEFAULT_MATERIAL = Material.NewMaterial(ShaderDefault.Instance);
 
@@ -30,7 +30,7 @@ namespace CRender.Pipeline
         }
 
         #region Application
-
+        private int _dataSizePerPixel;
         public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
             RenderTarget.Clear();
@@ -40,36 +40,45 @@ namespace CRender.Pipeline
             int* primitiveCounts = stackalloc int[entityCount];
 
             BeginRasterize();
-            *ShaderValue.WorldToView = *camera.WorldToView;
-            ShaderValue.Time = CRenderer.CurrentSecond;
-            ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
+            SetGlobalValues(camera);
             for (int i = 0; i < entityCount; i++)
             {
                 RenderEntity currentEntity = entities[i];
-                Material material = currentEntity.Material ?? DEFAULT_MATERIAL;
-                Vector4[] vertices = currentEntity.Model.Vertices;
-                IPrimitive[] primitives = currentEntity.Model.Primitives;
+                SetObjectValues(currentEntity);
 
-                *ShaderValue.ObjectToWorld = *currentEntity.Transform.LocalToWorld;
-                Mul(ShaderValue.WorldToView, ShaderValue.ObjectToWorld, ShaderValue.ObjectToView);
+                Material material = currentEntity.Material ?? DEFAULT_MATERIAL;
+
+                #region Vertex Stage
 
                 ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
+                ShaderInOutMap vertexInput = ShaderInvoker<IVertexShader>.ActiveInputMap;
+                ShaderInOutMap vertexOutput = ShaderInvoker<IVertexShader>.ActiveOutputMap;
 
+                Vector4[] vertices = currentEntity.Model.Vertices;
+                Vector3[] normals = currentEntity.Model.Normals;
                 int vertexCount = vertices.Length;
                 Vector2* coordsOutput = stackalloc Vector2[vertexCount];
-                Vector4* vertexOutput = stackalloc Vector4[vertexCount];
-
                 for (int j = 0; j < vertexCount; j++)
                 {
-                    ShaderInOutMap outputMap = ShaderInvoker<IVertexShader>.Invoke(j, vertices);
-                    vertexOutput[j] = *outputMap.VertexPtr;
-                    coordsOutput[j] = ViewToScreen(*outputMap.VertexPtr);
+                    *vertexInput.VertexPtr = vertices[j];
+                    *vertexInput.NormalPtr = normals[j];
+                    ShaderInvoker<IVertexShader>.Invoke();
+                    coordsOutput[j] = ViewToScreen(*vertexOutput.VertexPtr);
                 }
 
+                #endregion
+
+                ShaderInvoker<IFragmentShader>.ChangeActiveShader(material.ShaderType, material.Shader);
+                ShaderInOutMap fragmentInput = ShaderInvoker<IFragmentShader>.ActiveInputMap;
+                ShaderInOutMap fragmentOutput = ShaderInvoker<IFragmentShader>.ActiveOutputMap;
+
+
+
+                IPrimitive[] primitives = currentEntity.Model.Primitives;
                 primitiveCounts[i] = primitives.Length;
+                _rasterizedFragments.EnsureVacant(primitives.Length);
                 for (int j = 0; j < primitives.Length; j++)
-                    Rasterize(coordsOutput, primitives[j], _rasterizedFragments.GetPtr(_rasterizedFragments.Count + j));
-                _rasterizedFragments.AddEmpty(primitives.Length);
+                    Rasterize(coordsOutput, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
             }
             EndRasterize();
 
@@ -77,9 +86,9 @@ namespace CRender.Pipeline
             //TODO: View frustum clip, triangle clip, pixel clip
             //Clipping();
 
-            //Interpolation
+            //TODO: Interpolation
 
-            //This is not the proper way to output, just to check result as soon as possible
+            //This is not the proper way to output, rather for development efficiency
             GenericVector<float> white = new GenericVector<float>(3) { 1, 1, 1 };
             int fragmentIndex = 0;
             for (int i = 0; i < entityCount; i++)
@@ -90,6 +99,25 @@ namespace CRender.Pipeline
                 }
 
             return RenderTarget;
+        }
+
+        private static unsafe void SetObjectValues(RenderEntity currentEntity)
+        {
+            *ShaderValue.ObjectToWorld = *currentEntity.Transform.LocalToWorld;
+            Mul(ShaderValue.WorldToView, ShaderValue.ObjectToWorld, ShaderValue.ObjectToView);
+        }
+
+        private static unsafe void SetGlobalValues(ICamera camera)
+        {
+            *ShaderValue.WorldToView = *camera.WorldToView;
+            ShaderValue.Time = CRenderer.CurrentSecond;
+            ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
+        }
+
+        public void Dispose()
+        {
+            for (int i = 0; i < _rasterizedFragments.Count; i++)
+                _rasterizedFragments[i].FreeData();
         }
 
         #endregion

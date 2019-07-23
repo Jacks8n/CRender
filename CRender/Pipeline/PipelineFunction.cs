@@ -27,21 +27,19 @@ namespace CRender.Pipeline
             Vector2* coords = stackalloc Vector2[primitive.Count];
             for (int i = 0; i < primitive.Count; i++)
                 coords[i] = screenCoords[primitive.Indices[i]];
-            Rasterizer.SetVertices(coords);
-
             switch (primitive.Count)
             {
                 case 2:
-                    Rasterizer.Line();
+                    Rasterizer.Line(coords);
                     break;
                 case 3:
-                    Rasterizer.Triangle();
+                    Rasterizer.Triangle(coords);
                     break;
                 default:
                     throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
                     break;
             }
-            result->Initialize(Rasterizer.RasterizeResultLength);
+            result->Initialize(Rasterizer.RasterizedPixelCount, _dataSizePerPixel);
             Rasterizer.ContriveResult(result->Rasterization);
         }
 
