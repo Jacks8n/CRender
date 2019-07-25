@@ -4,6 +4,16 @@ namespace CUtility.Math
 {
     public static class JMathGeom
     {
+        public static float Cross(float x0, float y0, float x1, float y1)
+        {
+            return x0 * y1 - x1 * y0;
+        }
+
+        public static float Cross(Vector2 v0, Vector2 v1)
+        {
+            return v0.X * v1.Y - v0.Y * v1.X;
+        }
+
         public static Cuboid GetBoundBox(Vector3[] vertices)
         {
             float minX = float.MaxValue;

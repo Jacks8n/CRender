@@ -50,10 +50,10 @@ namespace CUtility.Collection
 
         public void EnsureVacant(int count)
         {
-            if (count < Capacity)
+            if (count < Capacity - Count)
                 return;
-            if (count > Capacity + Capacity)
-                AdjustCapacity(count);
+            if (count + Count > Capacity + Capacity)
+                AdjustCapacity(count + Count);
             else
                 AdjustCapacity(Capacity + Capacity);
         }

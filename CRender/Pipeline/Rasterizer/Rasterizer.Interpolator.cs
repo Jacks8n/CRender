@@ -1,35 +1,49 @@
-﻿using CUtility.Collection;
+﻿using System.Runtime.CompilerServices;
+using CUtility.Collection;
 
 namespace CRender.Pipeline
 {
     public sealed unsafe partial class Rasterizer
     {
-        public static class Interpolator
+        public class Interpolator
         {
-            public static readonly UnsafeList<float> InterpolatedValues = new UnsafeList<float>();
+            public readonly UnsafeList<float> InterpolatedValues;
 
-            private static readonly UnsafeList<float> FromValues = new UnsafeList<float>();
+            public readonly UnsafeList<float> StepValues;
 
-            private static readonly UnsafeList<float> StepValues = new UnsafeList<float>();
-
-            public static void SetRange(float* fromPtr, float* toPtr, int interpolationCount, float range)
+            public Interpolator(UnsafeList<float> interpolatedValues = null, UnsafeList<float> stepValues = null)
             {
-                FromValues.EnsureVacant(interpolationCount);
-                FromValues.Assign(0, fromPtr, interpolationCount);
+                InterpolatedValues = interpolatedValues ?? new UnsafeList<float>();
+                StepValues = stepValues ?? new UnsafeList<float>();
+            }
 
-                InterpolatedValues.EnsureVacant(interpolationCount);
+            public void SetInterpolationCount(int count)
+            {
+                PrepareList(InterpolatedValues, count);
+                PrepareList(StepValues, count);
+            }
+
+            public void SetInterpolation(float* fromPtr, float* toPtr, int interpolationCount, float range)
+            {
+                SetInterpolationCount(interpolationCount);
                 InterpolatedValues.Assign(0, fromPtr, interpolationCount);
 
-                StepValues.EnsureVacant(interpolationCount);
                 range = 1f / range;
                 for (int i = 0; i < interpolationCount; i++)
                     StepValues[i] = (toPtr[i] - fromPtr[i]) * range;
             }
 
-            public static void AccumulateStep()
+            public void IncrementStep()
             {
                 for (int i = 0; i < StepValues.Count; i++)
                     InterpolatedValues[i] += StepValues[i];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void PrepareList(UnsafeList<float> list, int interpolationCount)
+            {
+                list.Clear();
+                list.EnsureVacant(interpolationCount);
             }
         }
     }

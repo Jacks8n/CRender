@@ -1,25 +1,32 @@
 ﻿using System;
 using CUtility.Math;
 using CUtility.Extension;
+using CUtility.Collection;
 
 namespace CRender.Structure
 {
     public struct Model
     {
-        public readonly Vector4[] Vertices;
+        public Vector4[] Vertices;
 
-        public readonly IPrimitive[] Primitives;
+        public IPrimitive[] Primitives;
 
-        public readonly Vector2[] UVs;
+        public Vector2[] UVs;
 
-        public readonly Vector3[] Normals;
+        public Vector3[] Normals;
 
-        public Model(Vector4[] vertices, IPrimitive[] primitives, Vector2[] uvs, Vector3[] normals)//, Cuboid bound)
+        public GenericVector<float>[] VerticesData;
+
+        public int VerticesDataCount;
+
+        public Model(Vector4[] vertices, IPrimitive[] primitives, Vector2[] uvs = null, Vector3[] normals = null, GenericVector<float>[] verticesData = null)
         {
             Vertices = vertices;
             Primitives = primitives;
             UVs = uvs;
             Normals = normals;
+            VerticesData = verticesData;
+            VerticesDataCount = verticesData == null ? 0 : verticesData[0].Length;
         }
 
         /// <summary>
@@ -87,7 +94,7 @@ namespace CRender.Structure
         {
             size *= .5f;
             return new Model(
-                vertices: new Vector4[] 
+                vertices: new Vector4[]
                 {
                     new Vector4(size, size, 0f, 1f),
                     new Vector4(size, -size, 0f, 1f),

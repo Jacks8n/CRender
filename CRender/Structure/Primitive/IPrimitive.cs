@@ -1,8 +1,8 @@
 ﻿namespace CRender.Structure
 {
-    public interface IPrimitive
+    public unsafe interface IPrimitive
     {
-        int Count { get; }
+        int VertexCount { get; }
 
         int[] Indices { get; }
     }

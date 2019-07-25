@@ -72,13 +72,11 @@ namespace CRender.Pipeline
                 ShaderInOutMap fragmentInput = ShaderInvoker<IFragmentShader>.ActiveInputMap;
                 ShaderInOutMap fragmentOutput = ShaderInvoker<IFragmentShader>.ActiveOutputMap;
 
-
-
                 IPrimitive[] primitives = currentEntity.Model.Primitives;
                 primitiveCounts[i] = primitives.Length;
                 _rasterizedFragments.EnsureVacant(primitives.Length);
                 for (int j = 0; j < primitives.Length; j++)
-                    Rasterize(coordsOutput, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
+                    Rasterize(coordsOutput, currentEntity.Model.VerticesData, currentEntity.Model.VerticesDataCount, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
             }
             EndRasterize();
 
@@ -117,7 +115,7 @@ namespace CRender.Pipeline
         public void Dispose()
         {
             for (int i = 0; i < _rasterizedFragments.Count; i++)
-                _rasterizedFragments[i].FreeData();
+                _rasterizedFragments[i].FreeUnmanaged();
         }
 
         #endregion

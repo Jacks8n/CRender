@@ -2,7 +2,7 @@
 {
     public readonly struct LinePrimitive : IPrimitive
     {
-        public int Count => 2;
+        public int VertexCount => 2;
 
         public int[] Indices { get; }
 

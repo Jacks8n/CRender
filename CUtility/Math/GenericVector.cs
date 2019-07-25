@@ -8,42 +8,42 @@ namespace CUtility.Math
 {
     public unsafe struct GenericVector<T> : IEnumerable<T>, IDisposable where T : unmanaged
     {
-        public T X => _values[0];
-        public T Y => _values[1];
-        public T Z => _values[2];
-        public T W => _values[3];
+        public T X => ElementsPtr[0];
+        public T Y => ElementsPtr[1];
+        public T Z => ElementsPtr[2];
+        public T W => ElementsPtr[3];
 
         public T R => X;
         public T G => Y;
         public T B => Z;
         public T A => W;
 
-        public GenericVector<T> RG => new GenericVector<T>(_values, 0, 2);
-        public GenericVector<T> RGB => new GenericVector<T>(_values, 0, 3);
+        public GenericVector<T> RG => new GenericVector<T>(ElementsPtr, 0, 2);
+        public GenericVector<T> RGB => new GenericVector<T>(ElementsPtr, 0, 3);
 
         public GenericVector<T> XY => RG;
         public GenericVector<T> XYZ => RGB;
 
-        public T this[int index] { get => _values[index]; set => _values[index] = value; }
+        public T this[int index] { get => ElementsPtr[index]; set => ElementsPtr[index] = value; }
 
         public int Length { get; }
 
-        private readonly T* _values;
+        public readonly T* ElementsPtr;
 
         private int _addableIndex;
 
         public GenericVector(int size)
         {
-            _values = Alloc<T>(size);
+            ElementsPtr = Alloc<T>(size);
             Length = size;
             _addableIndex = 0;
             for (int i = 0; i < Length; i++)
-                _values[i] = default;
+                ElementsPtr[i] = default;
         }
 
         private GenericVector(T* arr, int start, int count)
         {
-            _values = arr + start;
+            ElementsPtr = arr + start;
             Length = count;
             _addableIndex = count;
         }
@@ -51,37 +51,37 @@ namespace CUtility.Math
         public void Write(T value)
         {
             for (int i = 0; i < Length; i++)
-                _values[i] = value;
+                ElementsPtr[i] = value;
         }
 
         public void Write(GenericVector<T> other)
         {
             for (int i = 0; i < Length && i < other.Length; i++)
-                _values[i] = other._values[i];
+                ElementsPtr[i] = other.ElementsPtr[i];
             _addableIndex = other.Length;
         }
 
         public void Add(T item)
         {
             if (_addableIndex < Length)
-                _values[_addableIndex++] = item;
+                ElementsPtr[_addableIndex++] = item;
         }
 
         public void Clear()
         {
             _addableIndex = 0;
             for (int i = 0; i < Length; i++)
-                _values[i] = default;
+                ElementsPtr[i] = default;
         }
 
         public static GenericVector<T> operator +(GenericVector<T> l, GenericVector<T> r)
         {
             if (typeof(T) == typeof(float))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((float)(object)l._values[i] + (float)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] + (float)(object)r.ElementsPtr[i]);
             else if (typeof(T) == typeof(int))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((int)(object)l._values[i] + (int)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] + (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
@@ -89,10 +89,10 @@ namespace CUtility.Math
         {
             if (typeof(T) == typeof(float))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((float)(object)l._values[i] - (float)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] - (float)(object)r.ElementsPtr[i]);
             else if (typeof(T) == typeof(int))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((int)(object)l._values[i] - (int)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] - (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
@@ -100,10 +100,10 @@ namespace CUtility.Math
         {
             if (typeof(T) == typeof(float))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((float)(object)l._values[i] * (float)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] * (float)(object)r.ElementsPtr[i]);
             else if (typeof(T) == typeof(int))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((int)(object)l._values[i] * (int)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] * (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
@@ -111,16 +111,16 @@ namespace CUtility.Math
         {
             if (typeof(T) == typeof(float))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((float)(object)l._values[i] / (float)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] / (float)(object)r.ElementsPtr[i]);
             else if (typeof(T) == typeof(int))
                 for (int i = 0; i < l.Length; i++)
-                    l._values[i] = (T)(object)((int)(object)l._values[i] / (int)(object)r._values[i]);
+                    l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] / (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
         void IDisposable.Dispose()
         {
-            Free(_values);
+            Free(ElementsPtr);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()

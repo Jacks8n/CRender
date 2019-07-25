@@ -1,6 +1,7 @@
 ﻿using System;
 using CRender.Structure;
 using CShader;
+using CUtility.Collection;
 using CUtility.Math;
 
 using static CUtility.Extension.MarshalExt;
@@ -22,25 +23,28 @@ namespace CRender.Pipeline
         /// Rasterize <paramref name="primitive"/> and stores the result in <paramref name="result"/>
         /// </summary>
         /// <param name="screenCoords">Screen coordinate of every vertex</param>
-        private unsafe void Rasterize(in Vector2* screenCoords, in IPrimitive primitive, Fragment* result)
+        private unsafe void Rasterize(in Vector2* screenCoords, in GenericVector<float>[] verticesData, int verticesDataCount, in IPrimitive primitive, Fragment* result)
         {
-            Vector2* coords = stackalloc Vector2[primitive.Count];
-            for (int i = 0; i < primitive.Count; i++)
+            Vector2* coords = stackalloc Vector2[primitive.VertexCount];
+            float** primitiveData = stackalloc float*[3];
+            for (int i = 0; i < primitive.VertexCount; i++)
+            {
                 coords[i] = screenCoords[primitive.Indices[i]];
-            switch (primitive.Count)
+                primitiveData[i] = verticesData[primitive.Indices[i]].ElementsPtr;
+            }
+            switch (primitive.VertexCount)
             {
                 case 2:
-                    Rasterizer.Line(coords);
+                    Rasterizer.Line(coords, primitiveData, verticesDataCount);
                     break;
                 case 3:
-                    Rasterizer.Triangle(coords);
+                    Rasterizer.Triangle(coords, primitiveData, verticesDataCount);
                     break;
                 default:
                     throw new NotImplementedException("Rasterization for this kind of primitive is not supported");
                     break;
             }
-            result->Initialize(Rasterizer.RasterizedPixelCount, _dataSizePerPixel);
-            Rasterizer.ContriveResult(result->Rasterization);
+            Rasterizer.ContriveResult(result);
         }
 
         /// <summary>

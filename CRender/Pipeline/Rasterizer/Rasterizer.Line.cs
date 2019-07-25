@@ -5,6 +5,8 @@ namespace CRender.Pipeline
 {
     public sealed unsafe partial class Rasterizer
     {
+        private static readonly Interpolator LineInterpolator = new Interpolator();
+
         public static void Line(Vector2* verticesPtr, float** verticesDataPtr, int verticesDataCount)
         {
             Vector2 from = verticesPtr[0], to = verticesPtr[1];
@@ -27,7 +29,7 @@ namespace CRender.Pipeline
             dirStep = Math.Sign(xSub);
             otherDirStep = Math.Sign(ySub);
             slopeAbs = Math.Abs(ySub / xSub);
-            Interpolator.SetRange(verticesDataPtr[0], verticesDataPtr[1], verticesDataCount, Math.Abs(xSub));
+            LineInterpolator.SetInterpolation(verticesDataPtr[0], verticesDataPtr[1], verticesDataCount, Math.Abs(xSub));
 
             Vector2Int resultPoint = new Vector2Int(JMath.RoundToInt(from.X * _resolution.X), JMath.RoundToInt(from.Y * _resolution.Y));
             if (resultPoint.X == _resolution.X)
@@ -39,8 +41,8 @@ namespace CRender.Pipeline
             int end = JMath.RoundToInt(to[dir] * _resolution[dir]);
             for (float otherDirFrac = slopeAbs; resultPoint[dir] != end; otherDirFrac += slopeAbs, resultPoint[dir] += dirStep)
             {
-                OutputRasterization(resultPoint, Interpolator.InterpolatedValues);
-                Interpolator.AccumulateStep();
+                OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
+                LineInterpolator.IncrementStep();
                 if (otherDirFrac >= 1f)
                 {
                     resultPoint[1 - dir] += otherDirStep;

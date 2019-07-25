@@ -16,6 +16,8 @@ namespace CUtility.Math
 
         public const float EPSILON = 1e-5f;
 
+        private const float REALLY_BIG_FUCKING_NUMBER = 1e8f;
+
         public static Vector3 Sin(Vector3 vector)
         {
             return new Vector3(MathF.Sin(vector.X), MathF.Sin(vector.Y), MathF.Sin(vector.Z));
@@ -24,6 +26,11 @@ namespace CUtility.Math
         public static Vector3 Cos(Vector3 vector)
         {
             return new Vector3(MathF.Cos(vector.X), MathF.Cos(vector.Y), MathF.Cos(vector.Z));
+        }
+
+        public static float Cap(float value)
+        {
+            return value > REALLY_BIG_FUCKING_NUMBER ? REALLY_BIG_FUCKING_NUMBER : value;
         }
 
         /// <summary>
