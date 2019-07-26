@@ -2,6 +2,7 @@
 using CUtility.Math;
 using CUtility.Extension;
 using CUtility.Collection;
+using static CUtility.Extension.MarshalExt;
 
 namespace CRender.Structure
 {
@@ -15,18 +16,20 @@ namespace CRender.Structure
 
         public Vector3[] Normals;
 
-        public GenericVector<float>[] VerticesData;
-
         public int VerticesDataCount;
 
-        public Model(Vector4[] vertices, IPrimitive[] primitives, Vector2[] uvs = null, Vector3[] normals = null, GenericVector<float>[] verticesData = null)
+        public GenericVector<float>[] VerticesData;
+
+        public unsafe Model(Vector4[] vertices, IPrimitive[] primitives, Vector2[] uvs = null, Vector3[] normals = null, GenericVector<float>[] verticesData = null)
         {
             Vertices = vertices;
             Primitives = primitives;
             UVs = uvs;
             Normals = normals;
+            VerticesDataCount = (uvs == null ? 0 : 2)
+                + (normals == null ? 0 : 3)
+                + (verticesData == null ? 0 : verticesData[0].Length);
             VerticesData = verticesData;
-            VerticesDataCount = verticesData == null ? 0 : verticesData[0].Length;
         }
 
         /// <summary>

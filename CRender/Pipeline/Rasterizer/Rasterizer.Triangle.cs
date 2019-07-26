@@ -1,6 +1,6 @@
 ﻿using System;
-using CUtility.Math;
 using CUtility.Collection;
+using CUtility.Math;
 
 using static CUtility.Math.JMathGeom;
 
@@ -37,9 +37,8 @@ namespace CRender.Pipeline
             }
 
             Vector2 top = verticesPtr[topIndex] * _resolution, mid = verticesPtr[midIndex] * _resolution, bottom = verticesPtr[3 - topIndex - midIndex] * _resolution;
-
-            #region Fragment Interpolation
-            if (verticesDataCount > 0)
+            bool ifInterpolate = verticesDataCount > 0;
+            if (ifInterpolate)
             {
                 Matrix2x2 midLineSpace;
                 *(Vector2*)&midLineSpace = bottom - (top + mid) * .5f;
@@ -59,12 +58,11 @@ namespace CRender.Pipeline
                     TriangleInterpolator_Vertical.StepValues[i] = midLineSpace.M21 * temp0 + midLineSpace.M22 * temp1;
                 }
             }
-            #endregion
 
             if (JMath.Approx(top.Y, mid.Y))
-                HorizontalEdgeTriangle(bottom, top.X, mid.X, top.Y, isUpwardApex: false);
+                HorizontalEdgeTriangle(bottom, top.X, mid.X, top.Y, isUpwardApex: false, interpolate: ifInterpolate);
             else if (JMath.Approx(mid.Y, bottom.Y))
-                HorizontalEdgeTriangle(top, mid.X, bottom.X, mid.Y);
+                HorizontalEdgeTriangle(top, mid.X, bottom.X, mid.Y, interpolate: ifInterpolate);
             else
             {
                 float midSectionX = JMath.Lerp(JMath.Ratio(mid.Y, top.Y, bottom.Y), top.X, bottom.X);
@@ -74,12 +72,12 @@ namespace CRender.Pipeline
                     midSectionX = mid.X;
                     mid.X = temp;
                 }
-                HorizontalEdgeTriangle(top, mid.X, midSectionX, mid.Y);
-                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, isUpwardApex: false, skipBottomEdge: true);
+                HorizontalEdgeTriangle(top, mid.X, midSectionX, mid.Y, interpolate: ifInterpolate);
+                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, isUpwardApex: false, skipBottomEdge: true, interpolate: ifInterpolate);
             }
         }
 
-        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool isUpwardApex = true, bool skipBottomEdge = false)
+        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool isUpwardApex = true, bool skipBottomEdge = false, bool interpolate = true)
         {
             float leftInvSlope = (apex.X - leftBottomX) / (apex.Y - bottomY);
             float rightInvSlope = (apex.X - rightBottomX) / (apex.Y - bottomY);
@@ -104,12 +102,14 @@ namespace CRender.Pipeline
                 for (; result.X <= endX; result.X++)
                 {
                     OutputRasterization(result, TriangleInterpolator_Horizontal.InterpolatedValues);
-                    TriangleInterpolator_Horizontal.IncrementStep();
+                    if (interpolate)
+                        TriangleInterpolator_Horizontal.IncrementStep();
                 }
 
                 leftBottomX -= leftInvSlope;
                 rightBottomX -= rightInvSlope;
-                TriangleInterpolator_Vertical.IncrementStep();
+                if (interpolate)
+                    TriangleInterpolator_Vertical.IncrementStep();
             }
         }
     }

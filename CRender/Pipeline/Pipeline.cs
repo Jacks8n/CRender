@@ -75,8 +75,12 @@ namespace CRender.Pipeline
                 IPrimitive[] primitives = currentEntity.Model.Primitives;
                 primitiveCounts[i] = primitives.Length;
                 _rasterizedFragments.EnsureVacant(primitives.Length);
-                for (int j = 0; j < primitives.Length; j++)
-                    Rasterize(coordsOutput, currentEntity.Model.VerticesData, currentEntity.Model.VerticesDataCount, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
+                if (fragmentInput.RequireInterpolation)
+                    for (int j = 0; j < primitives.Length; j++)
+                        Rasterize(coordsOutput, currentEntity.Model.VerticesData, currentEntity.Model.VerticesDataCount, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
+                else
+                    for (int j = 0; j < primitives.Length; j++)
+                        Rasterize(coordsOutput, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
             }
             EndRasterize();
 
@@ -87,7 +91,6 @@ namespace CRender.Pipeline
             //TODO: Interpolation
 
             //This is not the proper way to output, rather for development efficiency
-            GenericVector<float> white = new GenericVector<float>(3) { 1, 1, 1 };
             int fragmentIndex = 0;
             for (int i = 0; i < entityCount; i++)
                 for (int j = 0; j < primitiveCounts[i]; j++)

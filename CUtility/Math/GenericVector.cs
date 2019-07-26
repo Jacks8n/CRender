@@ -6,7 +6,7 @@ using static CUtility.Extension.MarshalExt;
 
 namespace CUtility.Math
 {
-    public unsafe struct GenericVector<T> : IEnumerable<T>, IDisposable where T : unmanaged
+    public unsafe struct GenericVector<T> : IEnumerable<float>, IEnumerable<Vector2>, IDisposable where T : unmanaged
     {
         public T X => ElementsPtr[0];
         public T Y => ElementsPtr[1];
@@ -18,8 +18,8 @@ namespace CUtility.Math
         public T B => Z;
         public T A => W;
 
-        public GenericVector<T> RG => new GenericVector<T>(ElementsPtr, 0, 2);
-        public GenericVector<T> RGB => new GenericVector<T>(ElementsPtr, 0, 3);
+        public GenericVector<T> RG => new GenericVector<T>(ElementsPtr, 2);
+        public GenericVector<T> RGB => new GenericVector<T>(ElementsPtr, 3);
 
         public GenericVector<T> XY => RG;
         public GenericVector<T> XYZ => RGB;
@@ -41,9 +41,9 @@ namespace CUtility.Math
                 ElementsPtr[i] = default;
         }
 
-        private GenericVector(T* arr, int start, int count)
+        private GenericVector(T* arr, int count)
         {
-            ElementsPtr = arr + start;
+            ElementsPtr = arr;
             Length = count;
             _addableIndex = count;
         }
@@ -61,12 +61,6 @@ namespace CUtility.Math
             _addableIndex = other.Length;
         }
 
-        public void Add(T item)
-        {
-            if (_addableIndex < Length)
-                ElementsPtr[_addableIndex++] = item;
-        }
-
         public void Clear()
         {
             _addableIndex = 0;
@@ -76,46 +70,77 @@ namespace CUtility.Math
 
         public static GenericVector<T> operator +(GenericVector<T> l, GenericVector<T> r)
         {
-            if (typeof(T) == typeof(float))
-                for (int i = 0; i < l.Length; i++)
+            for (int i = 0; i < l.Length; i++)
+                if (typeof(T) == typeof(float))
                     l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] + (float)(object)r.ElementsPtr[i]);
-            else if (typeof(T) == typeof(int))
-                for (int i = 0; i < l.Length; i++)
+                else if (typeof(T) == typeof(int))
                     l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] + (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
         public static GenericVector<T> operator -(GenericVector<T> l, GenericVector<T> r)
         {
-            if (typeof(T) == typeof(float))
-                for (int i = 0; i < l.Length; i++)
+            for (int i = 0; i < l.Length; i++)
+                if (typeof(T) == typeof(float))
                     l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] - (float)(object)r.ElementsPtr[i]);
-            else if (typeof(T) == typeof(int))
-                for (int i = 0; i < l.Length; i++)
+                else if (typeof(T) == typeof(int))
                     l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] - (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
         public static GenericVector<T> operator *(GenericVector<T> l, GenericVector<T> r)
         {
-            if (typeof(T) == typeof(float))
-                for (int i = 0; i < l.Length; i++)
+            for (int i = 0; i < l.Length; i++)
+                if (typeof(T) == typeof(float))
                     l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] * (float)(object)r.ElementsPtr[i]);
-            else if (typeof(T) == typeof(int))
-                for (int i = 0; i < l.Length; i++)
+                else if (typeof(T) == typeof(int))
                     l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] * (int)(object)r.ElementsPtr[i]);
             return l;
         }
 
         public static GenericVector<T> operator /(GenericVector<T> l, GenericVector<T> r)
         {
-            if (typeof(T) == typeof(float))
-                for (int i = 0; i < l.Length; i++)
+            for (int i = 0; i < l.Length; i++)
+                if (typeof(T) == typeof(float))
                     l.ElementsPtr[i] = (T)(object)((float)(object)l.ElementsPtr[i] / (float)(object)r.ElementsPtr[i]);
-            else if (typeof(T) == typeof(int))
-                for (int i = 0; i < l.Length; i++)
+                else if (typeof(T) == typeof(int))
                     l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] / (int)(object)r.ElementsPtr[i]);
             return l;
+        }
+
+        public void Add(T item)
+        {
+            if (_addableIndex < Length)
+                ElementsPtr[_addableIndex++] = item;
+            else
+                throw new Exception();
+        }
+
+        public void Add(Vector2 item)
+        {
+            if (typeof(T) != typeof(float))
+                throw new Exception();
+            Add((T)(object)item.X);
+            Add((T)(object)item.Y);
+        }
+
+        public void Add(Vector3 item)
+        {
+            if (typeof(T) != typeof(float))
+                throw new Exception();
+            Add((T)(object)item.X);
+            Add((T)(object)item.Y);
+            Add((T)(object)item.Z);
+        }
+
+        public void Add(Vector4 item)
+        {
+            if (typeof(T) != typeof(float))
+                throw new Exception();
+            Add((T)(object)item.X);
+            Add((T)(object)item.Y);
+            Add((T)(object)item.Z);
+            Add((T)(object)item.W);
         }
 
         void IDisposable.Dispose()
@@ -123,14 +148,23 @@ namespace CUtility.Math
             Free(ElementsPtr);
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+        #region Not Implemented
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             throw new NotImplementedException();
         }
+
+        IEnumerator<float> IEnumerable<float>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator<Vector2> IEnumerable<Vector2>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

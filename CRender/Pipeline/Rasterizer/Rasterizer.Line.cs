@@ -29,7 +29,10 @@ namespace CRender.Pipeline
             dirStep = Math.Sign(xSub);
             otherDirStep = Math.Sign(ySub);
             slopeAbs = Math.Abs(ySub / xSub);
-            LineInterpolator.SetInterpolation(verticesDataPtr[0], verticesDataPtr[1], verticesDataCount, Math.Abs(xSub));
+
+            bool ifInterpolate = verticesDataCount > 0;
+            if (ifInterpolate)
+                LineInterpolator.SetInterpolation(verticesDataPtr[0], verticesDataPtr[1], verticesDataCount, Math.Abs(xSub));
 
             Vector2Int resultPoint = new Vector2Int(JMath.RoundToInt(from.X * _resolution.X), JMath.RoundToInt(from.Y * _resolution.Y));
             if (resultPoint.X == _resolution.X)
@@ -41,8 +44,13 @@ namespace CRender.Pipeline
             int end = JMath.RoundToInt(to[dir] * _resolution[dir]);
             for (float otherDirFrac = slopeAbs; resultPoint[dir] != end; otherDirFrac += slopeAbs, resultPoint[dir] += dirStep)
             {
-                OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
-                LineInterpolator.IncrementStep();
+                if (ifInterpolate)
+                {
+                    OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
+                    LineInterpolator.IncrementStep();
+                }
+                else
+                    OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
                 if (otherDirFrac >= 1f)
                 {
                     resultPoint[1 - dir] += otherDirStep;

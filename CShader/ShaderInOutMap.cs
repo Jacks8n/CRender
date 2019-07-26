@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using CUtility.Math;
 
 using static CUtility.Extension.MarshalExt;
@@ -7,13 +6,17 @@ using static CUtility.Extension.MarshalExt;
 namespace CShader
 {
     [Flags]
-    internal enum ShaderInOutSemantic { None = 0, Vertex = 1, Normal = 2 }
+    internal enum ShaderInOutSemantic { None = 0, Vertex = 1, Normal = 2, UV = 4 }
 
     public unsafe class ShaderInOutMap : IDisposable
     {
+        public bool RequireInterpolation => NormalPtr != null || UVPtr != null;
+
         public Vector4* VertexPtr { get; private set; } = null;
 
         public Vector3* NormalPtr { get; private set; } = null;
+
+        public Vector2* UVPtr { get; private set; } = null;
 
         internal byte* InOutBufferPtr { get; private set; } = null;
 
@@ -22,14 +25,6 @@ namespace CShader
         private ShaderInOutSemantic _registeredSemantics = ShaderInOutSemantic.None;
 
         private int _totalBufferSize = 0;
-
-        public void Assign(ShaderInOutMap another)
-        {
-            if (VertexPtr != null && another.VertexPtr != null)
-                *VertexPtr = *another.VertexPtr;
-            if (NormalPtr != null && another.NormalPtr != null)
-                *NormalPtr = *another.NormalPtr;
-        }
 
         internal void RegisterSemantic(ShaderInOutSemantic semantic)
         {
@@ -56,6 +51,8 @@ namespace CShader
                     return sizeof(Vector4);
                 case ShaderInOutSemantic.Normal:
                     return sizeof(Vector3);
+                case ShaderInOutSemantic.UV:
+                    return sizeof(Vector2);
             }
             return 0;
         }
@@ -67,12 +64,15 @@ namespace CShader
                 {
                     case ShaderInOutSemantic.Vertex:
                         VertexPtr = (Vector4*)currentPtr;
-                        return currentPtr + sizeof(Vector4);
+                        break;
                     case ShaderInOutSemantic.Normal:
                         NormalPtr = (Vector3*)currentPtr;
-                        return currentPtr + sizeof(Vector3);
+                        break;
+                    case ShaderInOutSemantic.UV:
+                        UVPtr = (Vector2*)currentPtr;
+                        break;
                 }
-            return currentPtr;
+            return currentPtr + GetSemanticSize(semantic);
         }
 
         void IDisposable.Dispose()

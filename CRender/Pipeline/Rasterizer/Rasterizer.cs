@@ -75,6 +75,14 @@ namespace CRender.Pipeline
         /// <summary>
         /// Store result and shift <see cref="RasterizedPixelCount"/>
         /// </summary>
+        private static void OutputRasterization(Vector2Int pixelCoord)
+        {
+            _pixelCoords.Add(pixelCoord);
+        }
+
+        /// <summary>
+        /// Store result and shift <see cref="RasterizedPixelCount"/>
+        /// </summary>
         private static void OutputRasterization(Vector2Int pixelCoord, UnsafeList<float> fragmentData)
         {
             _pixelCoords.Add(pixelCoord);
