@@ -3,7 +3,7 @@ A soft renderer can output to command line interface, which is fully written in 
 
 # TODO
 - [x] Support of shader in C#
-- [ ] Interpolation for primitives
+- [x] Interpolation for primitives, i.e. support for fragment shader
 - [ ] Flexible pipeline with sets of interfaces
 - [ ] Performance optimization
 ...
