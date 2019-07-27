@@ -10,12 +10,23 @@ namespace CRender.Pipeline
 
         public Vector2Int* Rasterization;
 
-        public float* FragmentData;
+        public float** FragmentData;
+
+        public Vector4* FragmentColor;
 
         public void Free()
         {
-            MarshalExt.Free(Rasterization);
-            MarshalExt.Free(FragmentData);
+            MarshalExtension.Free(Rasterization);
+            Rasterization = null;
+            MarshalExtension.Free(FragmentColor);
+            FragmentColor = null;
+            if (FragmentData != null)
+            {
+                for (int i = 0; i < PixelCount; i++)
+                    MarshalExtension.Free(FragmentData[i]);
+                MarshalExtension.Free(FragmentData);
+                FragmentData = null;
+            }
         }
     }
 }

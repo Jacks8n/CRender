@@ -16,10 +16,12 @@ namespace CShader
 
         public struct FIn_Base
         {
+            public Vector4 Vertex;
         }
 
         public struct FOut_Base
         {
+            public Vector4 Color;
         }
     }
 }

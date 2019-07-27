@@ -1,6 +1,6 @@
 ﻿using CUtility.Math;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CShader
 {
@@ -15,6 +15,8 @@ namespace CShader
         public static float Time;
 
         public static float SinTime;
+
+        public static float SinTime2;
 
         static ShaderValue()
         {

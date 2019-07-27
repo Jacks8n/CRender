@@ -1,35 +1,57 @@
 ﻿using System;
+using CShader;
 using CUtility.Math;
 using CUtility.Extension;
 using CUtility.Collection;
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
+using System.Runtime.CompilerServices;
 
 namespace CRender.Structure
 {
-    public struct Model
+    public class Model
     {
-        public Vector4[] Vertices;
+        public readonly SemanticLayout VerticesDataReader;
 
-        public IPrimitive[] Primitives;
+        public Vector4[] Vertices { get; private set; }
 
-        public Vector2[] UVs;
+        public IPrimitive[] Primitives { get; private set; }
 
-        public Vector3[] Normals;
+        public Vector3[] Normals { get; private set; }
 
-        public int VerticesDataCount;
+        public Vector2[] UVs { get; private set; }
 
-        public GenericVector<float>[] VerticesData;
+        public int VerticesDataCount { get; private set; }
 
-        public unsafe Model(Vector4[] vertices, IPrimitive[] primitives, Vector2[] uvs = null, Vector3[] normals = null, GenericVector<float>[] verticesData = null)
+        public GenericVector<float>[] VerticesData { get; private set; }
+
+        public unsafe Model(Vector4[] vertices, IPrimitive[] primitives, Vector3[] normals = null, Vector2[] uvs = null)
         {
-            Vertices = vertices;
+            VerticesDataReader = new SemanticLayout();
+            VerticesDataReader.SetLayout(vertices, normals, uvs, null);
+            Vertices = vertices ?? throw new Exception();
             Primitives = primitives;
             UVs = uvs;
             Normals = normals;
-            VerticesDataCount = (uvs == null ? 0 : 2)
-                + (normals == null ? 0 : 3)
-                + (verticesData == null ? 0 : verticesData[0].Length);
-            VerticesData = verticesData;
+            VerticesDataCount = 4
+                              + (uvs == null ? 0 : 2)
+                              + (normals == null ? 0 : 3);
+            VerticesData = new GenericVector<float>[vertices.Length];
+            for (int i = 0; i < VerticesData.Length; i++)
+            {
+                VerticesData[i] = new GenericVector<float>(VerticesDataCount);
+                VerticesData[i].Add(vertices[i]);
+                if (normals != null)
+                    VerticesData[i].Add(normals[i]);
+                if (uvs != null)
+                    VerticesData[i].Add(uvs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal unsafe SemanticLayout ReadVertexData(int index)
+        {
+            VerticesDataReader.SetReadWritePointer(VerticesData[index].ElementsPtr);
+            return VerticesDataReader;
         }
 
         /// <summary>
@@ -77,8 +99,6 @@ namespace CRender.Structure
                     new TrianglePrimitive(6, 7, 2),
                     new TrianglePrimitive(7, 4, 3), },
 
-                uvs: null,
-
                 normals: hasNormals ?
                 new Vector3[] {
                     new Vector3(-JMath.SQRT3),
@@ -90,7 +110,9 @@ namespace CRender.Structure
                     new Vector3(JMath.SQRT3),
                     new Vector3(-JMath.SQRT3, JMath.SQRT3, JMath.SQRT3), }
                 : null
-                );
+,
+
+                uvs: null);
         }
 
         public static Model Plane(float size = 1f)
@@ -109,7 +131,7 @@ namespace CRender.Structure
                     new TrianglePrimitive(0, 1, 2),
                     new TrianglePrimitive(0, 2, 3),
                 },
-                uvs: null, normals: null);
+                normals: null, uvs: null);
         }
     }
 }

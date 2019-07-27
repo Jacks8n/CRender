@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CUtility.Extension
 {
-    public class ConsoleExt
+    public class ConsoleExtension
     {
         /// <summary>
         /// https://docs.microsoft.com/en-us/windows/console/coord-str
@@ -75,7 +75,7 @@ namespace CUtility.Extension
 
         private static readonly unsafe _CONSOLE_FONT_INFOEX* _consoleFontInfoExPtr;
 
-        static unsafe ConsoleExt()
+        static unsafe ConsoleExtension()
         {
             _outputBuffer0 = CreateConsoleScreenBuffer(GENERIC_READ_WRITE, FILE_SHARE_WRITE, IntPtr.Zero, CONSOLE_TEXTMODE_BUFFER, IntPtr.Zero);
             _outputBuffer1 = CreateConsoleScreenBuffer(GENERIC_READ_WRITE, FILE_SHARE_WRITE, IntPtr.Zero, CONSOLE_TEXTMODE_BUFFER, IntPtr.Zero);

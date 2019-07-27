@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace CUtility.Extension
 {
-    public unsafe static class MarshalExt
+    public unsafe static class MarshalExtension
     {
         private static List<IntPtr> _ptrsToFree = new List<IntPtr>();
 
-        static MarshalExt()
+        static MarshalExtension()
         {
             ConsoleEvent.OnCtrlClose += () =>
               {

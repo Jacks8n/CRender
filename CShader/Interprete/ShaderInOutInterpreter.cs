@@ -6,8 +6,10 @@ namespace CShader
 {
     public static class ShaderInOutInterpreter
     {
-        private const string NAME_VERTEX = "Vertex";
-        private const string NAME_NORMAL = "Normal";
+        private const string SEMATIC_VERTEX = "Vertex";
+        private const string SEMATIC_NORMAL = "Normal";
+        private const string SEMATIC_UV = "UV";
+        private const string SEMATIC_COLOR = "Color";
 
         private static readonly Dictionary<Type, ShaderInOutMap> InterpretedInOutMap = new Dictionary<Type, ShaderInOutMap>();
 
@@ -39,17 +41,24 @@ namespace CShader
             FieldInfo[] fields = type.GetFields();
             inoutMap = new ShaderInOutMap();
 
+            ShaderSemantic semantic = ShaderSemantic.None;
             for (int i = 0; i < fields.Length; i++)
                 switch (fields[i].Name)
                 {
-                    case NAME_VERTEX:
-                        inoutMap.RegisterSemantic(ShaderInOutSemantic.Vertex);
+                    case SEMATIC_VERTEX:
+                        semantic |= ShaderSemantic.Vertex;
                         break;
-                    case NAME_NORMAL:
-                        inoutMap.RegisterSemantic(ShaderInOutSemantic.Normal);
+                    case SEMATIC_NORMAL:
+                        semantic |= ShaderSemantic.Normal;
+                        break;
+                    case SEMATIC_UV:
+                        semantic |= ShaderSemantic.UV;
+                        break;
+                    case SEMATIC_COLOR:
+                        semantic |= ShaderSemantic.Color;
                         break;
                 }
-            inoutMap.GenerateMap();
+            inoutMap.GenerateMap(semantic);
 
             InterpretedInOutMap.Add(type, inoutMap);
             return inoutMap;

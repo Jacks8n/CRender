@@ -52,10 +52,16 @@ namespace CRender.Structure
                 _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(pixel);
         }
 
-        public unsafe void WritePixel(Vector2Int* uvs, int pixelCount, GenericVector<T> pixel)
+        public unsafe void WritePixel(Vector2Int* uvs, int pixelCount, GenericVector<T> color)
         {
             for (int i = 0; i < pixelCount; i++)
-                _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(pixel);
+                _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(color);
+        }
+
+        public unsafe void WritePixel(Vector2Int* uvs, int pixelCount, Vector4* colors)
+        {
+            for (int i = 0; i < pixelCount; i++)
+                _pixels[UVToIndex(uvs[i].X, uvs[i].Y)].Write(colors[i]);
         }
 
         public GenericVector<T>[] GetRenderBuffer()

@@ -1,6 +1,6 @@
 ﻿namespace CUtility.Extension
 {
-    public static class ArrayExt
+    public static class ArrayExtension
     {
         public static T[] GetEmptyArray<T>(this T[] arr)
         {

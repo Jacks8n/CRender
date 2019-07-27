@@ -4,7 +4,7 @@ using CShader;
 using CUtility.Collection;
 using CUtility.Math;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CRender.Pipeline
 {

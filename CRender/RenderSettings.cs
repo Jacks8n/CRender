@@ -27,9 +27,9 @@ namespace CRender
 
         public static bool IsShowFPS { get; set; }
 
-        public static void SetFontSize(short size) => ConsoleExt.SetFontSize(size, size);
+        public static void SetFontSize(short size) => ConsoleExtension.SetFontSize(size, size);
 
-        public static void SetFontSize(short width, short height) => ConsoleExt.SetFontSize(width, height);
+        public static void SetFontSize(short width, short height) => ConsoleExtension.SetFontSize(width, height);
 
         private static bool _isCountFrames;
     }

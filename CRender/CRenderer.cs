@@ -37,7 +37,7 @@ namespace CRender
                 cursorPos = DisplayString(outputChars, DisplayNumber(outputChars, cursorPos, JMath.RoundToInt(1000f / DeltaMS)) - 1, "FPS:") - 1;
 
             _frameCounts++;
-            ConsoleExt.Output(outputChars);
+            ConsoleExtension.Output(outputChars);
         }
 
         public static void ResetFrameCount()

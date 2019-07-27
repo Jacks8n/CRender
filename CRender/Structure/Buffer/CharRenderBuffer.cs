@@ -40,6 +40,7 @@ namespace CRender.Structure
             switch (color.Length)
             {
                 case 3:
+                case 4:
                     index = (int)((color.R * .299f + color.G * .587f + color.B * .114f) * COLOR_CHAR_COUNT);
                     break;
                 default:

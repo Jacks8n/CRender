@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using CRender.Sampler;
 using CRender.Structure;
 using CShader;
-using CUtility.Math;
 using CUtility.Collection;
-
+using CUtility.Math;
 using static CUtility.Math.Matrix4x4;
 
 namespace CRender.Pipeline
@@ -22,11 +21,13 @@ namespace CRender.Pipeline
 
         private readonly UnsafeList<Fragment> _rasterizedFragments = new UnsafeList<Fragment>();
 
+        private readonly UnsafeList<Vector4> _renderedColors = new UnsafeList<Vector4>();
+
         public Pipeline()
         {
             _bufferSize = CRenderSettings.Resolution;
             _bufferSizeF = (Vector2)_bufferSize;
-            RenderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 3);
+            RenderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 4);
         }
 
         public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
@@ -51,17 +52,14 @@ namespace CRender.Pipeline
                 ShaderInOutMap vertexInput = ShaderInvoker<IVertexShader>.ActiveInputMap;
                 ShaderInOutMap vertexOutput = ShaderInvoker<IVertexShader>.ActiveOutputMap;
 
-                Vector4[] vertices = currentEntity.Model.Vertices;
-                Vector3[] normals = currentEntity.Model.Normals;
-                int vertexCount = vertices.Length;
+                Model model = currentEntity.Model;
+                int vertexCount = model.Vertices.Length;
                 Vector2* coordsOutput = stackalloc Vector2[vertexCount];
                 for (int j = 0; j < vertexCount; j++)
                 {
-                    *vertexInput.VertexPtr = vertices[j];
-                    if (vertexInput.NormalPtr != null)
-                        *vertexInput.NormalPtr = normals[j];
+                    vertexInput.Layout.Assign(model.ReadVertexData(j));
                     ShaderInvoker<IVertexShader>.Invoke();
-                    coordsOutput[j] = ViewToScreen(*vertexOutput.VertexPtr);
+                    coordsOutput[j] = ViewToScreen(*vertexOutput.Layout.VertexPtr);
                 }
 
                 #endregion
@@ -70,15 +68,29 @@ namespace CRender.Pipeline
                 ShaderInOutMap fragmentInput = ShaderInvoker<IFragmentShader>.ActiveInputMap;
                 ShaderInOutMap fragmentOutput = ShaderInvoker<IFragmentShader>.ActiveOutputMap;
 
-                IPrimitive[] primitives = currentEntity.Model.Primitives;
+                bool needInterpolation = SemanticLayout.HasIntersection(fragmentInput.Layout, model.VerticesDataReader);
+                IPrimitive[] primitives = model.Primitives;
                 primitiveCounts[i] = primitives.Length;
-                _rasterizedFragments.EnsureVacant(primitives.Length);
-                if (fragmentInput.RequireInterpolation)
-                    for (int j = 0; j < primitives.Length; j++)
-                        Rasterize(coordsOutput, currentEntity.Model.VerticesData, currentEntity.Model.VerticesDataCount, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
+                _rasterizedFragments.AddEmpty(primitives.Length);
+                if (needInterpolation)
+                    for (int j = primitives.Length; j > 0; j--)
+                        Rasterize(coordsOutput, model.VerticesData, model.VerticesDataCount, primitives[j - 1], _rasterizedFragments.GetPointer(_rasterizedFragments.Count - j));
                 else
-                    for (int j = 0; j < primitives.Length; j++)
-                        Rasterize(coordsOutput, primitives[j], _rasterizedFragments.GetPointer(_rasterizedFragments.Count + j));
+                    for (int j = primitives.Length; j > 0; j--)
+                        Rasterize(coordsOutput, primitives[j - 1], _rasterizedFragments.GetPointer(_rasterizedFragments.Count - j));
+
+                for (int j = _rasterizedFragments.Count - primitives.Length; j < _rasterizedFragments.Count; j++)
+                {
+                    Fragment* fragment = _rasterizedFragments.GetPointer(j);
+                    for (int k = 0; k < fragment->PixelCount; k++)
+                    {
+                        if (needInterpolation)
+                            fragmentInput.Layout.SetReadWritePointer(fragment->FragmentData[k]);
+                        ShaderInvoker<IFragmentShader>.Invoke();
+                        _renderedColors.Add(*fragmentOutput.Layout.ColorPtr);
+                    }
+                    fragment->FragmentColor = _renderedColors.ArchivePointer();
+                }
             }
             EndRasterize();
 
@@ -86,16 +98,13 @@ namespace CRender.Pipeline
             //TODO: View frustum clip, triangle clip, pixel clip
             //Clipping();
 
-            //TODO: Interpolation
-
             //This is not the proper way to output, rather for development efficiency
             int fragmentIndex = 0;
-            GenericVector<float> white = new GenericVector<float>(3) { 1f, 1f, 1f };
             for (int i = 0; i < entityCount; i++)
                 for (int j = 0; j < primitiveCounts[i]; j++)
                 {
-                    RenderTarget.WritePixel(_rasterizedFragments[fragmentIndex].Rasterization, _rasterizedFragments[fragmentIndex].PixelCount, white);
-                    fragmentIndex++;
+                    Fragment fragment = _rasterizedFragments[fragmentIndex++];
+                    RenderTarget.WritePixel(fragment.Rasterization, fragment.PixelCount, fragment.FragmentColor);
                 }
 
             return RenderTarget;
@@ -112,6 +121,7 @@ namespace CRender.Pipeline
             *ShaderValue.WorldToView = *camera.WorldToView;
             ShaderValue.Time = CRenderer.CurrentSecond;
             ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
+            ShaderValue.SinTime2 = MathF.Sin(ShaderValue.Time * 2f);
         }
 
         private void Clear()

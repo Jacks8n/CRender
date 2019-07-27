@@ -2,7 +2,7 @@
 using CUtility.Math;
 
 using static CUtility.Math.Matrix4x4;
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CRender.Structure
 {

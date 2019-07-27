@@ -1,6 +1,6 @@
 ﻿using CUtility.Extension;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CUtility.Math
 {
@@ -32,8 +32,8 @@ namespace CUtility.Math
 
         public void Free()
         {
-            MarshalExt.Free(_columnRowPtr);
-            MarshalExt.Free(_elementsPtr);
+            MarshalExtension.Free(_columnRowPtr);
+            MarshalExtension.Free(_elementsPtr);
         }
     }
 }

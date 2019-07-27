@@ -57,8 +57,8 @@ namespace CRenderTest
                 new Model(
                     vertices: new Vector4[] { new Vector4(-.5f, -.25f, 0, 1f), new Vector4(.5f, -.25f, 0, 1f), new Vector4(0, .5f, 0, 1f) },
                     primitives: new IPrimitive[] { new TrianglePrimitive(0, 1, 2) },
-                    uvs: null,
-                    normals: null),
+                    normals: null,
+                    uvs: null),
                 material: null);
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CUtility.Collection
 {
@@ -48,14 +48,13 @@ namespace CUtility.Collection
             Count += collection.Count;
         }
 
-        public void EnsureVacant(int count)
+        public void AddEmpty(int count)
         {
-            if (count < Capacity - Count)
-                return;
             if (count + Count > Capacity + Capacity)
                 AdjustCapacity(count + Count);
-            else
+            else if (count + Count > Capacity)
                 AdjustCapacity(Capacity + Capacity);
+            Count += count;
         }
 
         public T* ArchivePointer()

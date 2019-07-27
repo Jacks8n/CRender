@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CUtility.Math
 {
@@ -106,6 +106,11 @@ namespace CUtility.Math
                 else if (typeof(T) == typeof(int))
                     l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] / (int)(object)r.ElementsPtr[i]);
             return l;
+        }
+
+        public static implicit operator GenericVector<T>(Vector4 vector)
+        {
+            return new GenericVector<T>(4) { vector };
         }
 
         public void Add(T item)

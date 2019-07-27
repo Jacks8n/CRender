@@ -1,4 +1,4 @@
-﻿using static CUtility.Extension.MarshalExt;
+﻿using static CUtility.Extension.MarshalExtension;
 
 namespace CUtility.Collection
 {

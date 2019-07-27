@@ -43,7 +43,7 @@ namespace CRender.Pipeline
             private static void PrepareList(UnsafeList<float> list, int interpolationCount)
             {
                 list.Clear();
-                list.EnsureVacant(interpolationCount);
+                list.AddEmpty(interpolationCount);
             }
         }
     }

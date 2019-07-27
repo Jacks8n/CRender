@@ -4,7 +4,7 @@ using CUtility.Collection;
 using CUtility.Math;
 using CRender.Structure;
 
-using static CUtility.Extension.MarshalExt;
+using static CUtility.Extension.MarshalExtension;
 
 namespace CRender.Pipeline
 {
@@ -23,7 +23,7 @@ namespace CRender.Pipeline
 
         private static readonly UnsafeList<Vector2Int> _pixelCoords = new UnsafeList<Vector2Int>();
 
-        private static readonly UnsafeList<float> _fragmentData = new UnsafeList<float>();
+        private static readonly UnsafeList<FloatPointer> _fragmentData = new UnsafeList<FloatPointer>();
 
         public static void StartRasterize(Vector2 resolution)
         {
@@ -49,7 +49,7 @@ namespace CRender.Pipeline
         {
             result->PixelCount = RasterizedPixelCount;
             result->Rasterization = _pixelCoords.ArchivePointer();
-            result->FragmentData = _fragmentData.ArchivePointer();
+            result->FragmentData = _fragmentData.Count > 0 ? (float**)_fragmentData.ArchivePointer() : null;
         }
 
         public static void ContriveResult(Vector2Int[] output, int start)
@@ -72,21 +72,15 @@ namespace CRender.Pipeline
             _fragmentData.Clear();
         }
 
-        /// <summary>
-        /// Store result and shift <see cref="RasterizedPixelCount"/>
-        /// </summary>
         private static void OutputRasterization(Vector2Int pixelCoord)
         {
             _pixelCoords.Add(pixelCoord);
         }
 
-        /// <summary>
-        /// Store result and shift <see cref="RasterizedPixelCount"/>
-        /// </summary>
         private static void OutputRasterization(Vector2Int pixelCoord, UnsafeList<float> fragmentData)
         {
             _pixelCoords.Add(pixelCoord);
-            _fragmentData.AddRange(fragmentData);
+            _fragmentData.Add(fragmentData.ArchivePointer());
         }
 
         void IDisposable.Dispose()

@@ -1,4 +1,6 @@
-﻿using CUtility;
+﻿using System;
+using CUtility;
+using CUtility.Math;
 
 using App = CShader.ShaderInOutDefault.App_Base;
 using VOut = CShader.ShaderInOutDefault.VOut_Base;
@@ -37,6 +39,9 @@ namespace CShader
         {
             FIn* fInPtr = (FIn*)inputPtr;
             FOut* fOutPtr = (FOut*)outputPtr;
+
+            float absSinTime = MathF.Abs(SinTime2);
+            fOutPtr->Color = new Vector4(absSinTime, absSinTime, absSinTime, 1f);
         }
     }
 }
