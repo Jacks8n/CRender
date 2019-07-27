@@ -19,7 +19,7 @@
             set => this[x + y * _lengthPtr[1]] = value;
         }
 
-        public override int Count => _lengthPtr[0];
+        public override int Count { get => _lengthPtr[0]; protected set => _lengthPtr[0] = value; }
 
         public int LengthInBytes => Count * sizeof(T);
 

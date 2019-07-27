@@ -42,7 +42,7 @@ namespace CRenderTest
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
                 model: Model.Cube(),
-                material: Material.NewMaterial(Shader_Distort.Instance));
+                material: null);
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
             DrawRotatingObject(pipeline, entitiesApply, camera, charBuffer);
@@ -104,8 +104,8 @@ namespace CRenderTest
 
         private static void DrawRotatingObject(IPipeline pipeline, RenderEntity[] entitiesApply, ICamera camera, CharRenderBuffer<float> charBuffer)
         {
-            float framerate = 25f;
-            float time = 10f;
+            float framerate = 60f;
+            float time = 7.5f;
             int totalFrame = (int)(framerate * time);
             float angleStep = JMath.PI_TWO / totalFrame;
             int frameInterval = (int)(1000f / framerate);

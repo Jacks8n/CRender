@@ -9,7 +9,7 @@ namespace CUtility.Collection
     {
         public abstract T this[int index] { get; set; }
 
-        public abstract int Count { get; }
+        public abstract int Count { get; protected set; }
 
         protected T* _itemsPtr;
 

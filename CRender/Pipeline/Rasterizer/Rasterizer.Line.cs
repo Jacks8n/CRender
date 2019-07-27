@@ -9,9 +9,9 @@ namespace CRender.Pipeline
 
         public static void Line(Vector2* verticesPtr, float** verticesDataPtr, int verticesDataCount)
         {
-            Vector2 from = verticesPtr[0], to = verticesPtr[1];
-            float xSub = (to.X - from.X) * _resolution.X,
-                  ySub = (to.Y - from.Y) * _resolution.Y;
+            Vector2 from = verticesPtr[0] * _resolution, to = verticesPtr[1] * _resolution;
+            float xSub = to.X - from.X,
+                  ySub = to.Y - from.Y;
 
             //0: X-major 1:Y-major
             int dir;
@@ -34,14 +34,14 @@ namespace CRender.Pipeline
             if (ifInterpolate)
                 LineInterpolator.SetInterpolation(verticesDataPtr[0], verticesDataPtr[1], verticesDataCount, Math.Abs(xSub));
 
-            Vector2Int resultPoint = new Vector2Int(JMath.RoundToInt(from.X * _resolution.X), JMath.RoundToInt(from.Y * _resolution.Y));
+            Vector2Int resultPoint = new Vector2Int(JMath.RoundToInt(from.X), JMath.RoundToInt(from.Y));
             if (resultPoint.X == _resolution.X)
                 resultPoint.X--;
             if (resultPoint.Y == _resolution.Y)
                 resultPoint.Y--;
 
             //End coordinate in Int
-            int end = JMath.RoundToInt(to[dir] * _resolution[dir]);
+            int end = JMath.RoundToInt(to[dir]);
             for (float otherDirFrac = slopeAbs; resultPoint[dir] != end; otherDirFrac += slopeAbs, resultPoint[dir] += dirStep)
             {
                 if (ifInterpolate)

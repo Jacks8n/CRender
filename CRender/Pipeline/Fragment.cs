@@ -1,7 +1,6 @@
 ﻿using System;
+using CUtility.Extension;
 using CUtility.Math;
-
-using static CUtility.Extension.MarshalExt;
 
 namespace CRender.Pipeline
 {
@@ -13,10 +12,10 @@ namespace CRender.Pipeline
 
         public float* FragmentData;
 
-        public void FreeUnmanaged()
+        public void Free()
         {
-            Free(Rasterization);
-            Free(FragmentData);
+            MarshalExt.Free(Rasterization);
+            MarshalExt.Free(FragmentData);
         }
     }
 }

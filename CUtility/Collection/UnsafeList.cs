@@ -20,7 +20,7 @@ namespace CUtility.Collection
 #endif
         }
 
-        public override int Count => _lengthPtr[0];
+        public override int Count { get => _lengthPtr[0]; protected set => _lengthPtr[0] = value; }
 
         public int Capacity { get; private set; }
 
@@ -28,7 +28,7 @@ namespace CUtility.Collection
         {
             _itemsPtr = Alloc<T>(capacity);
             _lengthPtr = Alloc<int>(1);
-            _lengthPtr[0] = 0;
+            Count = 0;
             Capacity = capacity;
         }
 
@@ -37,7 +37,7 @@ namespace CUtility.Collection
         {
             if (Count == Capacity)
                 AdjustCapacity(Capacity + Capacity);
-            _itemsPtr[_lengthPtr[0]++] = item;
+            _itemsPtr[Count++] = item;
         }
 
         public void AddRange<TCollection>(TCollection collection) where TCollection : UnsafeCollection<T>
@@ -45,7 +45,7 @@ namespace CUtility.Collection
             if (collection.Count + Count > Capacity)
                 AdjustCapacity(collection.Count + Count);
             Assign(Count, collection.GetPointer(), collection.Count);
-            _lengthPtr[0] += collection.Count;
+            Count += collection.Count;
         }
 
         public void EnsureVacant(int count)
@@ -61,22 +61,23 @@ namespace CUtility.Collection
         public T* ArchivePointer()
         {
             Clear();
-            _itemsPtr = Alloc<T>(DEFAULT_CAPACITY);
-            Capacity = 0;
             T* ptr = _itemsPtr;
+            _itemsPtr = Alloc<T>(DEFAULT_CAPACITY);
+            Capacity = DEFAULT_CAPACITY;
+            Count = 0;
             return ptr;
         }
 
         public void Clear()
         {
-            _lengthPtr[0] = 0;
+            Count = 0;
         }
 
         public T Pop()
         {
             if (Count < 1)
                 throw new Exception();
-            return this[--_lengthPtr[0]];
+            return this[--Count];
         }
 
         private void AdjustCapacity(int capacity)

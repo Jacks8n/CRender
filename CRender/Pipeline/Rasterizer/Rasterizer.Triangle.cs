@@ -36,7 +36,9 @@ namespace CRender.Pipeline
                     break;
             }
 
-            Vector2 top = verticesPtr[topIndex] * _resolution, mid = verticesPtr[midIndex] * _resolution, bottom = verticesPtr[3 - topIndex - midIndex] * _resolution;
+            Vector2 top = JMath.Floor(verticesPtr[topIndex] * _resolution);
+            Vector2 mid = JMath.Floor(verticesPtr[midIndex] * _resolution);
+            Vector2 bottom = JMath.Floor(verticesPtr[3 - topIndex - midIndex] * _resolution);
             bool ifInterpolate = verticesDataCount > 0;
             if (ifInterpolate)
             {
@@ -60,9 +62,15 @@ namespace CRender.Pipeline
             }
 
             if (JMath.Approx(top.Y, mid.Y))
-                HorizontalEdgeTriangle(bottom, top.X, mid.X, top.Y, isUpwardApex: false, interpolate: ifInterpolate);
+                if (top.X < mid.X)
+                    HorizontalEdgeTriangle(bottom, top.X, mid.X, top.Y, interpolate: ifInterpolate);
+                else
+                    HorizontalEdgeTriangle(bottom, mid.X, top.X, top.Y, interpolate: ifInterpolate);
             else if (JMath.Approx(mid.Y, bottom.Y))
-                HorizontalEdgeTriangle(top, mid.X, bottom.X, mid.Y, interpolate: ifInterpolate);
+                if (mid.X < bottom.X)
+                    HorizontalEdgeTriangle(top, mid.X, bottom.X, mid.Y, interpolate: ifInterpolate);
+                else
+                    HorizontalEdgeTriangle(top, bottom.X, mid.X, mid.Y, interpolate: ifInterpolate);
             else
             {
                 float midSectionX = JMath.Lerp(JMath.Ratio(mid.Y, top.Y, bottom.Y), top.X, bottom.X);
@@ -73,37 +81,53 @@ namespace CRender.Pipeline
                     mid.X = temp;
                 }
                 HorizontalEdgeTriangle(top, mid.X, midSectionX, mid.Y, interpolate: ifInterpolate);
-                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, isUpwardApex: false, skipBottomEdge: true, interpolate: ifInterpolate);
+                HorizontalEdgeTriangle(bottom, mid.X, midSectionX, mid.Y, skipBottomEdge: true, interpolate: ifInterpolate);
             }
         }
 
-        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool isUpwardApex = true, bool skipBottomEdge = false, bool interpolate = true)
+        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool skipBottomEdge = false, bool interpolate = true)
         {
-            float leftInvSlope = (apex.X - leftBottomX) / (apex.Y - bottomY);
-            float rightInvSlope = (apex.X - rightBottomX) / (apex.Y - bottomY);
+            if (skipBottomEdge && MathF.Abs(apex.Y - bottomY) < 1f)
+                return;
+
+            bool isUpward = apex.Y > bottomY;
+            float invHeight = 1f / (isUpward ? apex.Y - bottomY : apex.Y - bottomY);
+            float leftInvSlope = (apex.X - leftBottomX) * invHeight;
+            float rightInvSlope = (apex.X - rightBottomX) * invHeight;
 
             Vector2Int result = Vector2Int.Zero;
             int endX, endY;
-            if (isUpwardApex)
+            if (isUpward)
             {
-                endY = skipBottomEdge ? JMath.RoundToInt(bottomY) + 1 : JMath.RoundToInt(bottomY);
-                result.Y = JMath.RoundToInt(apex.Y);
+                endY = skipBottomEdge ? (int)bottomY + 1 : (int)bottomY;
+                result.Y = (int)apex.Y;
                 leftBottomX = rightBottomX = apex.X;
             }
             else
             {
-                endY = JMath.RoundToInt(apex.Y);
-                result.Y = skipBottomEdge ? JMath.RoundToInt(bottomY) - 1 : JMath.RoundToInt(bottomY);
-            }
-            for (; result.Y != endY; result.Y--)
-            {
-                result.X = JMath.RoundToInt(leftBottomX);
-                endX = JMath.RoundToInt(rightBottomX);
-                for (; result.X <= endX; result.X++)
+                endY = (int)apex.Y;
+                if (skipBottomEdge)
                 {
-                    OutputRasterization(result, TriangleInterpolator_Horizontal.InterpolatedValues);
+                    result.Y = (int)bottomY - 1;
+                    leftBottomX -= leftInvSlope;
+                    rightBottomX -= rightInvSlope;
+                }
+                else
+                    result.Y = (int)bottomY;
+            }
+
+            for (; result.Y >= endY; result.Y--)
+            {
+                endX = (int)rightBottomX;
+                for (result.X = (int)leftBottomX; result.X <= endX; result.X++)
+                {
                     if (interpolate)
+                    {
+                        OutputRasterization(result, TriangleInterpolator_Horizontal.InterpolatedValues);
                         TriangleInterpolator_Horizontal.IncrementStep();
+                    }
+                    else
+                        OutputRasterization(result);
                 }
 
                 leftBottomX -= leftInvSlope;

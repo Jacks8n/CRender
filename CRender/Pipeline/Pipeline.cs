@@ -29,12 +29,9 @@ namespace CRender.Pipeline
             RenderTarget = new RenderBuffer<float>(_bufferSize.X, _bufferSize.Y, channelCount: 3);
         }
 
-        #region Application
-        private int _dataSizePerPixel;
         public unsafe RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera)
         {
-            RenderTarget.Clear();
-            _rasterizedFragments.Clear();
+            Clear();
 
             int entityCount = entities.Length;
             int* primitiveCounts = stackalloc int[entityCount];
@@ -61,7 +58,8 @@ namespace CRender.Pipeline
                 for (int j = 0; j < vertexCount; j++)
                 {
                     *vertexInput.VertexPtr = vertices[j];
-                    *vertexInput.NormalPtr = normals[j];
+                    if (vertexInput.NormalPtr != null)
+                        *vertexInput.NormalPtr = normals[j];
                     ShaderInvoker<IVertexShader>.Invoke();
                     coordsOutput[j] = ViewToScreen(*vertexOutput.VertexPtr);
                 }
@@ -92,6 +90,7 @@ namespace CRender.Pipeline
 
             //This is not the proper way to output, rather for development efficiency
             int fragmentIndex = 0;
+            GenericVector<float> white = new GenericVector<float>(3) { 1f, 1f, 1f };
             for (int i = 0; i < entityCount; i++)
                 for (int j = 0; j < primitiveCounts[i]; j++)
                 {
@@ -115,12 +114,18 @@ namespace CRender.Pipeline
             ShaderValue.SinTime = MathF.Sin(ShaderValue.Time);
         }
 
+        private void Clear()
+        {
+            RenderTarget.Clear();
+            for (int i = 0; i < _rasterizedFragments.Count; i++)
+                _rasterizedFragments[i].Free();
+            _rasterizedFragments.Clear();
+        }
+
         public void Dispose()
         {
             for (int i = 0; i < _rasterizedFragments.Count; i++)
-                _rasterizedFragments[i].FreeUnmanaged();
+                _rasterizedFragments[i].Free();
         }
-
-        #endregion
     }
 }

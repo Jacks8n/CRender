@@ -2,8 +2,8 @@
 using CUtility;
 using CUtility.Math;
 
-using AppData = CShader.ShaderInOutDefault.AppData_Base;
-using VOutData = CShader.ShaderInOutDefault.VOutData_Base;
+using AppData = CShader.ShaderInOutDefault.App_Base;
+using VOutData = CShader.ShaderInOutDefault.VOut_Base;
 
 using static CShader.ShaderValue;
 using static CUtility.Math.Matrix4x4;

@@ -52,7 +52,7 @@ namespace CUtility.Collection
             else
                 _itemsPtr = Alloc<T>(itemPtrLength);
 
-            _lengthPtr[0] = itemPtrLength;
+            Count = itemPtrLength;
             return true;
         }
     }

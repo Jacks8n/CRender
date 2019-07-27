@@ -33,6 +33,13 @@ namespace CUtility.Math
             return value > REALLY_BIG_FUCKING_NUMBER ? REALLY_BIG_FUCKING_NUMBER : value;
         }
 
+        public static Vector2 Floor(Vector2 vector)
+        {
+            vector.X = MathF.Floor(vector.X);
+            vector.Y = MathF.Floor(vector.Y);
+            return vector;
+        }
+
         /// <summary>
         /// If <paramref name="left"/> approximates<paramref name="right"/> w.r.t. <see cref="EPSILON"/>
         /// </summary>

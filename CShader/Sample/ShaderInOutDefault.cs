@@ -4,14 +4,22 @@ namespace CShader
 {
     public static class ShaderInOutDefault
     {
-        public struct AppData_Base
+        public struct App_Base
         {
             public Vector4 Vertex;
         }
 
-        public struct VOutData_Base
+        public struct VOut_Base
         {
             public Vector4 Vertex;
+        }
+
+        public struct FIn_Base
+        {
+        }
+
+        public struct FOut_Base
+        {
         }
     }
 }
