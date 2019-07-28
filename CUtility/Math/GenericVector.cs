@@ -61,6 +61,33 @@ namespace CUtility.Math
             _addableIndex = other.Length;
         }
 
+        public void Write(Vector2 vector)
+        {
+            if (Length != 2)
+                throw new Exception();
+            ElementsPtr[0] = (T)(object)vector.X;
+            ElementsPtr[1] = (T)(object)vector.Y;
+        }
+
+        public void Write(Vector3 vector)
+        {
+            if (Length != 3)
+                throw new Exception();
+            ElementsPtr[0] = (T)(object)vector.X;
+            ElementsPtr[1] = (T)(object)vector.Y;
+            ElementsPtr[2] = (T)(object)vector.Z;
+        }
+
+        public void Write(Vector4 vector)
+        {
+            if (Length != 4)
+                throw new Exception();
+            ElementsPtr[0] = (T)(object)vector.X;
+            ElementsPtr[1] = (T)(object)vector.Y;
+            ElementsPtr[2] = (T)(object)vector.Z;
+            ElementsPtr[3] = (T)(object)vector.W;
+        }
+
         public void Clear()
         {
             _addableIndex = 0;
@@ -106,11 +133,6 @@ namespace CUtility.Math
                 else if (typeof(T) == typeof(int))
                     l.ElementsPtr[i] = (T)(object)((int)(object)l.ElementsPtr[i] / (int)(object)r.ElementsPtr[i]);
             return l;
-        }
-
-        public static implicit operator GenericVector<T>(Vector4 vector)
-        {
-            return new GenericVector<T>(4) { vector };
         }
 
         public void Add(T item)

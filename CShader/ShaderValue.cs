@@ -6,11 +6,11 @@ namespace CShader
 {
     public static unsafe class ShaderValue
     {
-        public static Matrix4x4* ObjectToWorld;
+        public static Matrix4x4* ObjectToWorld { get; private set; }
 
-        public static Matrix4x4* WorldToView;
+        public static Matrix4x4* WorldToView { get; private set; }
 
-        public static Matrix4x4* ObjectToView;
+        public static Matrix4x4* ObjectToView { get; private set; }
 
         public static float Time;
 
