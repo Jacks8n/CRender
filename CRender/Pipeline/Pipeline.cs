@@ -49,8 +49,8 @@ namespace CRender.Pipeline
                 #region Vertex Stage
 
                 ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
-                ShaderInOutMap vertexInput = ShaderInvoker<IVertexShader>.ActiveInputMap;
-                ShaderInOutMap vertexOutput = ShaderInvoker<IVertexShader>.ActiveOutputMap;
+                ShaderInOutInstance vertexInput = ShaderInvoker<IVertexShader>.ActiveInputMap;
+                ShaderInOutInstance vertexOutput = ShaderInvoker<IVertexShader>.ActiveOutputMap;
 
                 Model model = currentEntity.Model;
                 int vertexCount = model.Vertices.Length;
@@ -59,14 +59,14 @@ namespace CRender.Pipeline
                 {
                     vertexInput.Layout.Assign(model.ReadVertexData(j));
                     ShaderInvoker<IVertexShader>.Invoke();
-                    coordsOutput[j] = ViewToScreen(*vertexOutput.Layout.VertexPtr);
+                    coordsOutput[j] = ViewToScreen(vertexOutput.MappedLayout->VertexPtr);
                 }
 
                 #endregion
 
                 ShaderInvoker<IFragmentShader>.ChangeActiveShader(material.ShaderType, material.Shader);
-                ShaderInOutMap fragmentInput = ShaderInvoker<IFragmentShader>.ActiveInputMap;
-                ShaderInOutMap fragmentOutput = ShaderInvoker<IFragmentShader>.ActiveOutputMap;
+                ShaderInOutInstance fragmentInput = ShaderInvoker<IFragmentShader>.ActiveInputMap;
+                ShaderInOutInstance fragmentOutput = ShaderInvoker<IFragmentShader>.ActiveOutputMap;
 
                 bool needInterpolation = SemanticLayout.HasIntersection(fragmentInput.Layout, model.VerticesDataReader);
                 IPrimitive[] primitives = model.Primitives;
@@ -85,9 +85,9 @@ namespace CRender.Pipeline
                     for (int k = 0; k < fragment->PixelCount; k++)
                     {
                         if (needInterpolation)
-                            fragmentInput.Layout.SetReadWritePointer(fragment->FragmentData[k]);
+                            fragmentInput.Layout.MapTo(fragment->FragmentData[k]);
                         ShaderInvoker<IFragmentShader>.Invoke();
-                        _renderedColors.Add(*fragmentOutput.Layout.ColorPtr);
+                        _renderedColors.Add(*fragmentOutput.MappedLayout->ColorPtr);
                     }
                     fragment->FragmentColor = _renderedColors.ArchivePointer();
                 }

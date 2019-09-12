@@ -55,7 +55,7 @@ namespace CRenderTest
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
                 new Model(
-                    vertices: new Vector4[] { new Vector4(-.5f, -.25f, 0, 1f), new Vector4(.5f, -.25f, 0, 1f), new Vector4(0, .5f, 0, 1f) },
+                    vertices: new Vector3[] { new Vector3(-.5f, -.25f, 0), new Vector3(.5f, -.25f, 0), new Vector3(0, .5f, 0) },
                     primitives: new IPrimitive[] { new TrianglePrimitive(0, 1, 2) },
                     normals: null,
                     uvs: null),

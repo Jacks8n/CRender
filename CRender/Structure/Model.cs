@@ -3,8 +3,9 @@ using CShader;
 using CUtility.Math;
 using CUtility.Extension;
 using CUtility.Collection;
-using static CUtility.Extension.MarshalExtension;
 using System.Runtime.CompilerServices;
+
+using static CUtility.Extension.MarshalExtension;
 
 namespace CRender.Structure
 {
@@ -12,7 +13,7 @@ namespace CRender.Structure
     {
         public readonly SemanticLayout VerticesDataReader;
 
-        public Vector4[] Vertices { get; private set; }
+        public Vector3[] Vertices { get; private set; }
 
         public IPrimitive[] Primitives { get; private set; }
 
@@ -24,22 +25,27 @@ namespace CRender.Structure
 
         public GenericVector<float>[] VerticesData { get; private set; }
 
-        public unsafe Model(Vector4[] vertices, IPrimitive[] primitives, Vector3[] normals = null, Vector2[] uvs = null)
+        internal Cuboid Bound { get; private set; }
+
+        public unsafe Model(Vector3[] vertices, IPrimitive[] primitives, Vector3[] normals = null, Vector2[] uvs = null)
         {
             VerticesDataReader = new SemanticLayout();
-            VerticesDataReader.SetLayout(vertices, normals, uvs, null);
-            Vertices = vertices ?? throw new Exception();
+
+            Vertices = vertices ?? throw new Exception("Vertices are required");
+            VerticesDataReader.RegisterSemantic(hasVertex: true, normals != null, uvs != null);
             Primitives = primitives;
             UVs = uvs;
             Normals = normals;
-            VerticesDataCount = 4
-                              + (uvs == null ? 0 : 2)
-                              + (normals == null ? 0 : 3);
+
+            VerticesDataCount = (vertices == null ? 0 : sizeof(Vector4) / sizeof(float))
+                              + (uvs == null ? 0 : sizeof(Vector2) / sizeof(float))
+                              + (normals == null ? 0 : sizeof(Vector3) / sizeof(float));
             VerticesData = new GenericVector<float>[vertices.Length];
+            Bound = Cuboid.NegativeMax;
             for (int i = 0; i < VerticesData.Length; i++)
             {
-                VerticesData[i] = new GenericVector<float>(VerticesDataCount);
-                VerticesData[i].Add(vertices[i]);
+                VerticesData[i] = new GenericVector<float>(VerticesDataCount) { vertices[i], 1f };
+                Bound.ExtendToContain(vertices[i]);
                 if (normals != null)
                     VerticesData[i].Add(normals[i]);
                 if (uvs != null)
@@ -50,7 +56,7 @@ namespace CRender.Structure
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal unsafe SemanticLayout ReadVertexData(int index)
         {
-            VerticesDataReader.SetReadWritePointer(VerticesData[index].ElementsPtr);
+            VerticesDataReader.MapTo(VerticesData[index].ElementsPtr);
             return VerticesDataReader;
         }
 
@@ -61,15 +67,15 @@ namespace CRender.Structure
         {
             size *= .5f;
             return new Model(
-                vertices: new Vector4[] {
-                    new Vector4(-size, -size, -size, 1f),
-                    new Vector4(size, -size, -size, 1f),
-                    new Vector4(size, size, -size, 1f),
-                    new Vector4(-size, size, -size, 1f),
-                    new Vector4(-size, -size, size, 1f),
-                    new Vector4(size, -size, size, 1f),
-                    new Vector4(size, size, size, 1f),
-                    new Vector4(-size, size, size, 1f), },
+                vertices: new Vector3[] {
+                    new Vector3(-size, -size, -size),
+                    new Vector3(size, -size, -size),
+                    new Vector3(size, size, -size),
+                    new Vector3(-size, size, -size),
+                    new Vector3(-size, -size, size),
+                    new Vector3(size, -size, size),
+                    new Vector3(size, size, size),
+                    new Vector3(-size, size, size), },
 
                 primitives: isWireframe ?
                 new IPrimitive[] {
@@ -119,12 +125,12 @@ namespace CRender.Structure
         {
             size *= .5f;
             return new Model(
-                vertices: new Vector4[]
+                vertices: new Vector3[]
                 {
-                    new Vector4(size, size, 0f, 1f),
-                    new Vector4(size, -size, 0f, 1f),
-                    new Vector4(-size, -size, 0f, 1f),
-                    new Vector4(-size, size, 0f, 1f)
+                    new Vector3(size, size, 0f),
+                    new Vector3(size, -size, 0f),
+                    new Vector3(-size, -size, 0f),
+                    new Vector3(-size, size, 0f)
                 },
                 primitives: new IPrimitive[]
                 {

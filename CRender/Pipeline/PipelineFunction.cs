@@ -8,19 +8,24 @@ using static CUtility.Extension.MarshalExtension;
 
 namespace CRender.Pipeline
 {
-    public partial class Pipeline
+    public unsafe partial class Pipeline
     {
+        private void Cull()
+        {
+
+        }
+
         #region Rasterization
 
         // TODO: Fix projection
-        private Vector2 ViewToScreen(Vector4 vpos) => new Vector2(vpos.Y * .5f + .5f, vpos.Z * .5f + .5f);
+        private Vector2 ViewToScreen(Vector4* vpos) => new Vector2(vpos->Y * .5f + .5f, vpos->Z * .5f + .5f);
 
         private void BeginRasterize()
         {
             Rasterizer.StartRasterize(_bufferSizeF);
         }
 
-        private unsafe void Rasterize(in Vector2* screenCoords, in IPrimitive primitive, Fragment* result)
+        private void Rasterize(in Vector2* screenCoords, in IPrimitive primitive, Fragment* result)
         {
             Vector2* coords = stackalloc Vector2[primitive.VertexCount];
             for (int i = 0; i < primitive.VertexCount; i++)
@@ -28,7 +33,7 @@ namespace CRender.Pipeline
             Rasterize(primitive.VertexCount, result, coords, null, 0);
         }
 
-        private unsafe void Rasterize(in Vector2* screenCoords, in GenericVector<float>[] verticesData, int verticesDataCount, in IPrimitive primitive, Fragment* result)
+        private void Rasterize(in Vector2* screenCoords, in GenericVector<float>[] verticesData, int verticesDataCount, in IPrimitive primitive, Fragment* result)
         {
             Vector2* coords = stackalloc Vector2[primitive.VertexCount];
             float** primitiveData = stackalloc float*[primitive.VertexCount];
@@ -40,7 +45,7 @@ namespace CRender.Pipeline
             Rasterize(primitive.VertexCount, result, coords, primitiveData, verticesDataCount);
         }
 
-        private static unsafe void Rasterize(int vertexCount, Fragment* result, Vector2* coords, in float** verticesData, int verticesDataCount)
+        private static void Rasterize(int vertexCount, Fragment* result, Vector2* coords, in float** verticesData, int verticesDataCount)
         {
             switch (vertexCount)
             {

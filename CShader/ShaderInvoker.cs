@@ -5,9 +5,9 @@ namespace CShader
 {
     public unsafe class ShaderInvoker<TStage> : JSingleton<ShaderInvoker<TStage>> where TStage : IShaderStage<TStage>
     {
-        public static ShaderInOutMap ActiveInputMap { get; private set; }
+        public static ShaderInOutInstance ActiveInputMap { get; private set; }
 
-        public static ShaderInOutMap ActiveOutputMap { get; private set; }
+        public static ShaderInOutInstance ActiveOutputMap { get; private set; }
 
         private static TStage _activeShader;
 
@@ -23,7 +23,7 @@ namespace CShader
             if (_activeShaderType == shaderType)
                 return false;
 
-            ShaderInOutMap[] inoutMaps = ShaderInterpreter<TStage>.GetInterpretedInOut(shaderType);
+            ShaderInOutInstance[] inoutMaps = ShaderInterpreter<TStage>.GetInterpretedInOut(shaderType);
             ActiveInputMap = inoutMaps[0];
             ActiveOutputMap = inoutMaps[1];
             _activeShader = (TStage)shader;

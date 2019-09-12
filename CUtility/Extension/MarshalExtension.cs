@@ -32,6 +32,12 @@ namespace CUtility.Extension
             return (T*)Marshal.ReAllocHGlobal((IntPtr)ptr, (IntPtr)(sizeof(T) * length));
         }
 
+        public static void Move<T>(T* from, T* to, int length = 1) where T : unmanaged
+        {
+            while (--length >= 0)
+                *to = *from;
+        }
+
         public static void Free(void* ptr)
         {
             if (ptr == null)

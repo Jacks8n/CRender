@@ -21,6 +21,10 @@
 
         public static readonly Vector3 UnitZNegative = new Vector3(0, 0, -1);
 
+        public static readonly Vector3 MaxValue = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+
+        public static readonly Vector3 MinValue = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
         #endregion
 
         public float X, Y, Z;

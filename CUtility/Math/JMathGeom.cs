@@ -31,8 +31,7 @@ namespace CUtility.Math
                 maxY = MathLib.Max(vertices[i].Y, maxY);
                 maxZ = MathLib.Max(vertices[i].Z, maxZ);
             }
-            return new Cuboid(maxX - minX, maxY - minY, maxZ - minZ,
-                pos: new Vector3((minX + maxX) * .5f, (minY + maxY) * .5f, (minZ + maxZ) * .5f));
+            return new Cuboid(minX, minY, minZ, maxX, maxY, maxZ);
         }
 
         /// <summary>

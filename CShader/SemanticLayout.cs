@@ -8,150 +8,141 @@ namespace CShader
     [Flags]
     internal enum ShaderSemantic { None = 0, Vertex = 1, Normal = 2, UV = 4, Color = 8, All = Vertex | Normal | UV | Color }
 
-    public unsafe class SemanticLayout
+    public unsafe class SemanticLayout : IDisposable
     {
-        internal ShaderSemantic RegisteredSemantic { get; private set; }
-
-        public Vector4* VertexPtr { get; private set; }
-
-        public Vector3* NormalPtr { get; private set; }
-
-        public Vector2* UVPtr { get; private set; }
-
-        public Vector4* ColorPtr { get; private set; }
-
-        internal int TotalBufferSize;
-
-        private const int OFFSET_NULL = -1;
-
-        private static readonly byte* DiscardBuffer;
-
-        private int _vertexOffset;
-
-        private int _normalOffset;
-
-        private int _uvOffset;
-
-        private int _colorOffset;
-
-        static SemanticLayout()
+        public struct MappedLayout
         {
-            DiscardBuffer = AllocBytes<byte>(sizeof(Vector4));
-            FreeWhenExit(DiscardBuffer);
+            public Vector4* VertexPtr { get; internal set; }
+
+            public Vector3* NormalPtr { get; internal set; }
+
+            public Vector2* UVPtr { get; internal set; }
+
+            public Vector4* ColorPtr { get; internal set; }
         }
 
-        public static bool HasIntersection(SemanticLayout l,SemanticLayout r)
+        internal int TotalBufferSize { get; private set; }
+
+        private readonly MappedLayout* MappedLayoutPtr;
+
+        public SemanticLayout()
         {
-            return (l.RegisteredSemantic & r.RegisteredSemantic) != ShaderSemantic.None;
+            MappedLayoutPtr = Alloc<MappedLayout>();
         }
 
-        public void SetReadWritePointer<T>(T* pointer) where T : unmanaged
+        public static bool HasIntersection(SemanticLayout l, SemanticLayout r)
+        {
+            return (l._registeredSemantic & r._registeredSemantic) != ShaderSemantic.None;
+        }
+
+        public MappedLayout* MapTo<T>(T* pointer) where T : unmanaged
         {
             byte* ptr = (byte*)pointer;
-            VertexPtr = (Vector4*)(_vertexOffset == OFFSET_NULL ? DiscardBuffer : ptr + _vertexOffset);
-            NormalPtr = (Vector3*)(_normalOffset == OFFSET_NULL ? DiscardBuffer : ptr + _normalOffset);
-            UVPtr = (Vector2*)(_uvOffset == OFFSET_NULL ? DiscardBuffer : ptr + _uvOffset);
-            ColorPtr = (Vector4*)(_colorOffset == OFFSET_NULL ? DiscardBuffer : ptr + _colorOffset);
+            MappedLayoutPtr->VertexPtr = (Vector4*)(_vertexOffset == OFFSET_NULL ? null : ptr + _vertexOffset);
+            MappedLayoutPtr->NormalPtr = (Vector3*)(_normalOffset == OFFSET_NULL ? null : ptr + _normalOffset);
+            MappedLayoutPtr->UVPtr = (Vector2*)(_uvOffset == OFFSET_NULL ? null : ptr + _uvOffset);
+            MappedLayoutPtr->ColorPtr = (Vector4*)(_colorOffset == OFFSET_NULL ? null : ptr + _colorOffset);
+            return MappedLayoutPtr;
         }
 
         public void Assign(SemanticLayout another)
         {
-            ShaderSemantic commonSemantic = RegisteredSemantic & another.RegisteredSemantic;
+            ShaderSemantic commonSemantic = _registeredSemantic & another._registeredSemantic;
             if (commonSemantic == ShaderSemantic.None)
                 return;
-            *VertexPtr = *another.VertexPtr;
-            *NormalPtr = *another.NormalPtr;
-            *UVPtr = *another.UVPtr;
-            *ColorPtr = *another.ColorPtr;
+
+            MappedLayout* anotherLayoutPtr = another.MappedLayoutPtr;
+            if (commonSemantic.HasFlag(ShaderSemantic.Vertex))
+                Move(anotherLayoutPtr->VertexPtr, MappedLayoutPtr->VertexPtr);
+            if (commonSemantic.HasFlag(ShaderSemantic.Normal))
+                Move(anotherLayoutPtr->NormalPtr, MappedLayoutPtr->NormalPtr);
+            if (commonSemantic.HasFlag(ShaderSemantic.UV))
+                Move(anotherLayoutPtr->UVPtr, MappedLayoutPtr->UVPtr);
+            if (commonSemantic.HasFlag(ShaderSemantic.Color))
+                Move(anotherLayoutPtr->ColorPtr, MappedLayoutPtr->ColorPtr);
         }
 
-        public void SetLayout(Vector4[] vertices, Vector3[] normals, Vector2[] uvs, Vector4[] colors)
+        #region Registering
+
+        private const int OFFSET_NULL = -1;
+
+        private bool _isRegistering = false;
+
+        private ShaderSemantic _registeredSemantic;
+
+        private int _vertexOffset = OFFSET_NULL;
+
+        private int _normalOffset = OFFSET_NULL;
+
+        private int _uvOffset = OFFSET_NULL;
+
+        private int _colorOffset = OFFSET_NULL;
+
+        internal void BeginRegister()
         {
-            int offset = 0;
-            RegisteredSemantic = ShaderSemantic.None;
-            if (vertices != null)
-            {
-                _vertexOffset = offset;
-                RegisteredSemantic |= ShaderSemantic.Vertex;
-                offset += sizeof(Vector4);
-            }
-            else
-                _vertexOffset = OFFSET_NULL;
-            if (normals != null)
-            {
-                _normalOffset = offset;
-                RegisteredSemantic |= ShaderSemantic.Normal;
-                offset += sizeof(Vector3);
-            }
-            else
-                _normalOffset = OFFSET_NULL;
-            if (uvs != null)
-            {
-                _uvOffset = offset;
-                RegisteredSemantic |= ShaderSemantic.UV;
-                offset += sizeof(Vector2);
-            }
-            else
-                _uvOffset = OFFSET_NULL;
-            if (colors != null)
-            {
-                _colorOffset = offset;
-                RegisteredSemantic |= ShaderSemantic.Color;
-                offset += sizeof(Vector4);
-            }
-            else
-                _colorOffset = OFFSET_NULL;
-            TotalBufferSize = offset;
+            if (_isRegistering)
+                throw new Exception("Registering has begun");
+            _isRegistering = true;
         }
 
-        internal void SetLayout(ShaderSemantic semantic)
+        internal void RegisterVertex()
         {
-            int offset = 0;
-            if (semantic.HasFlag(ShaderSemantic.Vertex))
-            {
-                _vertexOffset = offset;
-                offset += sizeof(Vector4);
-            }
-            else
-                _vertexOffset = OFFSET_NULL;
-            if (semantic.HasFlag(ShaderSemantic.Normal))
-            {
-                _normalOffset = offset;
-                offset += sizeof(Vector3);
-            }
-            else
-                _normalOffset = OFFSET_NULL;
-            if (semantic.HasFlag(ShaderSemantic.UV))
-            {
-                _uvOffset = offset;
-                offset += sizeof(Vector2);
-            }
-            else
-                _uvOffset = OFFSET_NULL;
-            if (semantic.HasFlag(ShaderSemantic.Color))
-            {
-                _colorOffset = offset;
-                offset += sizeof(Vector4);
-            }
-            else
-                _colorOffset = OFFSET_NULL;
-            TotalBufferSize = offset;
-            RegisteredSemantic = semantic;
+            AssertIfNotRegistering();
+            _vertexOffset = TotalBufferSize;
+            _registeredSemantic |= ShaderSemantic.Vertex;
+            TotalBufferSize += sizeof(Vector4);
         }
 
-        internal static int SizeOfSemantic(ShaderSemantic semantic)
+        internal void RegisterNormal()
         {
-            switch (semantic)
-            {
-                case ShaderSemantic.Vertex:
-                case ShaderSemantic.Color:
-                    return sizeof(Vector4);
-                case ShaderSemantic.Normal:
-                    return sizeof(Vector3);
-                case ShaderSemantic.UV:
-                    return sizeof(Vector2);
-            }
-            return 0;
+            AssertIfNotRegistering();
+            _normalOffset = TotalBufferSize;
+            _registeredSemantic |= ShaderSemantic.Normal;
+            TotalBufferSize += sizeof(Vector3);
+        }
+
+        internal void RegisterUV()
+        {
+            AssertIfNotRegistering();
+            _uvOffset = TotalBufferSize;
+            _registeredSemantic |= ShaderSemantic.UV;
+            TotalBufferSize += sizeof(Vector2);
+        }
+
+        internal void RegisterColor()
+        {
+            AssertIfNotRegistering();
+            _colorOffset = TotalBufferSize;
+            _registeredSemantic |= ShaderSemantic.Color;
+            TotalBufferSize += sizeof(Vector4);
+        }
+
+        internal void EndRegister()
+        {
+            AssertIfNotRegistering();
+            _isRegistering = false;
+        }
+
+        private void AssertIfNotRegistering()
+        {
+            if (!_isRegistering)
+                throw new Exception("Registering hasn't begun");
+        }
+
+        #endregion
+
+        internal void Clear()
+        {
+            _vertexOffset = OFFSET_NULL;
+            _normalOffset = OFFSET_NULL;
+            _uvOffset = OFFSET_NULL;
+            _colorOffset = OFFSET_NULL;
+            TotalBufferSize = 0;
+        }
+
+        void IDisposable.Dispose()
+        {
+            Free(MappedLayoutPtr);
         }
     }
 }

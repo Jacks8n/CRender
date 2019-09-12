@@ -11,55 +11,58 @@ namespace CShader
         private const string SEMATIC_UV = "UV";
         private const string SEMATIC_COLOR = "Color";
 
-        private static readonly Dictionary<Type, ShaderInOutMap> InterpretedInOutMap = new Dictionary<Type, ShaderInOutMap>();
+        private static readonly Dictionary<Type, ShaderInOutInstance> InterpretedInOutMap = new Dictionary<Type, ShaderInOutInstance>();
 
-        public static ShaderInOutMap GetInterpretedMap<TInOut>()
+        public static ShaderInOutInstance GetInterpretedMap<TInOut>()
         {
-            InterpretedInOutMap.TryGetValue(typeof(TInOut), out ShaderInOutMap inoutMap);
-            return inoutMap;
+            if (InterpretedInOutMap.TryGetValue(typeof(TInOut), out ShaderInOutInstance inoutMap))
+                return inoutMap;
+            else
+                throw new Exception($"{typeof(TInOut).ToString()} hasn't been interpreted");
         }
 
-        public static ShaderInOutMap InterpretInput(ParameterInfo inputType)
+        public static ShaderInOutInstance InterpretInput(ParameterInfo inputType)
         {
             return Interpret<ShaderInputAttribute>(inputType);
         }
 
-        public static ShaderInOutMap InterpretOutput(ParameterInfo outputType)
+        public static ShaderInOutInstance InterpretOutput(ParameterInfo outputType)
         {
             return Interpret<ShaderOutputAttribute>(outputType);
         }
 
-        private static ShaderInOutMap Interpret<T>(ParameterInfo inoutType) where T : ShaderInOutAttributeBase
+        private static ShaderInOutInstance Interpret<T>(ParameterInfo inoutType) where T : ShaderInOutAttributeBase
         {
             Type type = inoutType.GetCustomAttribute<T>()?.Type;
 
             if (type == null)
                 throw new Exception("Shader Input/Output Attribute is required for parameter and return value");
-            if (InterpretedInOutMap.TryGetValue(type, out ShaderInOutMap inoutMap))
+            if (InterpretedInOutMap.TryGetValue(type, out ShaderInOutInstance inoutMap))
                 return inoutMap;
 
-            FieldInfo[] fields = type.GetFields();
-            inoutMap = new ShaderInOutMap();
-
-            ShaderSemantic semantic = ShaderSemantic.None;
-            for (int i = 0; i < fields.Length; i++)
-                switch (fields[i].Name)
+            FieldInfo[] inoutFields = type.GetFields();
+            SemanticLayout layout = new SemanticLayout();
+            layout.BeginRegister();
+            for (int i = 0; i < inoutFields.Length; i++)
+                switch (inoutFields[i].Name)
                 {
                     case SEMATIC_VERTEX:
-                        semantic |= ShaderSemantic.Vertex;
+                        layout.RegisterVertex();
                         break;
                     case SEMATIC_NORMAL:
-                        semantic |= ShaderSemantic.Normal;
+                        layout.RegisterNormal();
                         break;
                     case SEMATIC_UV:
-                        semantic |= ShaderSemantic.UV;
+                        layout.RegisterUV();
                         break;
                     case SEMATIC_COLOR:
-                        semantic |= ShaderSemantic.Color;
+                        layout.RegisterColor();
                         break;
                 }
-            inoutMap.GenerateMap(semantic);
+            layout.EndRegister();
 
+            inoutMap = new ShaderInOutInstance(layout);
+            inoutMap.Instantiate();
             InterpretedInOutMap.Add(type, inoutMap);
             return inoutMap;
         }

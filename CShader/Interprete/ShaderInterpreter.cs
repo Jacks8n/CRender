@@ -7,11 +7,11 @@ namespace CShader
 {
     public static class ShaderInterpreter<TStage> where TStage : IShaderStage<TStage>
     {
-        private static readonly Dictionary<Type, ShaderInOutMap[]> InterpretedShaderInputs = new Dictionary<Type, ShaderInOutMap[]>();
+        private const string METHOD_NAME_MAIN = "Main";
 
-        private static readonly Type[] _paramTypes = new Type[] { typeof(void*), typeof(void*), typeof(IShaderStage<TStage>) };
+        private static readonly Type[] METHOD_ARG_TYPES = new Type[] { typeof(void*), typeof(void*), typeof(IShaderStage<TStage>) };
 
-        private static bool _initialized = false;
+        private static readonly Dictionary<Type, ShaderInOutInstance[]> InterpretedShaderInputs = new Dictionary<Type, ShaderInOutInstance[]>();
 
         static ShaderInterpreter()
         {
@@ -32,21 +32,17 @@ namespace CShader
         /// </summary>
         public static void InterpretAll(Assembly targetAssembly)
         {
-            if (_initialized)
-                return;
-
             foreach (Type type in targetAssembly
                 .DefinedTypes
                 .Where(item =>
                     item.IsClass
                     && item.ImplementedInterfaces.Contains(typeof(TStage))))
                 InterpretMethod(type);
-            _initialized = true;
         }
 
-        public static ShaderInOutMap[] GetInterpretedInOut(Type type)
+        public static ShaderInOutInstance[] GetInterpretedInOut(Type type)
         {
-            if (InterpretedShaderInputs.TryGetValue(type, out ShaderInOutMap[] inoutMap))
+            if (InterpretedShaderInputs.TryGetValue(type, out ShaderInOutInstance[] inoutMap))
                 return inoutMap;
             throw new Exception($"{type} hasn't been interpreted");
         }
@@ -58,12 +54,12 @@ namespace CShader
 
         private static void InterpretMethod(Type shaderType)
         {
-            MethodInfo methodInfo = shaderType.GetMethod("Main", _paramTypes);
-            if (methodInfo == null)
+            MethodInfo mainMethodInfo = shaderType.GetMethod(METHOD_NAME_MAIN, METHOD_ARG_TYPES);
+            if (mainMethodInfo == null)
                 return;
 
-            ParameterInfo[] parameters = methodInfo.GetParameters();
-            InterpretedShaderInputs.Add(shaderType, new ShaderInOutMap[] {
+            ParameterInfo[] parameters = mainMethodInfo.GetParameters();
+            InterpretedShaderInputs.Add(shaderType, new ShaderInOutInstance[] {
                 ShaderInOutInterpreter.InterpretInput(parameters[0]),
                 ShaderInOutInterpreter.InterpretOutput(parameters[1]) });
         }
