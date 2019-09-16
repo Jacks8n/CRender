@@ -30,7 +30,7 @@ namespace CShader
             App* appPtr = (App*)inputPtr;
             VOut* vOutPtr = (VOut*)outputPtr;
 
-            Mul(ObjectToView, &appPtr->Vertex, &vOutPtr->Vertex);
+            Mul(ObjectToScreen, &appPtr->Vertex, &vOutPtr->Vertex);
         }
 
         public unsafe void Main(

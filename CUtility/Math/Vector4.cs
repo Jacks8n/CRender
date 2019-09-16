@@ -1,6 +1,9 @@
-﻿namespace CUtility.Math
+﻿using System.Runtime.InteropServices;
+
+namespace CUtility.Math
 {
     [System.Diagnostics.DebuggerDisplay("X:{X} Y:{Y} Z:{Z} W:{W}")]
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector4
     {
         #region Constants

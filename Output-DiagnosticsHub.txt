@@ -1,0 +1,14 @@
+﻿Profiling of 'CRenderTest' started.
+CRenderTest has exited.
+Profiling of 'CRenderTest' stopped.
+Symbols failed to load for C:\windows\system32\ntdll.dll. Cannot find or open the PDB file.
+Symbols loaded for C:\Users\Jacks0n\Documents\GitHub\CRender\CRenderTest\bin\Release\netcoreapp2.2\CRenderTest.dll.
+Symbols failed to load for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.2.6\System.Console.dll. Cannot find or open the PDB file.
+Symbols failed to load for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.2.6\coreclr.dll. Cannot find or open the PDB file.
+Symbols loaded for C:\Users\Jacks0n\Documents\GitHub\CRender\CRenderTest\bin\Release\netcoreapp2.2\CUtility.dll.
+Symbols failed to load for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.2.6\System.Private.CoreLib.dll. Cannot find or open the PDB file.
+Symbols loaded for C:\Users\Jacks0n\Documents\GitHub\CRender\CRenderTest\bin\Release\netcoreapp2.2\CRender.dll.
+Symbols loaded for C:\Users\Jacks0n\Documents\GitHub\CRender\CRenderTest\bin\Release\netcoreapp2.2\CShader.dll.
+Symbols failed to load for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.2.6\System.Console.dll. Cannot find or open the PDB file.
+Symbols failed to load for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.2.6\System.Runtime.Extensions.dll. Cannot find or open the PDB file.
+Symbols failed to load for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.2.6\System.Private.CoreLib.dll. Cannot find or open the PDB file.

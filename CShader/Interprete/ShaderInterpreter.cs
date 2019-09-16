@@ -54,6 +54,9 @@ namespace CShader
 
         private static void InterpretMethod(Type shaderType)
         {
+            if (InterpretedShaderInputs.ContainsKey(shaderType))
+                return;
+
             MethodInfo mainMethodInfo = shaderType.GetMethod(METHOD_NAME_MAIN, METHOD_ARG_TYPES);
             if (mainMethodInfo == null)
                 return;

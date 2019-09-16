@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 using static CUtility.Extension.MarshalExtension;
 
@@ -6,11 +7,11 @@ namespace CShader
 {
     public unsafe class ShaderInOutInstance : IDisposable
     {
-        public readonly SemanticLayout Layout;
-
-        public SemanticLayout.MappedLayout* MappedLayout { get; private set; }
+        public MappedLayout* MappedLayout { get; private set; }
 
         internal byte* InOutBufferPtr { get; private set; } = null;
+
+        internal readonly SemanticLayout Layout;
 
         private bool _instantiated = false;
 
@@ -23,8 +24,8 @@ namespace CShader
         {
             AssertIfInstantiated();
 
-            InOutBufferPtr = AllocBytes<byte>(Layout.TotalBufferSize);
-            MappedLayout = Layout.MapTo(InOutBufferPtr);
+            InOutBufferPtr = Alloc<byte>(Layout.TotalBufferSize);
+            MappedLayout = Layout.MapToValues(InOutBufferPtr);
             _instantiated = true;
         }
 

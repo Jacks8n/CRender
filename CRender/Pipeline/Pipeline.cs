@@ -5,7 +5,11 @@ using CRender.Structure;
 using CShader;
 using CUtility.Collection;
 using CUtility.Math;
+
 using static CUtility.Math.Matrix4x4;
+
+using VertexInvoker = CShader.ShaderInvoker<CShader.IVertexShader>;
+using FragmentInvoker = CShader.ShaderInvoker<CShader.IFragmentShader>;
 
 namespace CRender.Pipeline
 {
@@ -14,6 +18,11 @@ namespace CRender.Pipeline
         private static readonly Material DEFAULT_MATERIAL = Material.NewMaterial(ShaderDefault.Instance);
 
         public RenderBuffer<float> RenderTarget { get; }
+
+        private static readonly unsafe Matrix4x4* ViewToScreen = AllocMatrix(0f, .5f,  0f, .5f,
+                                                                             0f,  0f, .5f, .5f,
+                                                                             0f,  0f,  0f,  0f,
+                                                                             0f,  0f,  0f,  1f);
 
         private readonly Vector2 _bufferSizeF;
 
@@ -38,61 +47,55 @@ namespace CRender.Pipeline
             int* primitiveCounts = stackalloc int[entityCount];
 
             BeginRasterize();
-            SetGlobalValues(camera);
+            SetPerRenderValues(camera);
             for (int i = 0; i < entityCount; i++)
             {
                 RenderEntity currentEntity = entities[i];
-                SetObjectValues(currentEntity);
+                SetPerObjectValues(currentEntity);
 
                 Material material = currentEntity.Material ?? DEFAULT_MATERIAL;
 
                 #region Vertex Stage
 
-                ShaderInvoker<IVertexShader>.ChangeActiveShader(material.ShaderType, material.Shader);
-                ShaderInOutInstance vertexInput = ShaderInvoker<IVertexShader>.ActiveInputMap;
-                ShaderInOutInstance vertexOutput = ShaderInvoker<IVertexShader>.ActiveOutputMap;
+                //Prepare vertex shader
+                VertexInvoker.ChangeActiveShader(material.ShaderType, material.Shader);
 
+                //Invoke vertex shader
                 Model model = currentEntity.Model;
                 int vertexCount = model.Vertices.Length;
                 Vector2* coordsOutput = stackalloc Vector2[vertexCount];
                 for (int j = 0; j < vertexCount; j++)
                 {
-                    vertexInput.Layout.Assign(model.ReadVertexData(j));
-                    ShaderInvoker<IVertexShader>.Invoke();
-                    coordsOutput[j] = ViewToScreen(vertexOutput.MappedLayout->VertexPtr);
+                    VertexInvoker.Invoke(model.ReadVertexData(j));
+                    coordsOutput[j] = *(Vector2*)VertexInvoker.OutputLayoutPtr->VertexPtr;
                 }
 
                 #endregion
 
-                ShaderInvoker<IFragmentShader>.ChangeActiveShader(material.ShaderType, material.Shader);
-                ShaderInOutInstance fragmentInput = ShaderInvoker<IFragmentShader>.ActiveInputMap;
-                ShaderInOutInstance fragmentOutput = ShaderInvoker<IFragmentShader>.ActiveOutputMap;
+                #region Fragment Stage
 
-                bool needInterpolation = SemanticLayout.HasIntersection(fragmentInput.Layout, model.VerticesDataReader);
+                FragmentInvoker.ChangeActiveShader(material.ShaderType, material.Shader);
+
                 IPrimitive[] primitives = model.Primitives;
                 primitiveCounts[i] = primitives.Length;
                 _rasterizedFragments.AddEmpty(primitives.Length);
-                if (needInterpolation)
-                    for (int j = primitives.Length; j > 0; j--)
-                        Rasterize(coordsOutput, model.VerticesData, model.VerticesDataCount, primitives[j - 1], _rasterizedFragments.GetPointer(_rasterizedFragments.Count - j));
-                else
-                    for (int j = primitives.Length; j > 0; j--)
-                        Rasterize(coordsOutput, primitives[j - 1], _rasterizedFragments.GetPointer(_rasterizedFragments.Count - j));
+                for (int j = primitives.Length; j > 0; j--)
+                    Rasterize(coordsOutput, model.VerticesData, model.VerticesDataCount, primitives[j - 1], _rasterizedFragments.GetPointer(_rasterizedFragments.Count - j));
 
                 for (int j = _rasterizedFragments.Count - primitives.Length; j < _rasterizedFragments.Count; j++)
                 {
                     Fragment* fragment = _rasterizedFragments.GetPointer(j);
                     for (int k = 0; k < fragment->PixelCount; k++)
                     {
-                        if (needInterpolation)
-                            fragmentInput.Layout.MapTo(fragment->FragmentData[k]);
-                        ShaderInvoker<IFragmentShader>.Invoke();
-                        _renderedColors.Add(*fragmentOutput.MappedLayout->ColorPtr);
+                        FragmentInvoker.Invoke(fragment->FragmentData[k]);
+                        _renderedColors.Add(*FragmentInvoker.OutputLayoutPtr->ColorPtr);
                     }
                     fragment->FragmentColor = _renderedColors.ArchivePointer();
                 }
             }
             EndRasterize();
+
+            #endregion
 
             //Octree is so annoying
             //TODO: View frustum clip, triangle clip, pixel clip
@@ -110,13 +113,18 @@ namespace CRender.Pipeline
             return RenderTarget;
         }
 
-        private static unsafe void SetObjectValues(RenderEntity currentEntity)
+        private unsafe void SetPerObjectValues(RenderEntity currentEntity)
         {
             *ShaderValue.ObjectToWorld = *currentEntity.Transform.LocalToWorld;
             Mul(ShaderValue.WorldToView, ShaderValue.ObjectToWorld, ShaderValue.ObjectToView);
+            Mul(ViewToScreen, ShaderValue.ObjectToView, ShaderValue.ObjectToScreen);
+
+            //TODO Normalize
+            //if (!JMath.Approx(ShaderValue.ObjectToView->M44, 1f))
+            //    Divide(ShaderValue.ObjectToView, ShaderValue.ObjectToView->M44, ShaderValue.ObjectToView);
         }
 
-        private static unsafe void SetGlobalValues(ICamera camera)
+        private unsafe void SetPerRenderValues<T>(T camera) where T : ICamera
         {
             *ShaderValue.WorldToView = *camera.WorldToView;
             ShaderValue.Time = CRenderer.CurrentSecond;

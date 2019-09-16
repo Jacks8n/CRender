@@ -6,11 +6,13 @@ namespace CShader
 {
     public static unsafe class ShaderValue
     {
-        public static Matrix4x4* ObjectToWorld { get; private set; }
+        public static readonly Matrix4x4* ObjectToWorld;
 
-        public static Matrix4x4* WorldToView { get; private set; }
+        public static readonly Matrix4x4* WorldToView;
 
-        public static Matrix4x4* ObjectToView { get; private set; }
+        public static readonly Matrix4x4* ObjectToView;
+
+        public static readonly Matrix4x4* ObjectToScreen;
 
         public static float Time;
 
@@ -20,10 +22,10 @@ namespace CShader
 
         static ShaderValue()
         {
-            ObjectToWorld = Alloc<Matrix4x4>(3);
+            ObjectToWorld = AllocPermanant<Matrix4x4>(4);
             WorldToView = ObjectToWorld + 1;
             ObjectToView = WorldToView + 1;
-            FreeWhenExit(ObjectToWorld);
+            ObjectToScreen = ObjectToView + 1;
         }
     }
 }

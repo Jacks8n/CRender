@@ -1,4 +1,6 @@
-﻿namespace CUtility.Math
+﻿using System;
+
+namespace CUtility.Math
 {
     [System.Diagnostics.DebuggerDisplay("X: {X} Y: {Y} Z: {Z}")]
     public struct Vector3
@@ -29,6 +31,12 @@
 
         public float X, Y, Z;
 
+        public float SqrMagnitude => X * X + Y * Y + Z * Z;
+
+        public float Magnitude => MathF.Sqrt(SqrMagnitude);
+
+        public Vector3 Normalized => this * (1f / Magnitude);
+
         public Vector3(float xyz)
         {
             X = Y = Z = xyz;
@@ -49,6 +57,12 @@
 
         public static Vector3 operator -(Vector3 l, Vector3 r) => new Vector3(l.X - r.X, l.Y - r.Y, l.Z - r.Z);
 
-        public static Vector3 operator *(Vector3 value, float scale) => new Vector3(value.X * scale, value.Y * scale, value.Z * scale);
+        public static Vector3 operator *(Vector3 value, float multiplier) => new Vector3(value.X * multiplier, value.Y * multiplier, value.Z * multiplier);
+
+        public static Vector3 operator /(Vector3 value, float divisor)
+        {
+            divisor = 1f / divisor;
+            return new Vector3(value.X * divisor, value.Y * divisor, value.Z * divisor);
+        }
     }
 }

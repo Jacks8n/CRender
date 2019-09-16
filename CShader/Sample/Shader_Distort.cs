@@ -26,7 +26,7 @@ namespace CShader.Sample
 
             Vector4 pos = appPtr->Vertex;
             pos.Z *= MathF.Sin(pos.X + pos.Y + Time * .5f);
-            Mul(ObjectToView, &pos, &vOutPtr->Vertex);
+            Mul(ObjectToScreen, &pos, &vOutPtr->Vertex);
         }
     }
 }

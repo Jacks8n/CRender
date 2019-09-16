@@ -32,7 +32,9 @@ namespace CRender.Structure
             VerticesDataReader = new SemanticLayout();
 
             Vertices = vertices ?? throw new Exception("Vertices are required");
+            VerticesDataReader.BeginRegister();
             VerticesDataReader.RegisterSemantic(hasVertex: true, normals != null, uvs != null);
+            VerticesDataReader.EndRegister();
             Primitives = primitives;
             UVs = uvs;
             Normals = normals;
@@ -56,7 +58,7 @@ namespace CRender.Structure
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal unsafe SemanticLayout ReadVertexData(int index)
         {
-            VerticesDataReader.MapTo(VerticesData[index].ElementsPtr);
+            VerticesDataReader.MapToValues(VerticesData[index].ElementsPtr);
             return VerticesDataReader;
         }
 

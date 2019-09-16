@@ -10,33 +10,19 @@ namespace CRender.Pipeline
 {
     public unsafe partial class Pipeline
     {
-        private void Cull()
-        {
-
-        }
-
         #region Rasterization
-
-        // TODO: Fix projection
-        private Vector2 ViewToScreen(Vector4* vpos) => new Vector2(vpos->Y * .5f + .5f, vpos->Z * .5f + .5f);
 
         private void BeginRasterize()
         {
             Rasterizer.StartRasterize(_bufferSizeF);
         }
 
-        private void Rasterize(in Vector2* screenCoords, in IPrimitive primitive, Fragment* result)
-        {
-            Vector2* coords = stackalloc Vector2[primitive.VertexCount];
-            for (int i = 0; i < primitive.VertexCount; i++)
-                coords[i] = screenCoords[primitive.Indices[i]];
-            Rasterize(primitive.VertexCount, result, coords, null, 0);
-        }
-
         private void Rasterize(in Vector2* screenCoords, in GenericVector<float>[] verticesData, int verticesDataCount, in IPrimitive primitive, Fragment* result)
         {
             Vector2* coords = stackalloc Vector2[primitive.VertexCount];
             float** primitiveData = stackalloc float*[primitive.VertexCount];
+
+            //TODO not all data need to be interpolated
             for (int i = 0; i < primitive.VertexCount; i++)
             {
                 coords[i] = screenCoords[primitive.Indices[i]];

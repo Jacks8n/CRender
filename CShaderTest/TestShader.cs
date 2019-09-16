@@ -5,17 +5,17 @@ namespace CShaderTest
 {
     public struct VertexInputTest
     {
-        public Vector4 Position;
+        public Vector4 Vertex;
     }
 
     public struct FragmentInputTest
     {
-        public Vector4 Position;
+        public Vector4 Vertex;
     }
 
     public struct FragmentOutputTest
     {
-        public Vector4 Position;
+        public Vector4 Vertex;
     }
 
     public class TestShader : IVertexShader, IFragmentShader
@@ -30,7 +30,7 @@ namespace CShaderTest
             VertexInputTest* vin = (VertexInputTest*)inputPtr;
             FragmentInputTest* vout = (FragmentInputTest*)outputPtr;
 
-            vout->Position = vin->Position * 2.5f;
+            vout->Vertex = vin->Vertex * 2.5f;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace CShaderTest
             FragmentInputTest* fin = (FragmentInputTest*)inputPtr;
             FragmentOutputTest* fout = (FragmentOutputTest*)outputPtr;
 
-            fout->Position = fin->Position + 1;
+            fout->Vertex = fin->Vertex + 1;
         }
     }
 }

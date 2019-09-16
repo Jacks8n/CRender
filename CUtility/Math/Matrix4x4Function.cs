@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using static CUtility.Extension.MarshalExtension;
 
 namespace CUtility.Math
@@ -13,44 +14,52 @@ namespace CUtility.Math
 
         static Matrix4x4()
         {
-            MATRIX_TEMP = Alloc<Matrix4x4>(2);
-            VECTOR4_TEMP = Alloc<Vector4>();
+            MATRIX_TEMP = AllocPermanant<Matrix4x4>(2);
+            VECTOR4_TEMP = AllocPermanant<Vector4>();
             ARITHMETIC_TEMP = MATRIX_TEMP + 1;
-            FreeWhenExit(MATRIX_TEMP);
-            FreeWhenExit(VECTOR4_TEMP);
         }
 
-        public static Matrix4x4* Mul(Matrix4x4* matrix, Matrix4x4* transform)
+        public static Matrix4x4* Mul(Matrix4x4* transform, Matrix4x4* matrix)
         {
             *MATRIX_TEMP = *matrix;
-            Mul(MATRIX_TEMP, transform, matrix);
+            Mul(transform, MATRIX_TEMP, matrix);
             return matrix;
         }
 
-        /// <summary>
-        /// <paramref name="result"/> must differ from <paramref name="matrix"/>, otherwise invoke <see cref="Mul(Matrix4x4*, Matrix4x4*)"/> instead
-        /// </summary>
-        public static void Mul(Matrix4x4* matrix, Matrix4x4* transform, Matrix4x4* result)
+        public static Matrix4x4* Mul(Matrix4x4* matrix, float scalar, Matrix4x4* result)
         {
-            result->M11 = matrix->M11 * transform->M11 + matrix->M21 * transform->M12 + matrix->M31 * transform->M13 + matrix->M41 * transform->M14;
-            result->M12 = matrix->M12 * transform->M11 + matrix->M22 * transform->M12 + matrix->M32 * transform->M13 + matrix->M42 * transform->M14;
-            result->M13 = matrix->M13 * transform->M11 + matrix->M23 * transform->M12 + matrix->M33 * transform->M13 + matrix->M43 * transform->M14;
-            result->M14 = matrix->M14 * transform->M11 + matrix->M24 * transform->M12 + matrix->M34 * transform->M13 + matrix->M44 * transform->M14;
+            result->M11 = matrix->M11 * scalar; result->M21 = matrix->M21 * scalar; result->M31 = matrix->M31 * scalar; result->M41 = matrix->M41 * scalar;
+            result->M12 = matrix->M12 * scalar; result->M22 = matrix->M22 * scalar; result->M32 = matrix->M32 * scalar; result->M42 = matrix->M42 * scalar;
+            result->M13 = matrix->M13 * scalar; result->M23 = matrix->M23 * scalar; result->M33 = matrix->M33 * scalar; result->M43 = matrix->M43 * scalar;
+            result->M14 = matrix->M14 * scalar; result->M24 = matrix->M24 * scalar; result->M34 = matrix->M34 * scalar; result->M44 = matrix->M44 * scalar;
+            return result;
+        }
 
-            result->M21 = matrix->M11 * transform->M21 + matrix->M21 * transform->M22 + matrix->M31 * transform->M23 + matrix->M41 * transform->M24;
-            result->M22 = matrix->M12 * transform->M21 + matrix->M22 * transform->M22 + matrix->M32 * transform->M23 + matrix->M42 * transform->M24;
-            result->M23 = matrix->M13 * transform->M21 + matrix->M23 * transform->M22 + matrix->M33 * transform->M23 + matrix->M43 * transform->M24;
-            result->M24 = matrix->M14 * transform->M21 + matrix->M24 * transform->M22 + matrix->M34 * transform->M23 + matrix->M44 * transform->M24;
+        /// <summary>
+        /// <paramref name="result"/> must differ from <paramref name="transform"/> and <paramref name="matrix"/>, otherwise invoke <see cref="Mul(Matrix4x4*, Matrix4x4*)"/> instead
+        /// </summary>
+        public static Matrix4x4* Mul(Matrix4x4* transform, Matrix4x4* matrix, Matrix4x4* result)
+        {
+            result->M11 = transform->M11 * matrix->M11 + transform->M21 * matrix->M12 + transform->M31 * matrix->M13 + transform->M41 * matrix->M14;
+            result->M12 = transform->M12 * matrix->M11 + transform->M22 * matrix->M12 + transform->M32 * matrix->M13 + transform->M42 * matrix->M14;
+            result->M13 = transform->M13 * matrix->M11 + transform->M23 * matrix->M12 + transform->M33 * matrix->M13 + transform->M43 * matrix->M14;
+            result->M14 = transform->M14 * matrix->M11 + transform->M24 * matrix->M12 + transform->M34 * matrix->M13 + transform->M44 * matrix->M14;
 
-            result->M31 = matrix->M11 * transform->M31 + matrix->M21 * transform->M32 + matrix->M31 * transform->M33 + matrix->M41 * transform->M34;
-            result->M32 = matrix->M12 * transform->M31 + matrix->M22 * transform->M32 + matrix->M32 * transform->M33 + matrix->M42 * transform->M34;
-            result->M33 = matrix->M13 * transform->M31 + matrix->M23 * transform->M32 + matrix->M33 * transform->M33 + matrix->M43 * transform->M34;
-            result->M34 = matrix->M14 * transform->M31 + matrix->M24 * transform->M32 + matrix->M34 * transform->M33 + matrix->M44 * transform->M34;
+            result->M21 = transform->M11 * matrix->M21 + transform->M21 * matrix->M22 + transform->M31 * matrix->M23 + transform->M41 * matrix->M24;
+            result->M22 = transform->M12 * matrix->M21 + transform->M22 * matrix->M22 + transform->M32 * matrix->M23 + transform->M42 * matrix->M24;
+            result->M23 = transform->M13 * matrix->M21 + transform->M23 * matrix->M22 + transform->M33 * matrix->M23 + transform->M43 * matrix->M24;
+            result->M24 = transform->M14 * matrix->M21 + transform->M24 * matrix->M22 + transform->M34 * matrix->M23 + transform->M44 * matrix->M24;
 
-            result->M41 = matrix->M11 * transform->M41 + matrix->M21 * transform->M42 + matrix->M31 * transform->M43 + matrix->M41 * transform->M44;
-            result->M42 = matrix->M12 * transform->M41 + matrix->M22 * transform->M42 + matrix->M32 * transform->M43 + matrix->M42 * transform->M44;
-            result->M43 = matrix->M13 * transform->M41 + matrix->M23 * transform->M42 + matrix->M33 * transform->M43 + matrix->M43 * transform->M44;
-            result->M44 = matrix->M14 * transform->M41 + matrix->M24 * transform->M42 + matrix->M34 * transform->M43 + matrix->M44 * transform->M44;
+            result->M31 = transform->M11 * matrix->M31 + transform->M21 * matrix->M32 + transform->M31 * matrix->M33 + transform->M41 * matrix->M34;
+            result->M32 = transform->M12 * matrix->M31 + transform->M22 * matrix->M32 + transform->M32 * matrix->M33 + transform->M42 * matrix->M34;
+            result->M33 = transform->M13 * matrix->M31 + transform->M23 * matrix->M32 + transform->M33 * matrix->M33 + transform->M43 * matrix->M34;
+            result->M34 = transform->M14 * matrix->M31 + transform->M24 * matrix->M32 + transform->M34 * matrix->M33 + transform->M44 * matrix->M34;
+
+            result->M41 = transform->M11 * matrix->M41 + transform->M21 * matrix->M42 + transform->M31 * matrix->M43 + transform->M41 * matrix->M44;
+            result->M42 = transform->M12 * matrix->M41 + transform->M22 * matrix->M42 + transform->M32 * matrix->M43 + transform->M42 * matrix->M44;
+            result->M43 = transform->M13 * matrix->M41 + transform->M23 * matrix->M42 + transform->M33 * matrix->M43 + transform->M43 * matrix->M44;
+            result->M44 = transform->M14 * matrix->M41 + transform->M24 * matrix->M42 + transform->M34 * matrix->M43 + transform->M44 * matrix->M44;
+            return result;
         }
 
         public static Vector4* Mul(Matrix4x4* transform, Vector4* vector)
@@ -63,12 +72,19 @@ namespace CUtility.Math
         /// <summary>
         /// <paramref name="result"/> must differ from <paramref name="vector"/>, otherwise invoke <see cref="Mul(Matrix4x4*, Vector4*)"/> instead
         /// </summary>
-        public static void Mul(Matrix4x4* transform, Vector4* vector, Vector4* result)
+        public static Vector4* Mul(Matrix4x4* transform, Vector4* vector, Vector4* result)
         {
             result->X = vector->X * transform->M11 + vector->Y * transform->M21 + vector->Z * transform->M31 + vector->W * transform->M41;
             result->Y = vector->X * transform->M12 + vector->Y * transform->M22 + vector->Z * transform->M32 + vector->W * transform->M42;
             result->Z = vector->X * transform->M13 + vector->Y * transform->M23 + vector->Z * transform->M33 + vector->W * transform->M43;
             result->W = vector->X * transform->M14 + vector->Y * transform->M24 + vector->Z * transform->M34 + vector->W * transform->M44;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix4x4* Divide(Matrix4x4* matrix, float scalar, Matrix4x4* result)
+        {
+            return Mul(matrix, 1f / scalar, result);
         }
 
         public static Matrix4x4* Transpose(Matrix4x4* matrix)
@@ -139,7 +155,7 @@ namespace CUtility.Math
             return Scale(scale.X, scale.Y, scale.Z, result);
         }
 
-        public static Matrix4x4* Scale(float x,float y,float z,Matrix4x4* result)
+        public static Matrix4x4* Scale(float x, float y, float z, Matrix4x4* result)
         {
             result->M11 = x; result->M21 = 0; result->M31 = 0; result->M41 = 0;
             result->M12 = 0; result->M22 = y; result->M32 = 0; result->M42 = 0;

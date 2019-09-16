@@ -24,7 +24,19 @@ namespace CUtility.Extension
 
         public static T* AllocBytes<T>(int byteCount) where T : unmanaged
         {
-            return byteCount < 1 ? null : (T*)Marshal.AllocHGlobal(byteCount);
+            return (T*)Marshal.AllocHGlobal(byteCount);
+        }
+
+        public static T* AllocPermanant<T>(int length = 1) where T : unmanaged
+        {
+            return AllocBytesPermanent<T>(sizeof(T) * length);
+        }
+
+        public static T* AllocBytesPermanent<T>(int byteCount) where T : unmanaged
+        {
+            T* ptr = AllocBytes<T>(byteCount);
+            FreeWhenExit(ptr);
+            return ptr;
         }
 
         public static T* ReAlloc<T>(T* ptr, int length) where T : unmanaged
@@ -36,6 +48,13 @@ namespace CUtility.Extension
         {
             while (--length >= 0)
                 *to = *from;
+        }
+
+        public static void Set<T0, T1>(T0* to, T1 value, int length = 1) where T0 : unmanaged where T1 : unmanaged
+        {
+            T1* ptr = (T1*)to;
+            while (--length > -1)
+                ptr[length] = value;
         }
 
         public static void Free(void* ptr)

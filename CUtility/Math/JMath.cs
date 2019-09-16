@@ -14,7 +14,7 @@ namespace CUtility.Math
 
         public const float SQRT3 = 1.732050807568877f;
 
-        public const float EPSILON = 1e-5f;
+        public const float EPSILON = 1e-6f;
 
         private const float REALLY_BIG_FUCKING_NUMBER = 1e8f;
 

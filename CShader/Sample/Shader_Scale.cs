@@ -27,7 +27,7 @@ namespace CShader.Sample
             VOutData* vOutPtr = (VOutData*)outputPtr;
 
             Vector4 vertex = appPtr->Vertex * (SinTime * .3f + 1);
-            Mul(ObjectToView, &vertex, &vOutPtr->Vertex);
+            Mul(ObjectToScreen, &vertex, &vOutPtr->Vertex);
         }
     }
 }

@@ -16,19 +16,18 @@ namespace CRender.Structure
 
         static Transform()
         {
-            TRANSLATION_MATRIX_TEMP = Alloc<Matrix4x4>(3);
+            TRANSLATION_MATRIX_TEMP = AllocPermanant<Matrix4x4>(3);
             ROTATION_MATRIX_TEMP = TRANSLATION_MATRIX_TEMP + 1;
             SCALE_MATRIX_TEMP = ROTATION_MATRIX_TEMP + 1;
-            FreeWhenExit(TRANSLATION_MATRIX_TEMP);
         }
 
-        public Matrix4x4* LocalToWorld => Mul(Translation(Position, TRANSLATION_MATRIX_TEMP),
-            Mul(RotationEuler(Rotation, ROTATION_MATRIX_TEMP),
-                Scale(Scale, SCALE_MATRIX_TEMP)));
+        public Matrix4x4* LocalToWorld => Mul(Mul(Translation(Position, TRANSLATION_MATRIX_TEMP),
+            RotationEuler(Rotation, ROTATION_MATRIX_TEMP)),
+            Scale(Scale, SCALE_MATRIX_TEMP));
 
-        public Matrix4x4* WorldToLocal => Mul(Scale(1f / Scale.X, 1f / Scale.Y, 1f / Scale.Z, SCALE_MATRIX_TEMP),
-            Mul(RotationEulerInverse(Rotation, ROTATION_MATRIX_TEMP)
-                , Translation(-Position, TRANSLATION_MATRIX_TEMP)));
+        public Matrix4x4* WorldToLocal => Mul(Mul(Scale(1f / Scale.X, 1f / Scale.Y, 1f / Scale.Z, SCALE_MATRIX_TEMP),
+            RotationEulerInverse(Rotation, ROTATION_MATRIX_TEMP)),
+            Translation(-Position, TRANSLATION_MATRIX_TEMP));
 
         public Vector3 Position;
 
