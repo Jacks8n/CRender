@@ -7,7 +7,7 @@
 #if DEBUG
             get => index > -1 && index < Count ? _itemsPtr[index] : throw new System.IndexOutOfRangeException();
             set => _itemsPtr[index > -1 && index < Count ? index : throw new System.IndexOutOfRangeException()] = value;
-#elif RELEASE
+#else
             get => _itemsPtr[index];
             set => _itemsPtr[index] = value;
 #endif

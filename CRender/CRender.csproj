@@ -10,6 +10,7 @@
     <WarningLevel>1</WarningLevel>
     <ApplicationIcon />
     <StartupObject />
+    <Configurations>Debug;Release;Release-Linux</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

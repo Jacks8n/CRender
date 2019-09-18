@@ -10,11 +10,11 @@ namespace CUtility.Extension
 
         static MarshalExtension()
         {
-            ConsoleEvent.OnCtrlClose += () =>
-              {
-                  for (int i = 0; i < _ptrsToFree.Count; i++)
-                      Marshal.FreeHGlobal(_ptrsToFree[i]);
-              };
+            AppDomain.CurrentDomain.DomainUnload += (sender, args) =>
+               {
+                   for (int i = 0; i < _ptrsToFree.Count; i++)
+                       Marshal.FreeHGlobal(_ptrsToFree[i]);
+               };
         }
 
         public static T* Alloc<T>(int length = 1) where T : unmanaged

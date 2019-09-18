@@ -19,10 +19,10 @@ namespace CRender.Pipeline
 
         public RenderBuffer<float> RenderTarget { get; }
 
-        private static readonly unsafe Matrix4x4* ViewToScreen = AllocMatrix(0f, .5f,  0f, .5f,
-                                                                             0f,  0f, .5f, .5f,
-                                                                             0f,  0f,  0f,  0f,
-                                                                             0f,  0f,  0f,  1f);
+        private static readonly unsafe Matrix4x4* ViewToScreen = AllocMatrix(0f, .5f, 0f, .5f,
+                                                                             0f, 0f, .5f, .5f,
+                                                                             0f, 0f, 0f, 0f,
+                                                                             0f, 0f, 0f, 1f);
 
         private readonly Vector2 _bufferSizeF;
 
@@ -92,10 +92,11 @@ namespace CRender.Pipeline
                     }
                     fragment->FragmentColor = _renderedColors.ArchivePointer();
                 }
+
+                #endregion
             }
             EndRasterize();
 
-            #endregion
 
             //Octree is so annoying
             //TODO: View frustum clip, triangle clip, pixel clip

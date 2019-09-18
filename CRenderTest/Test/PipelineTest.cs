@@ -2,7 +2,6 @@
 using CRender;
 using CRender.Pipeline;
 using CRender.Structure;
-using CShader.Sample;
 using CUtility;
 using CUtility.Math;
 
@@ -105,7 +104,7 @@ namespace CRenderTest
         private static void DrawRotatingObject(IPipeline pipeline, RenderEntity[] entitiesApply, ICamera camera, CharRenderBuffer<float> charBuffer)
         {
             float framerate = 60f;
-            float time = 7.5f;
+            float time = 4.233f;
             int totalFrame = (int)(framerate * time);
             float angleStep = JMath.PI_TWO / totalFrame;
             int frameInterval = (int)(1000f / framerate);

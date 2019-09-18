@@ -8,6 +8,7 @@
     <RootNamespace>CRenderTest</RootNamespace>
     <StartupObject>CRenderTest.Program</StartupObject>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Debug;Release;Release-Linux</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

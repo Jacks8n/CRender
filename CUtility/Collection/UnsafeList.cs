@@ -14,7 +14,7 @@ namespace CUtility.Collection
 #if DEBUG
             get => index > -1 && index < Capacity ? _itemsPtr[index] : throw new IndexOutOfRangeException();
             set => _itemsPtr[index > -1 && index < Capacity ? index : throw new IndexOutOfRangeException()] = value;
-#elif RELEASE
+#else
             get => _itemsPtr[index];
             set => _itemsPtr[index] = value;
 #endif
