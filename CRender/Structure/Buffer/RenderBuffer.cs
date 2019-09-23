@@ -1,9 +1,10 @@
 ﻿using System;
+using CRender.IO;
 using CUtility.Math;
 
 namespace CRender.Structure
 {
-    public class RenderBuffer<T> : IRenderBuffer<GenericVector<T>> where T : unmanaged
+    public class RenderBuffer<T> : IRenderBuffer<GenericVector<T>>, IPPMImage where T : unmanaged
     {
         public int ChannelCount { get; private set; }
 
@@ -78,6 +79,13 @@ namespace CRender.Structure
         private int UVToIndex(int u, int v)
         {
             return (Height - v - 1) * Width + u;
+        }
+
+        public GenericVector<float> GetColorAt(int u, int v)
+        {
+            if (typeof(T) == typeof(float))
+                return (GenericVector<float>)(object)_pixels[UVToIndex(u, v)];
+            throw new Exception();
         }
     }
 }

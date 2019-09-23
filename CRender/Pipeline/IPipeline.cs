@@ -6,6 +6,6 @@ namespace CRender.Pipeline
     {
         RenderBuffer<float> RenderTarget { get; }
 
-        RenderBuffer<float> Draw(RenderEntity[] entities, ICamera camera);
+        RenderBuffer<float> Draw<T>(RenderEntity[] entities, T camera) where T : ICamera;
     }
 }

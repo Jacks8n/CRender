@@ -2,7 +2,7 @@
 using System.Threading;
 using CRender;
 using CUtility.Math;
-using CRender.Pipeline;
+using CRender.Pipeline.Rasterization;
 using CRender.Structure;
 using NUnit.Framework;
 
@@ -25,7 +25,8 @@ namespace CRenderTest
                 points[1] = new Vector2(.5f, .5f) - dir;
                 points[2] = new Vector2(.5f, .5f) + orthoDir;
                 points[3] = new Vector2(.5f, .5f) - orthoDir;
-                Rasterizer.Line(points, null, 0);
+                LinePrimitive* line = stackalloc LinePrimitive[1] { new LinePrimitive(points, null, 0) };
+                Rasterizer.Rasterize<Line, LinePrimitive>(line);
                 tex0.WritePixel(Rasterizer.ContriveResult(), new GenericVector<float>(3) { 1f, 1f, 1f });
                 CRenderer.Render(texChar);
                 tex0.Clear();
@@ -47,9 +48,10 @@ namespace CRenderTest
         [Test]
         public static unsafe void TestRasterizerLine()
         {
-            Vector2* line = stackalloc Vector2[2] { Vector2.Zero, Vector2.One };
+            Vector2* coords = stackalloc Vector2[2] { Vector2.Zero, Vector2.One };
             Rasterizer.StartRasterize(new Vector2(100, 100));
-            Rasterizer.Line(line, null, 0);
+            LinePrimitive* line = stackalloc LinePrimitive[1] { new LinePrimitive(coords, null, 0) };
+            Rasterizer.Rasterize<Line, LinePrimitive>(line);
             var resultArr = Rasterizer.ContriveResult();
             Assert.AreEqual(resultArr.Length, 100, 1);
             Rasterizer.EndRasterize();

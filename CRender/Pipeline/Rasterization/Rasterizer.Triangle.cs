@@ -1,19 +1,33 @@
 ﻿using System;
+using CUtility;
 using CUtility.Collection;
 using CUtility.Math;
 
 using static CUtility.Math.JMathGeom;
 
-namespace CRender.Pipeline
+namespace CRender.Pipeline.Rasterization
 {
-    public sealed unsafe partial class Rasterizer
+    public sealed unsafe class Triangle : JSingleton<Triangle>, IPrimitiveRasterizer<TrianglePrimitive>
     {
-        private static readonly Interpolator TriangleInterpolator_Horizontal = new Interpolator();
+        public Rasterizer.RasterizerEntry RasterizerEntry { get; }
 
-        private static readonly Interpolator TriangleInterpolator_Vertical = new Interpolator(TriangleInterpolator_Horizontal.InterpolatedValues);
+        public Vector2 Resolution { private get; set; }
 
-        public static void Triangle(Vector2* verticesPtr, float** verticesDataPtr, int verticesDataCount)
+        private readonly Interpolator TriangleInterpolator_Horizontal;
+
+        private readonly Interpolator TriangleInterpolator_Vertical;
+
+        public Triangle()
         {
+            TriangleInterpolator_Horizontal = new Interpolator();
+            TriangleInterpolator_Vertical = new Interpolator(TriangleInterpolator_Horizontal.InterpolatedValues);
+        }
+
+        public void Rasterize(TrianglePrimitive* trianglePtr)
+        {
+            Vector2* verticesPtr = trianglePtr->CoordsPtr;
+            float** verticesDataPtr = trianglePtr->VerticesDataPtr;
+            int verticesDataCount = trianglePtr->VerticesDataCount;
             int topIndex =
                 verticesPtr->Y > verticesPtr[1].Y ?
                     verticesPtr->Y > verticesPtr[2].Y ?
@@ -36,9 +50,9 @@ namespace CRender.Pipeline
                     break;
             }
 
-            Vector2 top = JMath.Floor(verticesPtr[topIndex] * _resolution);
-            Vector2 mid = JMath.Floor(verticesPtr[midIndex] * _resolution);
-            Vector2 bottom = JMath.Floor(verticesPtr[3 - topIndex - midIndex] * _resolution);
+            Vector2 top = JMath.Floor(verticesPtr[topIndex] * Resolution);
+            Vector2 mid = JMath.Floor(verticesPtr[midIndex] * Resolution);
+            Vector2 bottom = JMath.Floor(verticesPtr[3 - topIndex - midIndex] * Resolution);
             bool ifInterpolate = verticesDataCount > 0;
             if (ifInterpolate)
             {
@@ -85,7 +99,7 @@ namespace CRender.Pipeline
             }
         }
 
-        private static void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool skipBottomEdge = false, bool interpolate = true)
+        private void HorizontalEdgeTriangle(Vector2 apex, float leftBottomX, float rightBottomX, float bottomY, bool skipBottomEdge = false, bool interpolate = true)
         {
             if (skipBottomEdge && MathF.Abs(apex.Y - bottomY) < 1f)
                 return;
@@ -123,11 +137,11 @@ namespace CRender.Pipeline
                 {
                     if (interpolate)
                     {
-                        OutputRasterization(result, TriangleInterpolator_Horizontal.InterpolatedValues);
+                        RasterizerEntry.OutputRasterization(result, TriangleInterpolator_Horizontal.InterpolatedValues);
                         TriangleInterpolator_Horizontal.IncrementStep();
                     }
                     else
-                        OutputRasterization(result);
+                        RasterizerEntry.OutputRasterization(result);
                 }
 
                 leftBottomX -= leftInvSlope;

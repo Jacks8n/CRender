@@ -1,21 +1,38 @@
 ﻿using System;
+using CUtility;
 using CUtility.StupidWrapper;
 using CUtility.Collection;
 using CUtility.Math;
 using CRender.Structure;
+using System.Runtime.CompilerServices;
 
 using static CUtility.Extension.MarshalExtension;
 
-namespace CRender.Pipeline
+namespace CRender.Pipeline.Rasterization
 {
     /// <summary>
     /// Rasterize primitives, based on the resolution passed in <see cref="StartRasterize(Vector2Int)"/>
     /// </summary>
-    public sealed unsafe partial class Rasterizer : IDisposable
+    public static unsafe class Rasterizer
     {
+        public struct RasterizerEntry
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void OutputRasterization(Vector2Int pixelCoord)
+            {
+                Rasterizer.OutputRasterization(pixelCoord);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void OutputRasterization(Vector2Int pixelCoord, UnsafeList<float> fragmentData)
+            {
+                Rasterizer.OutputRasterization(pixelCoord, fragmentData);
+            }
+        }
+
         public static int RasterizedPixelCount => _pixelCoords.Count;
 
-        private static bool _initialized = false;
+        private static bool _rasterizing = false;
 
         private static Vector2 _resolution = Vector2.Zero;
 
@@ -25,22 +42,38 @@ namespace CRender.Pipeline
 
         private static readonly UnsafeList<FloatPointer> _fragmentData = new UnsafeList<FloatPointer>();
 
+        static Rasterizer()
+        {
+            AppDomain.CurrentDomain.DomainUnload += (sender, args) =>
+            {
+                if (_rasterizing)
+                    EndRasterize();
+            };
+        }
+
         public static void StartRasterize(Vector2 resolution)
         {
-            if (_initialized)
+            if (_rasterizing)
                 throw new Exception("Rasterization has begun");
-            _initialized = true;
+            _rasterizing = true;
 
             _resolution = resolution;
             _pixelSize.X = 1f / _resolution.X;
             _pixelSize.Y = 1f / _resolution.Y;
         }
 
+        public static void Rasterize<TRasterizer, TPrimitive>(TPrimitive* primitivePtr) where TRasterizer : JSingleton<TRasterizer>, IPrimitiveRasterizer<TPrimitive>, new() where TPrimitive : unmanaged, IPrimitive
+        {
+            TRasterizer rasterizer = JSingleton<TRasterizer>.Instance;
+            rasterizer.Resolution = _resolution;
+            rasterizer.Rasterize(primitivePtr);
+        }
+
         public static void EndRasterize()
         {
-            if (!_initialized)
+            if (!_rasterizing)
                 throw new Exception("Rasterization hasn't begun");
-            _initialized = false;
+            _rasterizing = false;
 
             Clear();
         }
@@ -81,12 +114,6 @@ namespace CRender.Pipeline
         {
             _pixelCoords.Add(pixelCoord);
             _fragmentData.Add(fragmentData.ArchivePointer());
-        }
-
-        void IDisposable.Dispose()
-        {
-            if (_initialized)
-                EndRasterize();
         }
     }
 }

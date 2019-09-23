@@ -1,12 +1,14 @@
 ﻿using System;
+using CShader.Attribute;
+using CShader.Interpret;
 using CUtility;
 using CUtility.Math;
 
-using AppData = CShader.ShaderInOutDefault.App_Base;
-using VOutData = CShader.ShaderInOutDefault.VOut_Base;
-
 using static CShader.ShaderValue;
 using static CUtility.Math.Matrix4x4;
+
+using AppData = CShader.ShaderInOutDefault.App_Base;
+using VOutData = CShader.ShaderInOutDefault.VOut_Base;
 
 namespace CShader.Sample
 {
@@ -14,7 +16,7 @@ namespace CShader.Sample
     {
         static Shader_Distort()
         {
-            ShaderInterpreter<IVertexShader>.Interpret<Shader_Distort>();
+            ShaderInterpreter<IVertexShader, ShaderInOutPatternDefault>.Interpret<Shader_Distort>();
         }
 
         public unsafe void Main(

@@ -1,5 +1,7 @@
 ﻿using CUtility;
 using CUtility.Math;
+using CShader.Attribute;
+using CShader.Interpret;
 
 using static CShader.ShaderValue;
 using static CUtility.Math.Matrix4x4;
@@ -16,7 +18,7 @@ namespace CShader.Sample
     {
         static Shader_Scale()
         {
-            ShaderInterpreter<IVertexShader>.Interpret<Shader_Scale>();
+            ShaderInterpreter<IVertexShader, ShaderInOutPatternDefault>.Interpret<Shader_Scale>();
         }
 
         public void Main(

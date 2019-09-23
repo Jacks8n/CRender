@@ -17,6 +17,7 @@ namespace CRenderTest
             CRenderSettings.IsCountFrames = true;
             CRenderSettings.IsShowFPS = true;
 
+            //PPMTest.TestSaveImageToDesktop();
             PipelineTest.TestRenderFaces();
             //PipelineTest.TestRenderCube();
             //PipelineTest.TestRenderTriangle();

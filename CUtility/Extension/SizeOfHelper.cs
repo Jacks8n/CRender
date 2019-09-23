@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace CShader
 {
-    public static class SizeOfHelper
+    public static unsafe class SizeOfHelper
     {
+        private static readonly Dictionary<Type, int> SizeDictionary = new Dictionary<Type, int>();
+
+        public static int SizeOfPointer => sizeof(IntPtr);
+
         public static int SizeOf(Type type)
         {
             if (type == typeof(byte))
@@ -31,13 +34,18 @@ namespace CShader
                 return sizeof(double);
             else if (type == typeof(decimal))
                 return sizeof(decimal);
-
-            IEnumerable<FieldInfo> fields = type.GetRuntimeFields().Where((field) => field.Attributes == FieldAttributes.Public);
-            if (fields.Count() > 0)
+            else if (type.IsPointer)
+                return SizeOfPointer;
+            else if (type.IsValueType)
             {
-                int size = 0;
-                foreach (FieldInfo field in fields)
-                    size += SizeOf(field.FieldType);
+                if (SizeDictionary.TryGetValue(type, out int size))
+                    return size;
+
+                size = 0;
+                FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+                for (int i = 0; i < fields.Length; i++)
+                    size += SizeOf(fields[i].FieldType);
+                SizeDictionary.Add(type, size);
                 return size;
             }
 

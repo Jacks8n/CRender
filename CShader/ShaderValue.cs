@@ -20,6 +20,10 @@ namespace CShader
 
         public static float SinTime2;
 
+        public static float CosTime;
+
+        public static float CosTime2;
+
         static ShaderValue()
         {
             ObjectToWorld = AllocPermanant<Matrix4x4>(4);

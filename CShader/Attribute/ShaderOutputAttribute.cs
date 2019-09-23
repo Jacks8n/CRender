@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace CShader
+namespace CShader.Attribute
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public class ShaderOutputAttribute : ShaderInOutAttributeBase
+    public class ShaderOutputAttribute : TypeBasedAttributeBase
     {
         public ShaderOutputAttribute(Type outputType) : base(outputType)
         {

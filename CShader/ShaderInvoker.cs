@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using CShader.Interpret;
 
 namespace CShader
 {
-    public unsafe static class ShaderInvoker<TStage> where TStage : IShaderStage<TStage>
+    public unsafe static class ShaderInvoker<TStage, TPattern> where TStage : IShaderStage<TStage> where TPattern : unmanaged
     {
-        public static MappedLayout* InputLayoutPtr { get; private set; }
+        public static SubPatternStruct<TPattern> ActiveInputMap;
 
-        public static MappedLayout* OutputLayoutPtr { get; private set; }
-
-        private static ShaderInOutInstance ActiveInputMap;
-
-        private static ShaderInOutInstance ActiveOutputMap;
+        public static SubPatternStruct<TPattern> ActiveOutputMap;
 
         private static TStage _activeShader;
 
@@ -28,25 +25,25 @@ namespace CShader
             if (_activeShaderType == shaderType)
                 return;
 
-            ShaderInOutInstance[] inoutMaps = ShaderInterpreter<TStage>.GetInterpretedInOut(shaderType);
-            ActiveInputMap = inoutMaps[0];
-            ActiveOutputMap = inoutMaps[1];
-            InputLayoutPtr = ActiveInputMap.MappedLayout;
-            OutputLayoutPtr = ActiveOutputMap.MappedLayout;
+            SubPatternStruct<TPattern>[] inout = ShaderInterpreter<TStage, TPattern>.GetInterpretedInOut(shaderType);
+            ActiveInputMap = inout[0];
+            ActiveOutputMap = inout[1];
             _activeShader = (TStage)shader;
             _activeShaderType = shaderType;
         }
 
-        public static void Invoke<T>(T* inputPointer) where T : unmanaged
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Invoke(byte* inputPtr)
         {
-            ActiveInputMap.Layout.MapToValues(inputPointer);
-            _activeShader.Main(ActiveInputMap.InOutBufferPtr, ActiveOutputMap.InOutBufferPtr, null);
+            ActiveInputMap.Read(inputPtr);
+            _activeShader.Main(ActiveInputMap.InstancePtr, ActiveOutputMap.InstancePtr, null);
         }
 
-        public static void Invoke(SemanticLayout input)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Invoke(TPattern* inputPtr)
         {
-            ActiveInputMap.Layout.AssignValues(input);
-            _activeShader.Main(ActiveInputMap.InOutBufferPtr, ActiveOutputMap.InOutBufferPtr, null);
+            ActiveInputMap.Read(inputPtr);
+            _activeShader.Main(ActiveInputMap.InstancePtr, ActiveOutputMap.InstancePtr, null);
         }
     }
 }

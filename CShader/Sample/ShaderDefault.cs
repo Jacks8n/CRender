@@ -1,14 +1,16 @@
 ﻿using System;
+using CShader.Attribute;
+using CShader.Interpret;
 using CUtility;
 using CUtility.Math;
 
-using App = CShader.ShaderInOutDefault.App_Base;
-using VOut = CShader.ShaderInOutDefault.VOut_Base;
-using FIn = CShader.ShaderInOutDefault.FIn_Base;
-using FOut = CShader.ShaderInOutDefault.FOut_Base;
-
 using static CShader.ShaderValue;
 using static CUtility.Math.Matrix4x4;
+
+using App = CShader.ShaderInOutDefault.App_Base;
+using FIn = CShader.ShaderInOutDefault.FIn_Base;
+using FOut = CShader.ShaderInOutDefault.FOut_Base;
+using VOut = CShader.ShaderInOutDefault.VOut_Base;
 
 namespace CShader
 {
@@ -19,8 +21,8 @@ namespace CShader
     {
         static ShaderDefault()
         {
-            ShaderInterpreter<IVertexShader>.Interpret<ShaderDefault>();
-            ShaderInterpreter<IFragmentShader>.Interpret<ShaderDefault>();
+            ShaderInterpreter<IVertexShader, ShaderInOutPatternDefault>.Interpret<ShaderDefault>();
+            ShaderInterpreter<IFragmentShader, ShaderInOutPatternDefault>.Interpret<ShaderDefault>();
         }
 
         public unsafe void Main(
@@ -40,7 +42,7 @@ namespace CShader
             FIn* fInPtr = (FIn*)inputPtr;
             FOut* fOutPtr = (FOut*)outputPtr;
 
-            float absSinTime = MathF.Abs(SinTime2);
+            float absSinTime = MathF.Abs(CosTime);
             fOutPtr->Color = new Vector4(absSinTime, absSinTime, absSinTime, 1f);
         }
     }

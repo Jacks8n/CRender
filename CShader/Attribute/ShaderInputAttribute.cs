@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace CShader
+namespace CShader.Attribute
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public class ShaderInputAttribute : ShaderInOutAttributeBase
+    public class ShaderInputAttribute : TypeBasedAttributeBase
     {
         public ShaderInputAttribute(Type inputType) : base(inputType)
         {

@@ -36,7 +36,7 @@ namespace CRenderTest
 
         public static void TestDrawLine()
         {
-            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
+            EstablishTestScene<Camera_Orthographic>(out var pipeline, out var charBuffer, out var camera);
 
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
@@ -49,15 +49,15 @@ namespace CRenderTest
 
         public static void TestRenderTriangle()
         {
-            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
+            EstablishTestScene<Camera_Orthographic>(out var pipeline, out var charBuffer, out var camera);
 
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
                 new Model(
                     vertices: new Vector3[] { new Vector3(-.5f, -.25f, 0), new Vector3(.5f, -.25f, 0), new Vector3(0, .5f, 0) },
-                    primitives: new IPrimitive[] { new TrianglePrimitive(0, 1, 2) },
-                    normals: null,
-                    uvs: null),
+                    indices: new int[] { 0, 1, 2 },
+                    uvs: null,
+                    normals: null),
                 material: null);
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
@@ -66,7 +66,7 @@ namespace CRenderTest
 
         public static void TestRenderFaces()
         {
-            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
+            EstablishTestScene<Camera_Orthographic>(out var pipeline, out var charBuffer, out var camera);
 
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
@@ -79,11 +79,11 @@ namespace CRenderTest
 
         public static void TestRenderCube()
         {
-            EstablishTestScene(out var pipeline, out var charBuffer, out var camera);
+            EstablishTestScene<Camera_Orthographic>(out var pipeline, out var charBuffer, out var camera);
 
             RenderEntity entity = new RenderEntity(
                 transform: new Transform(Vector3.Zero),
-                model: Model.Cube(isWireframe: false),
+                model: Model.Cube(),
                 material: null);
             RenderEntity[] entitiesApply = new RenderEntity[] { entity };
 
@@ -91,7 +91,7 @@ namespace CRenderTest
         }
 
         /// <param name="camera">It orients the origin</param>
-        private static void EstablishTestScene(out Pipeline pipeline, out CharRenderBuffer<float> charBuffer, out ICamera camera)
+        public static void EstablishTestScene<T>(out Pipeline pipeline, out CharRenderBuffer<float> charBuffer, out ICamera camera) where T : ICamera
         {
             pipeline = new Pipeline();
             charBuffer = new CharRenderBuffer<float>(pipeline.RenderTarget);
@@ -101,10 +101,10 @@ namespace CRenderTest
                 rotation: new Vector3(0, JMath.PI_HALF * .35f, -JMath.PI_HALF * 1.5f)));
         }
 
-        private static void DrawRotatingObject(IPipeline pipeline, RenderEntity[] entitiesApply, ICamera camera, CharRenderBuffer<float> charBuffer)
+        public static void DrawRotatingObject<TPipeline, TCamera>(TPipeline pipeline, RenderEntity[] entitiesApply, TCamera camera, CharRenderBuffer<float> charBuffer) where TPipeline : IPipeline where TCamera : ICamera
         {
             float framerate = 60f;
-            float time = 4.233f;
+            float time = 6f;
             int totalFrame = (int)(framerate * time);
             float angleStep = JMath.PI_TWO / totalFrame;
             int frameInterval = (int)(1000f / framerate);
@@ -125,6 +125,13 @@ namespace CRenderTest
                 CRenderer.Render(charBuffer);
             }
             timer.Stop();
+        }
+
+        public static void DrawOneFrame<TPipeline, TCamera>(TPipeline pipeline, RenderEntity[] entitiesApply, TCamera camera, CharRenderBuffer<float> charBuffer) where TPipeline : IPipeline where TCamera : ICamera
+        {
+            CRenderer.UpdateRenderInfo();
+            pipeline.Draw(entitiesApply, camera);
+            CRenderer.Render(charBuffer);
         }
     }
 }

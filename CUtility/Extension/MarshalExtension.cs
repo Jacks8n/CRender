@@ -47,7 +47,7 @@ namespace CUtility.Extension
         public static void Move<T>(T* from, T* to, int length = 1) where T : unmanaged
         {
             while (--length >= 0)
-                *to = *from;
+                to[length] = from[length];
         }
 
         public static void Set<T0, T1>(T0* to, T1 value, int length = 1) where T0 : unmanaged where T1 : unmanaged

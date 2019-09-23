@@ -1,15 +1,23 @@
 ﻿using System;
+using CUtility;
 using CUtility.Math;
 
-namespace CRender.Pipeline
+namespace CRender.Pipeline.Rasterization
 {
-    public sealed unsafe partial class Rasterizer
+    public sealed unsafe class Line : JSingleton<Line>, IPrimitiveRasterizer<LinePrimitive>
     {
-        private static readonly Interpolator LineInterpolator = new Interpolator();
+        public Rasterizer.RasterizerEntry RasterizerEntry { get; }
 
-        public static void Line(Vector2* verticesPtr, float** verticesDataPtr, int verticesDataCount)
+        public Vector2 Resolution { private get; set; }
+
+        private readonly Interpolator LineInterpolator = new Interpolator();
+
+        public void Rasterize(LinePrimitive* linePtr)
         {
-            Vector2 from = verticesPtr[0] * _resolution, to = verticesPtr[1] * _resolution;
+            Vector2* verticesPtr = linePtr->CoordsPtr;
+            float** verticesDataPtr = linePtr->VerticesDataPtr;
+            int verticesDataCount = linePtr->VerticesDataCount;
+            Vector2 from = verticesPtr[0] * Resolution, to = verticesPtr[1] * Resolution;
             float xSub = to.X - from.X,
                   ySub = to.Y - from.Y;
 
@@ -35,9 +43,9 @@ namespace CRender.Pipeline
                 LineInterpolator.SetInterpolation(verticesDataPtr[0], verticesDataPtr[1], verticesDataCount, Math.Abs(xSub));
 
             Vector2Int resultPoint = new Vector2Int(JMath.RoundToInt(from.X), JMath.RoundToInt(from.Y));
-            if (resultPoint.X == _resolution.X)
+            if (resultPoint.X == Resolution.X)
                 resultPoint.X--;
-            if (resultPoint.Y == _resolution.Y)
+            if (resultPoint.Y == Resolution.Y)
                 resultPoint.Y--;
 
             //End coordinate in Int
@@ -46,11 +54,11 @@ namespace CRender.Pipeline
             {
                 if (ifInterpolate)
                 {
-                    OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
+                    RasterizerEntry.OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
                     LineInterpolator.IncrementStep();
                 }
                 else
-                    OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
+                    RasterizerEntry.OutputRasterization(resultPoint, LineInterpolator.InterpolatedValues);
                 if (otherDirFrac >= 1f)
                 {
                     resultPoint[1 - dir] += otherDirStep;
